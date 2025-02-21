@@ -1,7 +1,8 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "palm",
-  "name": "ZapperAPI",
+  "name": "ZapperAPI Docs",
+  "description": "Documentação oficial da ZapperAPI, sua API de WhatsApp completa e fácil de usar",
   "colors": {
     "primary": "#6D28D9",
     "light": "#6D28D9",
@@ -57,6 +58,23 @@
   "logo": {
     "light": "/logo/light.svg",
     "dark": "/logo/dark.svg"
+  },
+  "fonts": {
+    "body": {
+      "family": "Poppins"
+    },
+    "heading": {
+      "family": "Poppins"
+    }
+  },
+  "seo": {
+    "indexing": "all",
+    "metatags": {
+      "og:site_name": "Documentação da ZapperAPI",
+      "og:title": "Documentação da ZapperAPI",
+      "og:image": "https://zapperapi.com/assets/sharing-image.png",
+      "twitter:image": "https://zapperapi.com/assets/sharing-image.png"
+    }
   },
   "navbar": {
     "links": [
