@@ -1,94 +1,799 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.0.3",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
-    "license": {
-      "name": "MIT"
-    },
-    "version": "1.0.0"
+    "title": "ZapperAPI",
+    "version": "v2"
   },
-  "servers": [
-    {
-      "url": "http://sandbox.mintlify.com"
-    }
-  ],
-  "security": [
-    {
-      "bearerAuth": []
-    }
-  ],
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "apiKey",
+        "description": "Chave privada da API",
+        "name": "X-Api-Key",
+        "in": "header"
+      }
+    },
+    "schemas": {}
+  },
   "paths": {
-    "/plants": {
+    "/": {
       "get": {
-        "description": "Returns all plants from the system that the user has access to",
+        "summary": "Obter status da API",
+        "tags": [
+          "API Status"
+        ],
+        "description": "Obtém o status da API para fins de monitoramento de disponibilidade",
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "UP"
+                      ]
+                    },
+                    "message": {
+                      "type": "string",
+                      "enum": [
+                        "welcome to zapperapi-core"
+                      ]
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "docs": {
+                      "type": "string",
+                      "format": "uri"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "message",
+                    "version",
+                    "docs"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connection": {
+      "get": {
+        "summary": "Obter conexão do WhatsApp",
+        "tags": [
+          "Conexão"
+        ],
+        "description": "Retorna um QR Code para se conectar ao WhatsApp do\n          dispositivo ou exibe os dados da conexão ativa. Caso o parâmetro\n          `number` seja informado, um código de confirmação será enviado para\n          este número, para um pareamento sem o uso de QR Code.",
         "parameters": [
           {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
             "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
+              "type": "string"
+            },
+            "in": "query",
+            "name": "number",
+            "required": false,
+            "description": "Número do WhatsApp que deseja receber um código de confirmação"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
           }
         ],
         "responses": {
           "200": {
-            "description": "Plant response",
+            "description": "Default Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "Status da conexão"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "image": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "qrCode": {
+                      "type": "string",
+                      "description": "QR Code no formato base64URL"
+                    },
+                    "pairingCode": {
+                      "type": "string",
+                      "description": "Código de pareamento para opção sem QR Code"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
           }
         }
       },
+      "delete": {
+        "summary": "Desconectar o WhatsApp",
+        "tags": [
+          "Conexão"
+        ],
+        "description": "Desconecta o WhatsApp da API.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "close"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messages/text": {
       "post": {
-        "description": "Creates a new plant in the store",
+        "summary": "Enviar mensagem de texto",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem de texto para um número de telefone ou grupo.",
         "requestBody": {
-          "description": "Plant to add to the store",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us"
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Texto da mensagem a ser enviada"
+                  }
+                },
+                "required": [
+                  "jid",
+                  "message"
+                ],
+                "additionalProperties": false
               }
             }
           },
           "required": true
         },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
         "responses": {
           "200": {
-            "description": "plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plant"
-                }
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/audio": {
+      "post": {
+        "summary": "Enviar mensagem de áudio",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem de áudio para um número de telefone ou grupo.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us"
+                  },
+                  "audio": {
+                    "type": "string",
+                    "description": "Áudio a ser encaminhado. Pode ser nos formatos mp3, mp4, wav,\n      ogg. Pode ser utilizado uma URL (http/https), arquivo no formato base64 ou\n      uma URL base64."
+                  }
+                },
+                "required": [
+                  "jid",
+                  "audio"
+                ],
+                "additionalProperties": false
               }
             }
           },
-          "400": {
-            "description": "unexpected error",
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/media": {
+      "post": {
+        "summary": "Enviar mensagem de mídia",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem de mídia para um número de telefone ou grupo.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us"
+                  },
+                  "mediaType": {
+                    "type": "string",
+                    "enum": [
+                      "image",
+                      "video",
+                      "audio",
+                      "document"
+                    ],
+                    "description": "Tipo de mídia a ser enviada."
+                  },
+                  "mimetype": {
+                    "type": "string",
+                    "description": "Mimetype do arquivo enviado (ex: image/png). Aplicável\n        somente para o tipo de mídia `document`"
+                  },
+                  "media": {
+                    "type": "string",
+                    "description": "Mídia a ser encaminhada. Pode ser utilizado uma URL\n    (http/https), arquivo no formato base64 ou uma URL base64."
+                  },
+                  "caption": {
+                    "type": "string",
+                    "description": "Legenda da mídia. Não se aplica ao tipo de mídia `audio`\n        e ao tipo de mídia `video` quando `videoNote` está ativo"
+                  },
+                  "filename": {
+                    "type": "string",
+                    "description": "Nome do arquivo. Aplicável somente para mídias do tipo `document`"
+                  },
+                  "videoNote": {
+                    "type": "boolean",
+                    "description": "Enviar vídeo como nota (em um círculo)"
+                  }
+                },
+                "required": [
+                  "jid",
+                  "mediaType",
+                  "media"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/status": {
+      "post": {
+        "summary": "Enviar mensagem de status",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem de status para exibição nos Stories.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "text",
+                      "image",
+                      "audio"
+                    ],
+                    "description": "Tipo de mensagem"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "Conteúdo da mensagem, sendo o texto no caso do tipo `text` ou a URL da mídia nos demais tipos"
+                  },
+                  "caption": {
+                    "type": "string",
+                    "description": "Legenda da mídia, quando aplicável"
+                  },
+                  "backgroundColor": {
+                    "type": "string",
+                    "description": "Cor do fundo (obrigatório para o tipo `text`)"
+                  },
+                  "font": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 5,
+                    "description": "Tipo de fonte (obrigatório para o tipo `text`\n\n\n                Fontes disponíveis:\n\n                1 - Serif\n\n                2 - Norican Regular\n\n                3 - Bryndan Write\n\n                4 - BebasNeue Regular\n\n                5 - Oswald Heavy"
+                  },
+                  "allContacts": {
+                    "type": "boolean",
+                    "description": "Indica se deseja enviar o status para todos os seus contatos"
+                  },
+                  "statusJidList": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Caso `allContacts` seja falso, os contatos que vão\n              receber o status devem ser indicados neste campo"
+                  }
+                },
+                "required": [
+                  "type",
+                  "content"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/sticker": {
+      "post": {
+        "summary": "Enviar sticker",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem de mídia em formato de sticker para um número de telefone ou grupo.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us"
+                  },
+                  "sticker": {
+                    "type": "string",
+                    "description": "Sticker a ser encaminhado. Pode ser utilizado uma URL (http/https) ou arquivo no formato base64."
+                  }
+                },
+                "required": [
+                  "jid",
+                  "sticker"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/location": {
+      "post": {
+        "summary": "Enviar localização",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem de localização para um número de telefone ou grupo.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us"
+                  },
+                  "location": {
+                    "type": "object",
+                    "properties": {
+                      "lat": {
+                        "type": "number"
+                      },
+                      "lon": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "lat",
+                      "lon"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "jid",
+                  "location"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/contact": {
+      "post": {
+        "summary": "Enviar contato",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem de contato para um número de telefone ou grupo.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us"
+                  },
+                  "vcard": {
+                    "type": "object",
+                    "properties": {
+                      "fn": {
+                        "type": "string",
+                        "description": "Nome completo do contato"
+                      },
+                      "n": {
+                        "type": "object",
+                        "properties": {
+                          "lastName": {
+                            "type": "string",
+                            "description": "Último nome do contato"
+                          },
+                          "firstName": {
+                            "type": "string",
+                            "description": "Primeiro nome do contato"
+                          },
+                          "additionalNames": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Nomes adicionais"
+                          },
+                          "prefixes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Prefixos do nome (ex: Sir)"
+                          },
+                          "suffixes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Sufixos do nome (I, II, III)"
+                          }
+                        },
+                        "required": [
+                          "lastName",
+                          "firstName"
+                        ],
+                        "additionalProperties": false,
+                        "description": "Os componentes estruturados no nome do contato"
+                      },
+                      "nickname": {
+                        "type": "string",
+                        "description": "Apelido"
+                      },
+                      "photo": {
+                        "type": "string",
+                        "description": "URL da foto ou imagem em formato base64"
+                      },
+                      "bday": {
+                        "type": "string",
+                        "description": "Data de nascimento do contato"
+                      },
+                      "adr": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "postOfficeBox": {
+                              "type": "string",
+                              "description": "Caixa postal"
+                            },
+                            "extendedAddress": {
+                              "type": "string",
+                              "description": "Detalhes adicionais do endereço"
+                            },
+                            "streetAddress": {
+                              "type": "string",
+                              "description": "Nome da rua"
+                            },
+                            "locality": {
+                              "type": "string",
+                              "description": "Cidade ou localização"
+                            },
+                            "region": {
+                              "type": "string",
+                              "description": "Estado ou província"
+                            },
+                            "postalCode": {
+                              "type": "string",
+                              "description": "Código postal (CEP/zipcode)"
+                            },
+                            "countryName": {
+                              "type": "string",
+                              "description": "Nome do país"
+                            },
+                            "type": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Tipo de endereço (ex: 'home', 'work')."
+                            }
+                          },
+                          "additionalProperties": false
+                        },
+                        "description": "Dados estruturados do endereço"
+                      },
+                      "tel": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string",
+                              "description": "Número de telefone"
+                            },
+                            "type": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Tipo de telefone (ex: 'home', 'work', 'cell')."
+                            }
+                          },
+                          "required": [
+                            "value"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "description": "Uma ou mais entradas de telefone"
+                      },
+                      "email": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string",
+                              "format": "email",
+                              "description": "Endereço de email"
+                            },
+                            "type": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Tipo de email (ex: 'home', 'work')."
+                            }
+                          },
+                          "required": [
+                            "value"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "description": "Um ou mais endereços de email"
+                      },
+                      "url": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "Url do website do contato"
+                      },
+                      "org": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Dados da organização do contato"
+                      },
+                      "title": {
+                        "type": "string",
+                        "description": "Título do contato em sua organização"
+                      },
+                      "role": {
+                        "type": "string",
+                        "description": "Papel ou ocupação do contato em sua organização"
+                      },
+                      "logo": {
+                        "type": "string",
+                        "description": "URL do logo"
+                      },
+                      "note": {
+                        "type": "string",
+                        "description": "Notas adicionais"
+                      },
+                      "categories": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Tags/categorias associadas ao contato"
+                      }
+                    },
+                    "required": [
+                      "fn"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "jid",
+                  "vcard"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/contacts": {
+      "get": {
+        "summary": "Listar contatos",
+        "tags": [
+          "Contatos"
+        ],
+        "description": "Lista todos os contatos do WhatsApp.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "type": "object",
+                  "properties": {
+                    "contacts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "Id do contato"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "Nome do contato"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "contacts"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -96,32 +801,694 @@
         }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
+    "/contacts/check-numbers": {
+      "post": {
+        "summary": "Checar números de WhatsApp",
+        "tags": [
+          "Contatos"
+        ],
+        "description": "Verifica se os números informados estão cadastrados no WhatsApp",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "numbers": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 1,
+                    "description": "Lista de números a ser checada"
+                  }
+                },
+                "required": [
+                  "numbers"
+                ],
+                "additionalProperties": false
+              }
             }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
           }
         ],
         "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
+          "200": {
+            "description": "Default Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "type": "object",
+                  "properties": {
+                    "numbers": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "exists": {
+                            "description": "Indica que o número existe"
+                          },
+                          "jid": {
+                            "type": "string",
+                            "description": "Id do número no WhatsApp"
+                          }
+                        },
+                        "required": [
+                          "jid"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/groups": {
+      "post": {
+        "summary": "Criar grupo",
+        "tags": [
+          "Grupos"
+        ],
+        "description": "Cria um grupo no WhatsApp",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "participants": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "summary": "Listar grupos",
+        "tags": [
+          "Grupos"
+        ],
+        "description": "Lista todos os grupos que o usuário participa.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "default": "false"
+            },
+            "in": "query",
+            "name": "showParticipants",
+            "required": false,
+            "description": "Indica se deseja mostrar os participantes dos grupos"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "groups": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "owner": {
+                            "type": "string"
+                          },
+                          "subject": {
+                            "type": "string"
+                          },
+                          "subjectOwner": {
+                            "type": "string"
+                          },
+                          "subjectTime": {
+                            "type": "number"
+                          },
+                          "creation": {
+                            "type": "number"
+                          },
+                          "desc": {
+                            "type": "string"
+                          },
+                          "descOwner": {
+                            "type": "string"
+                          },
+                          "descId": {
+                            "type": "string"
+                          },
+                          "linkedParent": {
+                            "type": "string"
+                          },
+                          "restrict": {
+                            "type": "boolean"
+                          },
+                          "announce": {
+                            "type": "boolean"
+                          },
+                          "memberAddMode": {
+                            "type": "boolean"
+                          },
+                          "joinApprovalMode": {
+                            "type": "boolean"
+                          },
+                          "isCommunity": {
+                            "type": "boolean"
+                          },
+                          "isCommunityAnnounce": {
+                            "type": "boolean"
+                          },
+                          "size": {
+                            "type": "number"
+                          },
+                          "participants": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "isAdmin": {
+                                  "type": "boolean"
+                                },
+                                "isSuperAdmin": {
+                                  "type": "boolean"
+                                },
+                                "admin": {
+                                  "type": "string",
+                                  "enum": [
+                                    "admin",
+                                    "superadmin"
+                                  ],
+                                  "nullable": true
+                                }
+                              },
+                              "required": [
+                                "id"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "ephemeralDuration": {
+                            "type": "number"
+                          },
+                          "inviteCode": {
+                            "type": "string"
+                          },
+                          "author": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "subject"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "groups"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/groups/{groupId}": {
+      "get": {
+        "summary": "Obter grupo",
+        "tags": [
+          "Grupos"
+        ],
+        "description": "Obtém informações de um grupo no WhatsApp e seus participantes.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "groupId",
+            "required": true,
+            "description": "Id do grupo, com ou sem o sufixo `@g.us`"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Atualizar grupo",
+        "tags": [
+          "Grupos"
+        ],
+        "description": "Atualiza informações de um grupo no WhatsApp.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Novo nome do grupo"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Nova descrição do grupo"
+                  },
+                  "displayPicture": {
+                    "type": "string",
+                    "nullable": true,
+                    "description": "Nova imagem de perfil do grupo, podendo ser uma URL, o arquivo no formato base64 ou uma Data URI no formato base64. Caso enviar o valor `null`, a imagem atual será removida."
+                  },
+                  "announcement": {
+                    "type": "boolean",
+                    "description": "Indica se o grupo só permite postagens dos admins"
+                  },
+                  "locked": {
+                    "type": "boolean",
+                    "description": "Indica se o grupo é bloqueado para edição e somente pode ser alterado por admins"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "groupId",
+            "required": true,
+            "description": "Id do grupo, com ou sem o sufixo `@g.us`"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/groups/{groupId}/participants": {
+      "patch": {
+        "summary": "Atualizar participantes do grupo",
+        "tags": [
+          "Grupos"
+        ],
+        "description": "Atualiza os participantes de um grupo no WhatsApp, adicionando ou removendo no grupo, ou ainda promovendo ou revogandos como admins.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "participants": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "Id do contato, com ou sem o sufixo `@s.whatsapp.net`"
+                    },
+                    "minItems": 1,
+                    "description": "Lista de participantes que deseja alterar"
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "add",
+                      "promote",
+                      "demote",
+                      "remove"
+                    ],
+                    "description": "Ação que deseja realizar nos participantes (add: adicionar - remove: remover - promote: promover a admin - demote: revogar admin"
+                  }
+                },
+                "required": [
+                  "participants",
+                  "action"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "groupId",
+            "required": true,
+            "description": "Id do grupo, com ou sem o sufixo `@g.us`"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/groups/{groupId}/invite-code": {
+      "get": {
+        "summary": "Obter código de convite",
+        "tags": [
+          "Grupos"
+        ],
+        "description": "Obtém o código de convite para entrar em um grupo.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "groupId",
+            "required": true,
+            "description": "Id do grupo, com ou sem o sufixo `@g.us`"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "inviteCode": {
+                      "type": "string"
+                    },
+                    "inviteUrl": {
+                      "type": "string",
+                      "format": "uri"
+                    }
+                  },
+                  "required": [
+                    "inviteCode",
+                    "inviteUrl"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webhook": {
+      "post": {
+        "summary": "Criar webhook",
+        "tags": [
+          "Webhook"
+        ],
+        "description": "Cria um novo webhook para disparo de eventos do WhatsApp. Caso um webhook já tenha sido configurado, ele será substituído.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URL que receberá as requisições do webhook. Ela deve estar preparada para receber requisições do tipo `POST`"
+                  },
+                  "secretKey": {
+                    "type": "string",
+                    "description": "Chave secreta para autenticar as requisições oriundas da API, e garantir a origem das informações"
+                  }
+                },
+                "required": [
+                  "url",
+                  "secretKey"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "summary": "Obter webhook",
+        "tags": [
+          "Webhook"
+        ],
+        "description": "Obtém o webhook configurado para disparo de eventos do WhatsApp.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string"
+                    },
+                    "secretKey": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "url",
+                    "secretKey"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Apagar webhook",
+        "tags": [
+          "Webhook"
+        ],
+        "description": "Apaga as configurações de webhook.",
+        "responses": {
+          "204": {
+            "description": "Webhook removed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": false,
+                  "description": "Webhook removed"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Webhook not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": false,
+                  "description": "Webhook not found"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings": {
+      "post": {
+        "summary": "Atualizar configurações",
+        "tags": [
+          "Configurações"
+        ],
+        "description": "Atualiza as configurações de sua API.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "messages": {
+                    "type": "object",
+                    "properties": {
+                      "delay": {
+                        "type": "string",
+                        "enum": [
+                          "short",
+                          "medium",
+                          "long"
+                        ],
+                        "description": "Delay para envio das mensagens. short: de 5 a 15 segundos | medium: de 15 a 45 segundos | long: de 60 a 90 segundos"
+                      },
+                      "enableSendPresenceUpdate": {
+                        "type": "boolean",
+                        "description": "Indica se deve enviar nas mensagens de texto e áudio o status _digitando_ ou _gravando áudio_. Função não disponível nas mensagens para grupos"
+                      }
+                    },
+                    "required": [
+                      "delay",
+                      "enableSendPresenceUpdate"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Configurações de envio de mensagens"
+                  }
+                },
+                "required": [
+                  "messages"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "summary": "Obter configurações",
+        "tags": [
+          "Configurações"
+        ],
+        "description": "Obtém as configurações de sua API.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "messages": {
+                      "type": "object",
+                      "properties": {
+                        "delay": {
+                          "type": "string",
+                          "enum": [
+                            "short",
+                            "medium",
+                            "long"
+                          ]
+                        },
+                        "enableSendPresenceUpdate": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "delay",
+                        "enableSendPresenceUpdate"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "messages"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -130,66 +1497,16 @@
       }
     }
   },
-  "components": {
-    "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
-          }
+  "servers": [
+    {
+      "url": "https://api.zapperapi.com/{instanceId}",
+      "description": "Production",
+      "variables": {
+        "instanceId": {
+          "description": "Identificador da sua instância",
+          "default": "inst_abcdef123456"
         }
-      },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
-            }
-          }
-        ]
-      },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
       }
     }
-  }
+  ]
 }

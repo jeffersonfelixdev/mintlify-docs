@@ -1,78 +1,58 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mint Starter Kit",
+  "theme": "palm",
+  "name": "ZapperAPI",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#6D28D9",
+    "light": "#6D28D9",
+    "dark": "#6D28D9"
   },
   "favicon": "/favicon.svg",
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Docs",
         "groups": [
           {
-            "group": "Get Started",
+            "group": "Comece por aqui",
             "pages": [
               "introduction",
-              "quickstart",
-              "development"
+              "creating-instance",
+              "connecting-whatsapp",
+              "quickstart"
             ]
           },
           {
-            "group": "Essentials",
+            "group": "Definições",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
+              "definitions/authentication",
+              "definitions/number-format"
+            ]
+          },
+          {
+            "group": "Funções principais",
+            "pages": [
+              "functions/messages",
+              "functions/contacts",
+              "functions/groups"
+            ]
+          },
+          {
+            "group": "Integrações e webhooks",
+            "pages": [
+              "integrations/webhooks",
+              "integrations/n8n",
+              "integrations/zapier",
+              "integrations/make"
             ]
           }
         ]
       },
       {
         "tab": "API Reference",
-        "groups": [
-          {
-            "group": "API Documentation",
-            "pages": [
-              "api-reference/introduction"
-            ]
-          },
-          {
-            "group": "Endpoint Examples",
-            "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete"
-            ]
-          }
-        ]
+        "openapi": "/api-reference/openapi.json"
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Community",
-          "href": "https://mintlify.com/community",
-          "icon": "slack"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
+    ]
   },
   "logo": {
     "light": "/logo/light.svg",
@@ -81,21 +61,17 @@
   "navbar": {
     "links": [
       {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "label": "Suporte",
+        "href": "https://api.whatsapp.com/send?phone=551231990360&text=Olá!+Preciso+de+ajuda"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "href": "https://app.zapperapi.com"
     }
   },
   "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
+    "socials": {}
   }
 }

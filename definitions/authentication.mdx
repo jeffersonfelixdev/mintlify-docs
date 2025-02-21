@@ -1,0 +1,24 @@
+---
+title: Autenticação
+description: "Saiba como utilizar as rotas protegidas de sua ZapperAPI"
+---
+
+Todas as rotas de sua ZapperAPI, com exceção da rota para obtenção do status da 
+API, possuem autenticação baseada em token. Consulte seu 
+<a href="https://app.zapperapi.com/dash">painel do usuário</a> e encontre seu 
+token na opção **API KEY**.
+
+Se você não possui acesso ao painel do usuário, solicite ao administrador a API KEY.
+
+Para utilizar o token, o mesmo deverá ser enviado no atributo `X-Api-Key` do 
+cabeçalho (header) de cada requisição:
+
+```
+X-Api-Key: sk_token_de_exemplo_123
+```
+
+<Card title="‼️ ATENÇÃO">
+Nunca forneça sua chave da API para terceiros e pessoas alheias ao seu projeto. 
+Ninguém da Zapper irá solicitar sua chave de API para realizar suporte. Guarde 
+sua chave de API em um armazenamento seguro.
+</Card>
