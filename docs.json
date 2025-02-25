@@ -4,9 +4,9 @@
   "name": "ZapperAPI Docs",
   "description": "Documentação oficial da ZapperAPI, sua API de WhatsApp completa e fácil de usar",
   "colors": {
-    "primary": "#6D28D9",
-    "light": "#6D28D9",
-    "dark": "#6D28D9"
+    "primary": "#2563eb",
+    "light": "#2563eb",
+    "dark": "#2563eb"
   },
   "favicon": "/favicon.svg",
   "navigation": {
