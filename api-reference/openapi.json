@@ -2,6 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ZapperAPI",
+    "description": "\n## Introdução\n\nEsta é a documentação oficial da Zapper API, sua API completa para integração\ncom o WhatsApp.\n\nEsta API está documentada utilizando o formato **Open API** e encontra-se\ndividida em módulos os quais poderão ser acessados a seguir.\n\n## Autenticação\n\nTodas as rotas de sua ZapperAPI, com exceção da rota para obtenção do status\nda API, possuem autenticação baseada em **token**. Consulte seu painel do\nusuário em [https://app.zapperapi.com/dash](https://app.zapperapi.com/dash)\ne encontre seu token na opção **API KEY**.\n\nSe você não possui acesso ao painel do usuário, solicite ao administrador a API\nKEY.\n\nPara utilizar o token, o mesmo deverá ser enviado no atributo `X-Api-Key` do\ncabeçalho (header) de cada requisição:\n\n```\nX-Api-Key: sk_token_de_exemplo_123\n```\n\n**ATENÇÃO: Nunca forneça sua chave da API para terceiros e pessoas alheias\nao seu projeto. Ninguém da Zapper irá solicitar sua chave de API para realizar\nsuporte. Guarde sua chave de API em um armazenamento seguro.**\n\n## Número do telefone\n\nEm todas as requisições que exigirem o preenchimento do número de telefone\ndo WhatsApp, seja de quem estiver enviando ou de quem estiver recebendo\nmensagens, o número deverá ser preenchido de forma **completa**, inclusive\ncom o **código do país**, sem a necessidade de incluir o caracter `+`.\n\nPor exemplo, para números de WhatsApp do Brasil, o número ficará `5511912345678`.\n",
     "version": "v2"
   },
   "components": {
@@ -13,7 +14,9 @@
         "in": "header"
       }
     },
-    "schemas": {}
+    "schemas": {
+
+    }
   },
   "paths": {
     "/": {
@@ -1363,7 +1366,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": {},
+                  "properties": {
+
+                  },
                   "additionalProperties": false,
                   "description": "Webhook removed"
                 }
@@ -1376,7 +1381,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": {},
+                  "properties": {
+
+                  },
                   "additionalProperties": false,
                   "description": "Webhook not found"
                 }
@@ -1405,11 +1412,12 @@
                       "delay": {
                         "type": "string",
                         "enum": [
+                          "shortest",
                           "short",
                           "medium",
                           "long"
                         ],
-                        "description": "Delay para envio das mensagens. short: de 5 a 15 segundos | medium: de 15 a 45 segundos | long: de 60 a 90 segundos"
+                        "description": "Delay para envio das mensagens. shortest: de 1 a 3 segundos | short: de 5 a 10 segundos | medium: de 15 a 45 segundos | long: de 60 a 90 segundos"
                       },
                       "enableSendPresenceUpdate": {
                         "type": "boolean",
@@ -1469,6 +1477,7 @@
                         "delay": {
                           "type": "string",
                           "enum": [
+                            "shortest",
                             "short",
                             "medium",
                             "long"
