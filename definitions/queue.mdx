@@ -1,0 +1,36 @@
+---
+title: Sistema de filas
+description: "Como a ZapperAPI protege seu número contra bloqueios com uma fila customizada"
+---
+
+Nós nos preocupamos com a integridade de seu número do WhatsApp. Além de termos
+um sistema robusto contra uso indevido e SPAM, cada instância da ZapperAPI conta
+com uma fila individual de disparo de todas as mensagens, sejam elas de texto, 
+imagens, vídeos, documentos ou áudios.
+
+Cada instância possui uma fila única, para disparo de mensagens para pessoas ou
+grupos, com 4 tipos de intervalos pré-configuráveis entre as mensagens:
+- **shortest**: de 1 a 3 segundos;
+- **short**: de 5 a 10 segundos;
+- **medium**: de 15 a 45 segundos;
+- **long**: de 60 a 90 segundos.
+
+Além disso, você pode adicionar um delay antes do envio das mensagens, com o
+status de *Digitando* ou *Gravando áudio*, o que permite uma abordagem ainda
+mais humanizada em chatbots.
+
+Consulte a <a href="/api-reference/configurações/atualizar-configurações">
+documentação de referência da API</a> e saiba como atualizar essas configurações.
+
+<Card title="IMPORTANTE">
+Não é possível desligar o sistema de filas e disparar mensagens simultâneas para
+diferentes pessoas ou grupos, nem fazer disparo de transmissões (broadcast).
+A ZapperAPI é contra a prática de SPAM e o uso indevido poderá ser penalizado
+conforme os <a href="https://zapperapi.com/terms-of-use">Termos de Uso</a> da
+plataforma.
+</Card>
+
+<Card title="INFORMAÇÃO">
+A funcionalidade de exibir status de *Digitando* ou *Gravando áudio* não está
+disponível para envio de mensagens em grupos.
+</Card>

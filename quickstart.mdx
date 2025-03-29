@@ -3,3 +3,39 @@ title: 'Início Rápido'
 description: 'Veja como utilizar a API e envie uma mensagem em menos de 3 minutos'
 ---
 
+## Obtendo os dados de conexão
+
+Na tela do <a href="https://app.zapperapi.com/dash">dashboard</a>, você encontrará
+em cada instância os dados necessários para realizar uma conexão à API:
+- **URL**: é o endereço de sua instância na ZapperAPI, onde você fará as solicitações
+de envio de mensagens, mídias, gerenciamento de grupos, configurações. Cada
+instância possui uma URL própria;
+- **X-Api-Key**: é a chave de acesso privada para realizar as ações na sua
+instância, tornando segura a conexão entre sua aplicação e a ZapperAPI.
+
+Para copiar a URL e a X-Api-Key, basta clicar sobre os respectivos valores, que
+os dados serão copiados para a área de transferência.
+
+<Card title="INFORMAÇÃO DE SEGURANÇA">
+A chave de acesso à sua API é privada e não deve ser fornecida para terceiros.
+Use somente em sua aplicação, e armazene em local seguro e de forma criptografada.
+Com a chave de acesso privada é possível ter acesso direto ao WhatsApp, portanto,
+proteja essa informação.
+
+A chave de acesso da instância não pode ser alterada. Em caso de vazamento e uso
+indevido de sua chave de acesso, apague a instância e crie uma nova.
+</Card>
+
+## Enviando uma mensagem
+
+- Acesse a documentação para <a href="/api-reference/mensagens/enviar-mensagem-de-texto" target="_blank">enviar uma mensagem de texto</a>;
+- Clique em **Try it**;
+- Preencha no campo `instanceId` o id da sua instância, 
+que é o **valor que se encontra logo após https://api.zapperapi.com/ em sua 
+URL** (ex: inst_abcde12345);
+- Preencha o campo `X-Api-Key` com sua chave de acesso privada;
+- No campo `jid`, preencha o número do telefone para qual deseja mandar uma
+mensagem, com o código do país (ex: 5512912345678);
+- Em `message`, digite a mensagem de texto que deseja enviar.
+
+Sua mensagem será encaminhada para uma fila de disparo, que irá respeitar um intervalo de envios de acordo com as <a href="/api-reference/configurações/obter-configurações">configurações de sua API</a>.

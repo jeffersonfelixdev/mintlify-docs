@@ -27,7 +27,8 @@
             "group": "Definições",
             "pages": [
               "definitions/authentication",
-              "definitions/number-format"
+              "definitions/number-format",
+              "definitions/queue"
             ]
           },
           {

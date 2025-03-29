@@ -2,3 +2,30 @@
 title: Criando uma instância
 description: "Como criar uma instância na ZapperAPI"
 ---
+
+## O que é uma instância
+
+Uma instância representa o número de WhatsApp conectado à ZapperAPI. Para cada
+número conectado é necessário criar uma instância, com isso, você pode conectar
+diversos números de WhatsApp em sua conta. 
+
+Cada instância opera como uma sessão do WhatsApp Web em um navegador Chrome. 
+Nossa infraestrutura foi projetada para que cada instância opere de forma
+completamente isolada, de modo que o funcionamento de uma instância não interfere
+em outra.
+
+## Como criar uma instância
+
+- Acesse o dashboard da ZapperAPI em https://app.zapperapi.com/dash;
+- Clique no botão **Nova Instância**;
+- Na caixa de diálogo que se abre, digite o **Nome da instância** e em seguida,
+clique em **Sim, criar nova instância**;
+- Aguarde alguns segundos enquanto o orquestrador da ZapperAPI constrói sua nova
+instância em nossa infraestrutura.
+
+<Card title="IMPORTANTE">
+Cada instância possui um valor fixo mensal, e seu plano é atualizado 
+automaticamente quando novas instâncias são adicionadas ou removidas, sendo
+cobrado no primeiro mês o valor _pro rata_ referente aos dias de uso até o 
+fechamento da fatura.
+</Card>
