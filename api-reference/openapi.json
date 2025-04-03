@@ -14,9 +14,7 @@
         "in": "header"
       }
     },
-    "schemas": {
-
-    }
+    "schemas": {}
   },
   "paths": {
     "/": {
@@ -751,6 +749,58 @@
         }
       }
     },
+    "/messages/react": {
+      "post": {
+        "summary": "Reagir a mensagem",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia um emoji de reação a uma mensagem em conversa particular ou em grupo.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remoteJid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Id da conversa onde ocorreu a mensagem. Pode ser um número de WhatsApp ou um grupo"
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "Id da mensagem que deseja reagir"
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1,
+                    "description": "Emoji da reação. Qualquer outro tipo de caracter que não seja um emoji não irá funcionar"
+                  },
+                  "participant": {
+                    "type": "string",
+                    "description": "Id do participante que enviou a mensagem. Necessário somente para grupos"
+                  }
+                },
+                "required": [
+                  "remoteJid",
+                  "id",
+                  "text",
+                  "participant"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
     "/contacts": {
       "get": {
         "summary": "Listar contatos",
@@ -1172,7 +1222,7 @@
                     "type": "array",
                     "items": {
                       "type": "string",
-                      "description": "Id do contato, com ou sem o sufixo `@s.whatsapp.net`"
+                      "description": "Id do participante"
                     },
                     "minItems": 1,
                     "description": "Lista de participantes que deseja alterar"
@@ -1366,9 +1416,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": {
-
-                  },
+                  "properties": {},
                   "additionalProperties": false,
                   "description": "Webhook removed"
                 }
@@ -1381,14 +1429,105 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": {
-
-                  },
+                  "properties": {},
                   "additionalProperties": false,
                   "description": "Webhook not found"
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/jobs": {
+      "get": {
+        "summary": "Ver resumo da fila",
+        "tags": [
+          "Fila de jobs"
+        ],
+        "description": "Retorna um resumo das quantidades de jobs na fila, por status.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "active": {
+                      "type": "number"
+                    },
+                    "completed": {
+                      "type": "number"
+                    },
+                    "failed": {
+                      "type": "number"
+                    },
+                    "waiting": {
+                      "type": "number"
+                    },
+                    "delayed": {
+                      "type": "number"
+                    },
+                    "paused": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "active",
+                    "completed",
+                    "failed",
+                    "waiting",
+                    "delayed",
+                    "paused"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{status}": {
+      "get": {
+        "summary": "Listar jobs",
+        "tags": [
+          "Fila de jobs"
+        ],
+        "description": "Obtém a lista de jobs na fila de execução a partir do status do job",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "waiting",
+                "active",
+                "delayed",
+                "failed",
+                "paused"
+              ]
+            },
+            "in": "path",
+            "name": "status",
+            "required": true,
+            "description": "Status do job"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
           }
         }
       }
@@ -1509,7 +1648,7 @@
   "servers": [
     {
       "url": "https://api.zapperapi.com/{instanceId}",
-      "description": "Production",
+      "description": "Development",
       "variables": {
         "instanceId": {
           "description": "Identificador da sua instância",
