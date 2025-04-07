@@ -197,6 +197,18 @@
                     "type": "string",
                     "minLength": 1,
                     "description": "Texto da mensagem a ser enviada"
+                  },
+                  "mentions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "Id do contato, com ou sem o sufixo `@s.whatsapp.net`"
+                    },
+                    "description": "Lista de números que deseja mencionar na mensagem. Campo opcional e só tem efeito em envio de mensagens para grupos"
+                  },
+                  "mentionsEveryone": {
+                    "type": "boolean",
+                    "description": "Indica se deseja mencionar todos os participantes do grupo. Use com cautela. Caso esta opção esteja ativa, o parâmetro `mentions` será ignorado."
                   }
                 },
                 "required": [
@@ -313,6 +325,18 @@
                   "videoNote": {
                     "type": "boolean",
                     "description": "Enviar vídeo como nota (em um círculo)"
+                  },
+                  "mentions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "Id do contato, com ou sem o sufixo `@s.whatsapp.net`"
+                    },
+                    "description": "Lista de números que deseja mencionar na mensagem. Campo opcional e só tem efeito em envio de mensagens para grupos"
+                  },
+                  "mentionsEveryone": {
+                    "type": "boolean",
+                    "description": "Indica se deseja mencionar todos os participantes do grupo. Use com cautela. Caso esta opção esteja ativa, o parâmetro `mentions` será ignorado."
                   }
                 },
                 "required": [
