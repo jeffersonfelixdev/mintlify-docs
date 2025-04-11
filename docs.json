@@ -44,8 +44,7 @@
             "pages": [
               "integrations/webhooks",
               "integrations/n8n",
-              "integrations/make",
-              "integrations/zapier"
+              "integrations/make"
             ]
           }
         ]

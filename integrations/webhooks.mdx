@@ -2,3 +2,329 @@
 title: Webhooks
 description: "Processe as mensagens enviadas por seus contatos e automatize as conversas"
 ---
+
+## Introdução
+
+Um webhook é uma ferramenta que permite a comunicação entre aplicações, possibilitando
+o envio de dados para uma aplicação _A_ imediatamente após a ocorrência de um
+evento na aplicação _B_. 
+
+Também chamados de _callbacks_, os webhooks substituem a abordagem chamada _polling_, onde uma 
+aplicação fica solicitando de tempos em tempos o status de uma ocorrência. Com o
+uso de webhooks, a comunicação entre sistemas diferentes torna-se muito mais simples.
+
+Na ZapperAPI, há webhooks para notificar sua aplicação das seguintes ações no
+WhatsApp:
+- Recebimento de mensagens
+- Recebimento de reações em mensagens
+
+## Como usar
+
+Para cadastrar uma URL para receber os webhooks da ZapperAPI, consulte a 
+<a href="http://localhost:3000/api-reference/webhook">Seção Webhooks</a> na 
+documentação de referência da API.
+
+Além da `url`, você deverá informar qual a `secretKey` que a ZapperAPI deve enviar
+para autenticar que é a ZapperAPI que está disparando a requisição. A `secret`
+será enviada no cabeçalho da requisição, no formato de `Authorization Bearer`.
+
+<Card title="IMPORTANTE">
+A `secretKey` é a única maneira de garantir que as requisições que sua aplicação
+recebe são oriundas do webhook da ZapperAPI. Você é o responsável por executar
+a validação da informação, bem como proteger sua aplicação com outras regras de 
+segurança, como _rate limits_ e SSL. Nunca forneça a sua `secretKey`, e sempre
+que possível, faça uma rotação regular de seu valor.
+</Card>
+
+<Card title="INFORMAÇÃO">
+Os arquivos recebidos pelos Webhooks da ZapperAPI ficam armazenados em nossos
+servidores pelo prazo de 7 dias.
+</Card>
+
+## Exemplos de payload
+
+A seguir, iremos listar os exemplos de payload dos webhooks da ZapperAPI, para 
+os diferentes tipos de mensagens recebidas no WhatsApp:
+
+### Recebimento de mensagens
+
+Tipo: `messages.upsert`
+
+**Mensagem de texto**
+
+```json
+{
+  "type": "messages.upsert",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "3AB16AB78CD9012E89A0"
+  },
+  "messageTimestamp": 1744398716,
+  "pushName": "John Doe",
+  "broadcast": false,
+  "message": {
+    "conversation": "Hello world from ZapperAPI",
+    "messageContextInfo": {
+      "deviceListMetadata": {
+        "senderKeyHash": "aBCd1234==",
+        "senderTimestamp": "1744145094",
+        "recipientKeyHash": "ZyXpto1234==",
+        "recipientTimestamp": "1744348039"
+      },
+      "deviceListMetadataVersion": 2,
+      "messageSecret": "abcdef123456/9876Xpto="
+    }
+  }
+}
+```
+
+**Mensagem de áudio**
+
+```json
+{
+  "type": "messages.upsert",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "78AD14337B2A86AFCC956A4C728481EB"
+  },
+  "messageTimestamp": 1744399258,
+  "pushName": "John Doe",
+  "broadcast": false,
+  "message": {
+    "audioMessage": {
+      "url": "https://mmg.whatsapp.net/v/test_url?mms3=true",
+      "mimetype": "audio/ogg; codecs=opus",
+      "fileSha256": "AbcDefGh12345=",
+      "fileLength": "8500",
+      "seconds": 4,
+      "ptt": true,
+      "mediaKey": "yXpto1234=",
+      "fileEncSha256": "aBC/DeFGh1234/6g788afrgHDs1234=",
+      "directPath": "/v/t62.7117-24/avcd_12r4fs.enc?ccb=12-5oh=f34urjfhei&oe=15f6d&_nc_sid=5a12a0",
+      "mediaKeyTimestamp": "1744399255",
+      "waveform": "AAAAABBBBB12234=="
+    },
+    "messageContextInfo": {
+      "deviceListMetadata": {
+        "senderKeyHash": "iDads+fds3D==",
+        "senderTimestamp": "1744145094",
+        "recipientKeyHash": "Cefgr+df==",
+        "recipientTimestamp": "1744348039"
+      },
+      "deviceListMetadataVersion": 2,
+      "messageSecret": "LRfsdg3rg21fdg3eY="
+    }
+  },
+  "mediaUrl": "https://storage.zapperapi.com/media/551245678900/5512912345678/1744399258603-548723645df463782eacd43.oga"
+}
+```
+
+**Envio de documento**
+
+
+```json
+{
+  "type": "messages.upsert",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "195AE8577DAD7DA921BE6AEA4255E196"
+  },
+  "messageTimestamp": 1744400179,
+  "pushName": "Will Smith",
+  "broadcast": false,
+  "message": {
+    "documentMessage": {
+      "url": "https://mmg.whatsapp.net/v/t62.7119-24/12345694_4321098765412345_8789897654456789907_n.enc?ccb=11-4&oh=01_Q5Aa1QFSK-_SYsySdefsfsfz5w6HceIfsdfhBaT7A2o-oQ&oe=682fsdf84B&_nc_sid=5fsa3e0&mms3=true",
+      "mimetype": "application/pdf",
+      "fileSha256": "MNg59Afdsfsfs9dqyifSwsdgfsDk2s=",
+      "fileLength": "23025",
+      "pageCount": 12,
+      "mediaKey": "OLOuiVpfewdfgsdKBXY38lfsdfswlWPoVuLuooQ=",
+      "fileName": "senhas-pati.pdf",
+      "fileEncSha256": "Ig+efdf32ferfwefsdYjteErfvJfdsfsW+CKCl6dqE=",
+      "directPath": "/v/t62.7119-24/12345694_4321098765412345_8789897654456789907_n.enc?ccb=11-4&oh=01_fv2zV3bq-P1dHWGgdfgdfgYPFgXO0ZvgfdgsdAdN5FHQ-oQ&oe=682550E337&_nc_sid=5103e0",
+      "mediaKeyTimestamp": "1744400177",
+      "thumbnailDirectPath": "/v/t62.36145-24/2345678_1234567890_198765432101234567_n.enc?ccb=11-4&oh=01_fv2zV3bq-P1dHWGgdfgdfgYPFgXO0ZvgfdgsdAdN5FHQ&oe=682550E337&_nc_sid=5103e0",
+      "thumbnailSha256": "qQmdwefkerswgfrwe3=",
+      "thumbnailEncSha256": "qqpl+fdsafasf=",
+      "jpegThumbnail": "/9j/fdsfsdfdsADds+fed3==",
+      "thumbnailHeight": 480,
+      "thumbnailWidth": 370,
+      "caption": "Documentação em anexo"
+    },
+    "messageContextInfo": {
+      "deviceListMetadata": {
+        "senderKeyHash": "fdsi+WderiDJqg==",
+        "senderTimestamp": "1744145094",
+        "recipientKeyHash": "Cifre3f9d==",
+        "recipientTimestamp": "1744348039"
+      },
+      "deviceListMetadataVersion": 2,
+      "messageSecret": "OHJdikejwoxi+ferDsd="
+    }
+  },
+  "mediaUrl": "https://storage.zapperapi.com/media/551245678900/5512912345678/1744400179958-ad37655efdc1489a987d6f698c9e87.pdf"
+}
+```
+
+**Envio de imagem**
+
+```json
+{
+  "type": "messages.upsert",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "7B3F1FA5E211E42FEDFA1F2143A102D6"
+  },
+  "messageTimestamp": 1744400576,
+  "pushName": "Will Smith",
+  "broadcast": false,
+  "message": {
+    "imageMessage": {
+      "url": "https://mmg.whatsapp.net/v/t62.7118-24/321561_156151_651651_n.enc?ccb=11-4&oh=gfdgdfgd&oe=126456&_nc_sid=5e03e0&mms3=true",
+      "mimetype": "image/jpeg",
+      "fileSha256": "fhjd0jieruygvj0wer9+Fo=",
+      "fileLength": "12525",
+      "height": 640,
+      "width": 480,
+      "mediaKey": "gdfgds+erggdfg+hSKU=",
+      "fileEncSha256": "Hfewghjsodgfhj=",
+      "directPath": "/v/t62.7118-24/123456_123456_15645.enc?ccb=11-4&oh=4g65sd1g6sd5&oe=f1sdf3s&_nc_sid=5e03e0",
+      "mediaKeyTimestamp": "1744363528",
+      "jpegThumbnail": "/9j/FIRWEUGFH93RUGH/sfhjsdf/2c7Z//////////////fdfg3/Zztn////////////////gsdfgs/sfds/dd/AAAA/AAAA+gfg3+",
+      "scansSidecar": "fdf3erfgs+gs==",
+      "scanLengths": [
+        1234,
+        4321
+      ],
+      "midQualityFileSha256": "sdfsdf/fdf/df/sdfsaf="
+    },
+    "messageContextInfo": {
+      "deviceListMetadata": {
+        "senderKeyHash": "d+dfsfs==",
+        "senderTimestamp": "1744145094",
+        "recipientKeyHash": "fr3sdfg==",
+        "recipientTimestamp": "1744348039"
+      },
+      "deviceListMetadataVersion": 2,
+      "messageSecret": "g3gre+gr34gdfgsgs="
+    }
+  },
+  "mediaUrl": "https://storage.zapperapi.com/media/551245678900/5512912345678/1744400577105-12c2b82fdebc64a249a2182e9eb57b170.jpeg"
+}
+```
+
+**Envio de vídeo**
+
+```json
+{
+  "type": "messages.upsert",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "9A9BA7815141EAA71DB9986A32AEFE67"
+  },
+  "messageTimestamp": 1744401275,
+  "pushName": "Will Smith",
+  "broadcast": false,
+  "message": {
+    "videoMessage": {
+      "url": "https://mmg.whatsapp.net/v/t62.1212-24/123456_654321_1234567.enc?ccb=11-4&oh=ferw3fe3&oe=1wf6&_nc_sid=5e03e0&mms3=true",
+      "mimetype": "video/mp4",
+      "fileSha256": "fer3fwfw+9Gu4H+A=",
+      "fileLength": "295632",
+      "seconds": 1,
+      "mediaKey": "e+rewfw+/fewf=",
+      "height": 850,
+      "width": 474,
+      "fileEncSha256": "efwf/mSHj4nfwefkCghDfwefwOVGWWCjc9ok=",
+      "directPath": "/v/t62.7161-24/26006495_651803170909509_8692356198490887094_n.enc?ccb=11-4&oh=01_Q5Aa1QHJBZcffHnD3ISle6otMfGXyqD77WWjDGnFpdrs3TWEtA&oe=6820F12F&_nc_sid=5e03e0",
+      "mediaKeyTimestamp": "1744401273",
+      "jpegThumbnail": "hfirfhue/f98vyei=",
+      "contextInfo": {},
+      "streamingSidecar": "Vfdesfwef="
+    },
+    "messageContextInfo": {
+      "deviceListMetadata": {
+        "senderKeyHash": "fs+fsd==",
+        "senderTimestamp": "1744145094",
+        "recipientKeyHash": "sdf23fc==",
+        "recipientTimestamp": "1744348039"
+      },
+      "deviceListMetadataVersion": 2,
+      "messageSecret": "fwe3rtw+werga="
+    }
+  },
+  "mediaUrl": "https://storage.zapperapi.com/media/551246787585/5512912345678/1744401275832-ad71abe8547533259a3274d4af8711c3.mp4"
+}
+```
+
+**Envio de contato**
+
+```json
+{
+  "type": "messages.upsert",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "E6189A524889DE724D911AAA2F837AB1"
+  },
+  "messageTimestamp": 1744401096,
+  "pushName": "Jane Doe",
+  "broadcast": false,
+  "message": {
+    "contactMessage": {
+      "displayName": "John Doe",
+      "vcard": "BEGIN:VCARD\nVERSION:3.0\nN:;John;;;\nFN:John Doe\nitem1.TEL;waid=555599995555:+55 55 9999-5555\nitem1.X-ABLabel:Celular\nEND:VCARD"
+    },
+    "messageContextInfo": {
+      "deviceListMetadata": {
+        "senderKeyHash": "dsa+das==",
+        "senderTimestamp": "1744145094",
+        "recipientKeyHash": "dasfw==",
+        "recipientTimestamp": "1744348039"
+      },
+      "deviceListMetadataVersion": 2,
+      "messageSecret": "fsdfgwdgsd="
+    }
+  }
+}
+```
+
+### Recebimento de reações em mensagens
+
+Tipo: `messages.reaction`
+
+**Envio de reação**
+
+- `key`: Dados da mensagem que recebeu a reação
+- `reaction.key`: Dados de quem enviou a reação
+- `reaction.text`: Emoji utilizado
+
+```json
+{
+  "type": "messages.reaction",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "78AE2812AC5A62A1CB8A5A1D967572A0"
+  },
+  "reaction": {
+    "key": {
+      "remoteJid": "5512912345678@s.whatsapp.net",
+      "fromMe": false,
+      "id": "4D2AAEC025A74710866EF732A614AABA"
+    },
+    "text": "❤️",
+    "senderTimestampMs": {
+      "low": 642979577,
+      "high": 406,
+      "unsigned": false
+    }
+  }
+}
+```
