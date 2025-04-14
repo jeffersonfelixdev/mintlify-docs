@@ -14,7 +14,9 @@
         "in": "header"
       }
     },
-    "schemas": {}
+    "schemas": {
+
+    }
   },
   "paths": {
     "/": {
@@ -964,13 +966,32 @@
                 "type": "object",
                 "properties": {
                   "name": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Nome do grupo"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Descrição do grupo"
+                  },
+                  "displayPicture": {
+                    "type": "string",
+                    "description": "Imagem de perfil do grupo, podendo ser uma URL, o arquivo no formato base64 ou uma Data URI no formato base64."
+                  },
+                  "announcement": {
+                    "type": "boolean",
+                    "description": "Indica se o grupo só permite postagens dos admins"
+                  },
+                  "locked": {
+                    "type": "boolean",
+                    "description": "Indica se o grupo é bloqueado para edição e somente pode ser alterado por admins"
                   },
                   "participants": {
                     "type": "array",
                     "items": {
-                      "type": "string"
-                    }
+                      "type": "string",
+                      "description": "JID do participante"
+                    },
+                    "description": "Lista inicial de participantes do grupo"
                   }
                 },
                 "required": [
@@ -1440,7 +1461,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": {},
+                  "properties": {
+
+                  },
                   "additionalProperties": false,
                   "description": "Webhook removed"
                 }
@@ -1453,7 +1476,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": {},
+                  "properties": {
+
+                  },
                   "additionalProperties": false,
                   "description": "Webhook not found"
                 }
@@ -1607,11 +1632,16 @@
                       "enableSendPresenceUpdate": {
                         "type": "boolean",
                         "description": "Indica se deve enviar nas mensagens de texto e áudio o status _digitando_ ou _gravando áudio_. Função não disponível nas mensagens para grupos"
+                      },
+                      "enableLinkPreview": {
+                        "type": "boolean",
+                        "description": "Indica se deve enviar o preview do link da mensagem de texto."
                       }
                     },
                     "required": [
                       "delay",
-                      "enableSendPresenceUpdate"
+                      "enableSendPresenceUpdate",
+                      "enableLinkPreview"
                     ],
                     "additionalProperties": false,
                     "description": "Configurações de envio de mensagens"
@@ -1670,6 +1700,10 @@
                         },
                         "enableSendPresenceUpdate": {
                           "type": "boolean"
+                        },
+                        "enableLinkPreview": {
+                          "type": "boolean",
+                          "default": false
                         }
                       },
                       "required": [
