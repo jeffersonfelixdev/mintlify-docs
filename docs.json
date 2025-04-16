@@ -8,6 +8,11 @@
     "light": "#2563eb",
     "dark": "#2563eb"
   },
+  "integrations": {
+    "gtm": {
+      "tagId": "GTM-PZCF2GZ"
+    }
+  },
   "favicon": "/favicon.svg",
   "navigation": {
     "tabs": [
