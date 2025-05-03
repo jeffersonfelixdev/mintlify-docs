@@ -1367,6 +1367,224 @@
         }
       }
     },
+    "/integrations": {
+      "post": {
+        "summary": "Criar integração",
+        "tags": [
+          "Integrações"
+        ],
+        "description": "Cria uma nova integração com um agente de IA. Opções disponíveis: Chatvolt",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "CHATVOLT"
+                    ],
+                    "description": "Tipo de integração"
+                  },
+                  "apiKey": {
+                    "type": "string",
+                    "description": "Chave da API do serviço de IA"
+                  },
+                  "agentId": {
+                    "type": "string",
+                    "description": "ID do agente de conversação do serviço de IA"
+                  }
+                },
+                "required": [
+                  "type",
+                  "apiKey",
+                  "agentId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/integrations/{type}/toggle-enable": {
+      "patch": {
+        "summary": "Ativar ou desativar uma integração",
+        "tags": [
+          "Integrações"
+        ],
+        "description": "Ativa ou desativa uma integração específica.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "type",
+            "required": true,
+            "description": "Tipo de integração a ser ativada ou desativada"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean",
+                      "description": "Status da integração"
+                    }
+                  },
+                  "required": [
+                    "enabled"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/integrations/{type}": {
+      "get": {
+        "summary": "Buscar integração",
+        "tags": [
+          "Integrações"
+        ],
+        "description": "Busca uma integração específica.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "type",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "integration": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "CHATVOLT"
+                          ],
+                          "description": "Tipo de integração"
+                        },
+                        "enabled": {
+                          "type": "boolean",
+                          "description": "Status da integração"
+                        },
+                        "apiKey": {
+                          "type": "string",
+                          "description": "Chave da API da integração"
+                        },
+                        "agentId": {
+                          "type": "string",
+                          "description": "ID do agente da integração"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Data de criação da integração"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Data de atualização da integração"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "enabled",
+                        "apiKey",
+                        "agentId",
+                        "createdAt",
+                        "updatedAt"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "integration"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deletar integração",
+        "tags": [
+          "Integrações"
+        ],
+        "description": "Deleta uma integração específica.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "type",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
     "/webhook": {
       "post": {
         "summary": "Criar webhook",
@@ -1732,7 +1950,7 @@
       "variables": {
         "instanceId": {
           "description": "Identificador da sua instância",
-          "default": "inst_abcdef123456"
+          "default": "inst_9urg0dt7e2g7"
         }
       }
     }
