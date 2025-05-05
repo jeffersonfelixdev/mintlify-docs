@@ -211,6 +211,14 @@
                   "mentionsEveryone": {
                     "type": "boolean",
                     "description": "Indica se deseja mencionar todos os participantes do grupo. Use com cautela. Caso esta opção esteja ativa, o parâmetro `mentions` será ignorado."
+                  },
+                  "splitMessage": {
+                    "type": "boolean",
+                    "description": "Divide a mensagem em várias mensagens menores. A divisão é feita baseado nas quebras de linha da mensagem original."
+                  },
+                  "processImageLink": {
+                    "type": "boolean",
+                    "description": "Processa o primeiro link de imagem dentro da mensagem como uma imagem. Caso a mensagem possua um link de imagem, o conteúdo do link será enviado como uma imagem logo após a mensagem de texto. Caso a função `splitMessage` esteja ativa, cada parte da mensagem será processada para verificar se possui um link de imagem."
                   }
                 },
                 "required": [
@@ -1849,7 +1857,7 @@
                       },
                       "enableSendPresenceUpdate": {
                         "type": "boolean",
-                        "description": "Indica se deve enviar nas mensagens de texto e áudio o status _digitando_ ou _gravando áudio_. Função não disponível nas mensagens para grupos"
+                        "description": "Indica se deve enviar nas mensagens de texto e áudio o status _digitando_ ou _gravando áudio_. Função não disponível nas mensagens para grupos."
                       },
                       "enableLinkPreview": {
                         "type": "boolean",
