@@ -49,7 +49,8 @@
             "pages": [
               "integrations/webhooks",
               "integrations/n8n",
-              "integrations/make"
+              "integrations/make",
+              "integrations/chatvolt"
             ]
           }
         ]
