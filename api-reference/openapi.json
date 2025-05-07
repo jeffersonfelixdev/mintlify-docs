@@ -209,16 +209,37 @@
                     "description": "Lista de números que deseja mencionar na mensagem. Campo opcional e só tem efeito em envio de mensagens para grupos"
                   },
                   "mentionsEveryone": {
-                    "type": "boolean",
-                    "description": "Indica se deseja mencionar todos os participantes do grupo. Use com cautela. Caso esta opção esteja ativa, o parâmetro `mentions` será ignorado."
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Indica se deseja mencionar todos os participantes do grupo. Use com cautela. Caso esta opção esteja ativa, o parâmetro `mentions` será ignorado."
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
                   },
                   "splitMessage": {
-                    "type": "boolean",
-                    "description": "Divide a mensagem em várias mensagens menores. A divisão é feita baseado nas quebras de linha da mensagem original."
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Divide a mensagem em várias mensagens menores. A divisão é feita baseado nas quebras de linha da mensagem original."
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
                   },
                   "processImageLink": {
-                    "type": "boolean",
-                    "description": "Processa o primeiro link de imagem dentro da mensagem como uma imagem. Caso a mensagem possua um link de imagem, o conteúdo do link será enviado como uma imagem logo após a mensagem de texto. Caso a função `splitMessage` esteja ativa, cada parte da mensagem será processada para verificar se possui um link de imagem."
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Processa o primeiro link de imagem dentro da mensagem como uma imagem. Caso a mensagem possua um link de imagem, o conteúdo do link será enviado como uma imagem logo após a mensagem de texto. Caso a função `splitMessage` esteja ativa, cada parte da mensagem será processada para verificar se possui um link de imagem."
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
                   }
                 },
                 "required": [
@@ -333,8 +354,15 @@
                     "description": "Nome do arquivo. Aplicável somente para mídias do tipo `document`"
                   },
                   "videoNote": {
-                    "type": "boolean",
-                    "description": "Enviar vídeo como nota (em um círculo)"
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Enviar vídeo como nota (em um círculo)"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
                   },
                   "mentions": {
                     "type": "array",
@@ -345,8 +373,15 @@
                     "description": "Lista de números que deseja mencionar na mensagem. Campo opcional e só tem efeito em envio de mensagens para grupos"
                   },
                   "mentionsEveryone": {
-                    "type": "boolean",
-                    "description": "Indica se deseja mencionar todos os participantes do grupo. Use com cautela. Caso esta opção esteja ativa, o parâmetro `mentions` será ignorado."
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Indica se deseja mencionar todos os participantes do grupo. Use com cautela. Caso esta opção esteja ativa, o parâmetro `mentions` será ignorado."
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
                   }
                 },
                 "required": [
@@ -413,8 +448,15 @@
                     "description": "Tipo de fonte (obrigatório para o tipo `text`\n\n\n                Fontes disponíveis:\n\n                1 - Serif\n\n                2 - Norican Regular\n\n                3 - Bryndan Write\n\n                4 - BebasNeue Regular\n\n                5 - Oswald Heavy"
                   },
                   "allContacts": {
-                    "type": "boolean",
-                    "description": "Indica se deseja enviar o status para todos os seus contatos"
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Indica se deseja enviar o status para todos os seus contatos"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
                   },
                   "statusJidList": {
                     "type": "array",
@@ -986,12 +1028,26 @@
                     "description": "Imagem de perfil do grupo, podendo ser uma URL, o arquivo no formato base64 ou uma Data URI no formato base64."
                   },
                   "announcement": {
-                    "type": "boolean",
-                    "description": "Indica se o grupo só permite postagens dos admins"
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Indica se o grupo só permite postagens dos admins"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
                   },
                   "locked": {
-                    "type": "boolean",
-                    "description": "Indica se o grupo é bloqueado para edição e somente pode ser alterado por admins"
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Indica se o grupo é bloqueado para edição e somente pode ser alterado por admins"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
                   },
                   "participants": {
                     "type": "array",
@@ -1222,12 +1278,26 @@
                     "description": "Nova imagem de perfil do grupo, podendo ser uma URL, o arquivo no formato base64 ou uma Data URI no formato base64. Caso enviar o valor `null`, a imagem atual será removida."
                   },
                   "announcement": {
-                    "type": "boolean",
-                    "description": "Indica se o grupo só permite postagens dos admins"
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Indica se o grupo só permite postagens dos admins"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
                   },
                   "locked": {
-                    "type": "boolean",
-                    "description": "Indica se o grupo é bloqueado para edição e somente pode ser alterado por admins"
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Indica se o grupo é bloqueado para edição e somente pode ser alterado por admins"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
                   }
                 },
                 "additionalProperties": false
@@ -1377,11 +1447,11 @@
     },
     "/integrations": {
       "post": {
-        "summary": "Criar integração",
+        "summary": "Criar/Atualizar integração",
         "tags": [
           "Integrações"
         ],
-        "description": "Cria uma nova integração com um agente de IA. Opções disponíveis: Chatvolt",
+        "description": "Cria uma nova integração com um agente de IA ou atualiza uma existente. Opções disponíveis: Chatvolt e GPT Maker. As conversas são apagadas e recriadas com a nova integração.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1391,7 +1461,8 @@
                   "type": {
                     "type": "string",
                     "enum": [
-                      "CHATVOLT"
+                      "CHATVOLT",
+                      "GPTMAKER"
                     ],
                     "description": "Tipo de integração"
                   },
@@ -1427,77 +1498,11 @@
         }
       },
       "get": {
-        "responses": {
-          "200": {
-            "description": "Default Response"
-          }
-        }
-      }
-    },
-    "/integrations/{type}/toggle-enable": {
-      "patch": {
-        "summary": "Ativar ou desativar uma integração",
-        "tags": [
-          "Integrações"
-        ],
-        "description": "Ativa ou desativa uma integração específica.",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "type",
-            "required": true,
-            "description": "Tipo de integração a ser ativada ou desativada"
-          }
-        ],
-        "security": [
-          {
-            "apiKey": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "enabled": {
-                      "type": "boolean",
-                      "description": "Status da integração"
-                    }
-                  },
-                  "required": [
-                    "enabled"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/integrations/{type}": {
-      "get": {
         "summary": "Buscar integração",
         "tags": [
           "Integrações"
         ],
-        "description": "Busca uma integração específica.",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "type",
-            "required": true
-          }
-        ],
+        "description": "Obtém os dados da integração ativa.",
         "security": [
           {
             "apiKey": []
@@ -1517,7 +1522,8 @@
                         "type": {
                           "type": "string",
                           "enum": [
-                            "CHATVOLT"
+                            "CHATVOLT",
+                            "GPTMAKER"
                           ],
                           "description": "Tipo de integração"
                         },
@@ -1570,17 +1576,7 @@
         "tags": [
           "Integrações"
         ],
-        "description": "Deleta uma integração específica.",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "type",
-            "required": true
-          }
-        ],
+        "description": "Deleta a integração registrada no sistema.",
         "security": [
           {
             "apiKey": []
@@ -1856,12 +1852,26 @@
                         "description": "Delay para envio das mensagens. shortest: de 1 a 3 segundos | short: de 5 a 10 segundos | medium: de 15 a 45 segundos | long: de 60 a 90 segundos"
                       },
                       "enableSendPresenceUpdate": {
-                        "type": "boolean",
-                        "description": "Indica se deve enviar nas mensagens de texto e áudio o status _digitando_ ou _gravando áudio_. Função não disponível nas mensagens para grupos."
+                        "anyOf": [
+                          {
+                            "type": "boolean",
+                            "description": "Indica se deve enviar nas mensagens de texto e áudio o status _digitando_ ou _gravando áudio_. Função não disponível nas mensagens para grupos."
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
                       },
                       "enableLinkPreview": {
-                        "type": "boolean",
-                        "description": "Indica se deve enviar o preview do link da mensagem de texto."
+                        "anyOf": [
+                          {
+                            "type": "boolean",
+                            "description": "Indica se deve enviar o preview do link da mensagem de texto."
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
                       }
                     },
                     "required": [
@@ -1871,10 +1881,48 @@
                     ],
                     "additionalProperties": false,
                     "description": "Configurações de envio de mensagens"
+                  },
+                  "integrations": {
+                    "type": "object",
+                    "properties": {
+                      "debounce": {
+                        "type": "number",
+                        "description": "Tempo de debounce para processar as mensagens do agente (em segundos)"
+                      },
+                      "splitMessage": {
+                        "anyOf": [
+                          {
+                            "type": "boolean",
+                            "description": "Dividir mensagem do agente em mensagens menores, utilizando as linhas em branco como separador"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "processImageLink": {
+                        "anyOf": [
+                          {
+                            "type": "boolean",
+                            "description": "Processar links de imagens do agente, convertendo os links em mensagens de mídia do tipo imagem"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "debounce",
+                      "splitMessage",
+                      "processImageLink"
+                    ],
+                    "additionalProperties": false
                   }
                 },
                 "required": [
-                  "messages"
+                  "messages",
+                  "integrations"
                 ],
                 "additionalProperties": false
               }
@@ -1922,13 +1970,30 @@
                             "short",
                             "medium",
                             "long"
-                          ]
+                          ],
+                          "description": "Delay entre mensagens"
                         },
                         "enableSendPresenceUpdate": {
-                          "type": "boolean"
+                          "anyOf": [
+                            {
+                              "type": "boolean",
+                              "description": "Ativar envio de atualização de presença"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
                         },
                         "enableLinkPreview": {
-                          "type": "boolean",
+                          "anyOf": [
+                            {
+                              "type": "boolean",
+                              "description": "Ativar preview de links"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ],
                           "default": false
                         }
                       },
@@ -1937,10 +2002,48 @@
                         "enableSendPresenceUpdate"
                       ],
                       "additionalProperties": false
+                    },
+                    "integrations": {
+                      "type": "object",
+                      "properties": {
+                        "debounce": {
+                          "type": "number",
+                          "description": "Debounce"
+                        },
+                        "splitMessage": {
+                          "anyOf": [
+                            {
+                              "type": "boolean",
+                              "description": "Dividir mensagem"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "processImageLink": {
+                          "anyOf": [
+                            {
+                              "type": "boolean",
+                              "description": "Processar links de imagens"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "debounce",
+                        "splitMessage",
+                        "processImageLink"
+                      ],
+                      "additionalProperties": false
                     }
                   },
                   "required": [
-                    "messages"
+                    "messages",
+                    "integrations"
                   ],
                   "additionalProperties": false
                 }

@@ -1,9 +1,11 @@
 ---
-title: Chatvolt
-description: "Integre diretamente com o Chatvolt e tenha um agente de IA especializado em seu negócio"
+title: Agentes de IA
+description: "Integre diretamente com o Chatvolt ou GPT Maker e tenha um agente de IA especializado em seu negócio"
 ---
 
 ## Introdução
+
+**O que é o Chatvolt**
 
 O Chatvolt é uma plataforma completa de atendimento ao cliente com automação 
 baseada em Agentes de IA. Com o Chatvolt você pode:
@@ -14,13 +16,39 @@ baseada em Agentes de IA. Com o Chatvolt você pode:
 
 Caso ainda não tenha uma conta no Chatvolt, <a target="_blank" href="https://app.chatvolt.ai/partner/zapperapi">faça o seu cadastro agora mesmo!</a>
 
-## Como integrar o Chatvolt à ZapperAPI
+**Como funciona o GPT Make**
 
-Para realizar a integração de um Agente de IA da Chatvolt na ZapperAPI, consulte a 
+Assim como o Chatvolt, o GPT Make é um serviço de atendimento humanizado através
+da inteligência artificial, com muitas funcionalidades e integrações:
+
+- Criação de agentes e treinamento com sua base de dados
+- Envio e recebimento de mídias
+- Criação de intenções para acesso a ferramentas externas
+- Integração com diversos canais e APIs
+
+Para maiores informações, acesse https://gptmaker.ai
+
+## Como integrar um agente de IA à ZapperAPI
+
+### Pela API
+
+Para realizar a integração de um Agente de IA da Chatvolt ou do GPT Maker na ZapperAPI, consulte a 
 <a href="http://docs.zapperapi.com/api-reference/integra%C3%A7%C3%B5es/criar-integra%C3%A7%C3%A3o">Seção Integrações</a> na 
-documentação de referência da API para criar um nova integração e utilize na requisição o type `CHATVOLT`.
+documentação de referência da API para criar ou atualizar os dados de uma integração.
 
-Você deverá passar no corpo da requisição o id do Agente no Chatvolt (`agentId`) e o token de API (`apiKey`).
+Você deverá passar no corpo da requisição o id do Agente (`agentId`) e o token de API (`apiKey`)
+da sua plataforma de agente de IA.
+
+### Pelo Dashboard
+
+A ZapperAPI conta com uma interface amigável para configuração de seu agente de IA:
+
+- Acesse o dashboard em https://app.zapperapi.com/dash;
+- Clique sobre a instância desejada;
+- No menu lateral, selecione **Integração IA**;
+- Preencha os dados de seu agente Chatvolt ou GPT Maker e clique em **Atualizar Integração**.
+
+## Informações sobre o Chatvolt
 
 ### Onde consigo um token de API da Chatvolt?
 
