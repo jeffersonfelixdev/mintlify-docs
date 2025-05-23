@@ -234,7 +234,7 @@
                     "anyOf": [
                       {
                         "type": "boolean",
-                        "description": "Processa o primeiro link de imagem dentro da mensagem como uma imagem. Caso a mensagem possua um link de imagem, o conteúdo do link será enviado como uma imagem logo após a mensagem de texto. Caso a função `splitMessage` esteja ativa, cada parte da mensagem será processada para verificar se possui um link de imagem."
+                        "description": "Processa os links de imagem dentro da mensagem como imagens. Caso a mensagem possua um link de imagem, o conteúdo do link será enviado como uma imagem logo após a mensagem de texto. Caso a função `splitMessage` esteja ativa, cada parte da mensagem será processada para verificar se possui links de imagem."
                       },
                       {
                         "type": "string"
@@ -870,6 +870,73 @@
           },
           "required": true
         },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/delete": {
+      "post": {
+        "summary": "Excluir mensagem",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Exclui uma mensagem enviada pelo WhatsApp. É necessário informar a chave da mensagem, que é exatamente como recebida pelo webhook. Só é possível deletar mensagens enviadas pela própria conta conectada.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "object",
+                    "properties": {
+                      "remoteJid": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "JID da mensagem (número do telefone ou grupo para onde foi enviada a mensagem)"
+                      },
+                      "fromMe": {
+                        "type": "boolean",
+                        "nullable": true,
+                        "description": "Indica se a mensagem foi enviada pela própria conta conectada"
+                      },
+                      "id": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Identificador único da mensagem"
+                      },
+                      "participant": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "JID do participante que enviou a mensagem (nos casos de mensagem enviada em grupo)"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "description": "Chave da mensagem, deve ser exatamente como recebida pelo webhook"
+                  }
+                },
+                "required": [
+                  "key"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Default Response"
@@ -1589,6 +1656,20 @@
         }
       }
     },
+    "/integrations/toggle": {
+      "patch": {
+        "summary": "Ativar/desativar integração",
+        "tags": [
+          "Integrações"
+        ],
+        "description": "Ativa/desativa a integração com o agente de IA.",
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
     "/webhook": {
       "post": {
         "summary": "Criar webhook",
@@ -1676,36 +1757,169 @@
           "Webhook"
         ],
         "description": "Apaga as configurações de webhook.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
         "responses": {
-          "204": {
-            "description": "Webhook removed",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-
-                  },
-                  "additionalProperties": false,
-                  "description": "Webhook removed"
-                }
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/text-to-speech/key": {
+      "post": {
+        "summary": "Atualizar API Key da ElevenLabs",
+        "tags": [
+          "ElevenLabs"
+        ],
+        "description": "Atualiza a API Key da ElevenLabs.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "apiKey": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "apiKey"
+                ],
+                "additionalProperties": false
               }
             }
           },
-          "404": {
-            "description": "Webhook not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/text-to-speech/voices": {
+      "get": {
+        "summary": "Listar vozes da ElevenLabs",
+        "tags": [
+          "ElevenLabs"
+        ],
+        "description": "Lista as vozes disponíveis na ElevenLabs. É necessário cadastrar a API Key da ElevenLabs no endpoint `POST /text-to-speech/key`",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/text-to-speech/voices/{voiceId}": {
+      "put": {
+        "summary": "Selecionar voz da ElevenLabs",
+        "tags": [
+          "ElevenLabs"
+        ],
+        "description": "Seleciona a voz da ElevenLabs que será utilizada para conversão de texto para áudio. É necessário cadastrar a API Key da ElevenLabs no endpoint `POST /text-to-speech/key`",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "voiceId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/text-to-speech/settings": {
+      "get": {
+        "summary": "Buscar configurações da ElevenLabs",
+        "tags": [
+          "ElevenLabs"
+        ],
+        "description": "Busca as configurações de conversão de texto para áudio.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/text-to-speech": {
+      "post": {
+        "summary": "Enviar áudio a partir de texto",
+        "tags": [
+          "Mensagens",
+          "ElevenLabs"
+        ],
+        "description": "Envia áudio a partir de texto, utilizando a API do ElevenLabs. É necessário cadastrar a API Key da ElevenLabs no endpoint `POST /text-to-speech/key`",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us"
                   },
-                  "additionalProperties": false,
-                  "description": "Webhook not found"
-                }
+                  "text": {
+                    "type": "string",
+                    "description": "Texto a ser convertido para áudio"
+                  },
+                  "voiceId": {
+                    "type": "string",
+                    "description": "ID da voz a ser utilizada. Caso não informada, será utilizada a voz padrão configurada na API."
+                  }
+                },
+                "required": [
+                  "jid",
+                  "text"
+                ],
+                "additionalProperties": false
               }
             }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
           }
         }
       }
@@ -1910,12 +2124,24 @@
                             "type": "string"
                           }
                         ]
+                      },
+                      "answerInAudio": {
+                        "anyOf": [
+                          {
+                            "type": "boolean",
+                            "description": "Responde mensagens em áudio quando o agente receber uma mensagem de áudio. É necessário ter configurado o ElevenLabs para responder em áudio."
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
                       }
                     },
                     "required": [
                       "debounce",
                       "splitMessage",
-                      "processImageLink"
+                      "processImageLink",
+                      "answerInAudio"
                     ],
                     "additionalProperties": false
                   }
@@ -2031,12 +2257,24 @@
                               "type": "string"
                             }
                           ]
+                        },
+                        "answerInAudio": {
+                          "anyOf": [
+                            {
+                              "type": "boolean",
+                              "description": "Envia a resposta em áudio"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
                         }
                       },
                       "required": [
                         "debounce",
                         "splitMessage",
-                        "processImageLink"
+                        "processImageLink",
+                        "answerInAudio"
                       ],
                       "additionalProperties": false
                     }
@@ -2061,7 +2299,7 @@
       "variables": {
         "instanceId": {
           "description": "Identificador da sua instância",
-          "default": "inst_9urg0dt7e2g7"
+          "default": "inst_abcdefghijk1234567890z"
         }
       }
     }
