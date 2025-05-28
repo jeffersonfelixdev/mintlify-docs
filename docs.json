@@ -48,10 +48,10 @@
             "group": "Integrações e webhooks",
             "pages": [
               "integrations/webhooks",
-              "integrations/n8n",
-              "integrations/make",
               "integrations/ai-agents",
-              "integrations/eleven-labs"
+              "integrations/eleven-labs",
+              "integrations/n8n",
+              "integrations/make"
             ]
           }
         ]
