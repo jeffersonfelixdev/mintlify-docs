@@ -91,3 +91,17 @@ O ID do Agente vai aparecer na tela de informações gerais, Card "ID do Agente"
 
 Copie o Id do Agente para utilizar na API da ZapperAPI (campo `agentId`)
 
+### Como enviar follow-up e mensagens de notas
+
+Para utilizar o follow-up nativo da Chatvolt em sua instância da ZapperAPI, os
+seguintes passos devem ser seguidos:
+
+1. No dashboard da ZapperAPI, Selecione a instância que deseja integrar o follow-up;
+2. Clique na guia *Integração IA*;
+3. Na tela da integração, copie a URL do webhook de follow up;
+4. No Chatvolt, selecione seu agente de IA, e na guia *Webhooks*, cole a URL no 
+campo  *Sua URL externa*
+
+Pronto! Com isso suas mensagens de follow-up, bem como aquelas que você digita 
+como nota em uma conversa do Chatvolt, serão redirecionadas ao WhatsApp do cliente,
+via integração ZapperAPI.
