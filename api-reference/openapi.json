@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ZapperAPI",
-    "description": "\n## Introdução\n\nEsta é a documentação oficial da Zapper API, sua API completa para integração\ncom o WhatsApp.\n\nEsta API está documentada utilizando o formato **Open API** e encontra-se\ndividida em módulos os quais poderão ser acessados a seguir.\n\n## Autenticação\n\nTodas as rotas de sua ZapperAPI, com exceção da rota para obtenção do status\nda API, possuem autenticação baseada em **token**. Consulte seu painel do\nusuário em [https://app.zapperapi.com/dash](https://app.zapperapi.com/dash)\ne encontre seu token na opção **API KEY**.\n\nSe você não possui acesso ao painel do usuário, solicite ao administrador a API\nKEY.\n\nPara utilizar o token, o mesmo deverá ser enviado no atributo `X-Api-Key` do\ncabeçalho (header) de cada requisição:\n\n```\nX-Api-Key: sk_token_de_exemplo_123\n```\n\n**ATENÇÃO: Nunca forneça sua chave da API para terceiros e pessoas alheias\nao seu projeto. Ninguém da Zapper irá solicitar sua chave de API para realizar\nsuporte. Guarde sua chave de API em um armazenamento seguro.**\n\n## Número do telefone\n\nEm todas as requisições que exigirem o preenchimento do número de telefone\ndo WhatsApp, seja de quem estiver enviando ou de quem estiver recebendo\nmensagens, o número deverá ser preenchido de forma **completa**, inclusive\ncom o **código do país**, sem a necessidade de incluir o caracter `+`.\n\nPor exemplo, para números de WhatsApp do Brasil, o número ficará `5511912345678`.\n",
+    "description": "Documentação oficial da ZapperAPI",
     "version": "v2"
   },
   "components": {
@@ -193,7 +193,7 @@
                   "jid": {
                     "type": "string",
                     "minLength": 1,
-                    "description": "Número de telefone ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us"
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
                   },
                   "message": {
                     "type": "string",
@@ -204,7 +204,7 @@
                     "type": "array",
                     "items": {
                       "type": "string",
-                      "description": "Id do contato, com ou sem o sufixo `@s.whatsapp.net`"
+                      "description": "Id do contato (número ou lid), com ou sem o sufixo `@s.whatsapp.net` ou `@lid`"
                     },
                     "description": "Lista de números que deseja mencionar na mensagem. Campo opcional e só tem efeito em envio de mensagens para grupos"
                   },
@@ -235,6 +235,17 @@
                       {
                         "type": "boolean",
                         "description": "Processa os links de imagem dentro da mensagem como imagens. Caso a mensagem possua um link de imagem, o conteúdo do link será enviado como uma imagem logo após a mensagem de texto. Caso a função `splitMessage` esteja ativa, cada parte da mensagem será processada para verificar se possui links de imagem."
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "autoCaption": {
+                    "anyOf": [
+                      {
+                        "type": "boolean",
+                        "description": "Caso processImageLink esteja ativo, utiliza o texto da mensagem como legenda para a imagem."
                       },
                       {
                         "type": "string"
@@ -280,7 +291,7 @@
                   "jid": {
                     "type": "string",
                     "minLength": 1,
-                    "description": "Número de telefone ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us"
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
                   },
                   "audio": {
                     "type": "string",
@@ -325,7 +336,7 @@
                   "jid": {
                     "type": "string",
                     "minLength": 1,
-                    "description": "Número de telefone ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us"
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
                   },
                   "mediaType": {
                     "type": "string",
@@ -368,7 +379,7 @@
                     "type": "array",
                     "items": {
                       "type": "string",
-                      "description": "Id do contato, com ou sem o sufixo `@s.whatsapp.net`"
+                      "description": "Id do contato (número ou lid), com ou sem o sufixo `@s.whatsapp.net` ou `@lid`"
                     },
                     "description": "Lista de números que deseja mencionar na mensagem. Campo opcional e só tem efeito em envio de mensagens para grupos"
                   },
@@ -504,7 +515,7 @@
                   "jid": {
                     "type": "string",
                     "minLength": 1,
-                    "description": "Número de telefone ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us"
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
                   },
                   "sticker": {
                     "type": "string",
@@ -549,7 +560,7 @@
                   "jid": {
                     "type": "string",
                     "minLength": 1,
-                    "description": "Número de telefone ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us"
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
                   },
                   "location": {
                     "type": "object",
@@ -606,7 +617,7 @@
                   "jid": {
                     "type": "string",
                     "minLength": 1,
-                    "description": "Número de telefone ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us"
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
                   },
                   "vcard": {
                     "type": "object",
@@ -944,6 +955,100 @@
         }
       }
     },
+    "/message-stats": {
+      "get": {
+        "summary": "Estatísticas de mensagens",
+        "tags": [
+          "Estatísticas"
+        ],
+        "description": "Retorna as estatísticas de mensagens da instância (mensagens enviadas pela API), com agrupamento por dia ou mês. A consulta é limitada a um período de 180 dias",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "default": {
+
+              }
+            },
+            "in": "query",
+            "name": "startDate",
+            "required": false,
+            "description": "Data de início do período. Opcional, se não for informada, será considerado o início do mês atual"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "default": {
+
+              }
+            },
+            "in": "query",
+            "name": "endDate",
+            "required": false,
+            "description": "Data de fim do período. Opcional, se não for informada, será considerada a data atual"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "day",
+                "month"
+              ],
+              "default": "day"
+            },
+            "in": "query",
+            "name": "groupBy",
+            "required": false,
+            "description": "Agrupar por dia ou mês. Opcional, se não for informado, será considerado o agrupamento por dia"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "date": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "count": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "date",
+                          "count"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/contacts": {
       "get": {
         "summary": "Listar contatos",
@@ -1052,6 +1157,9 @@
                           "jid": {
                             "type": "string",
                             "description": "Id do número no WhatsApp"
+                          },
+                          "lid": {
+                            "description": "LID"
                           }
                         },
                         "required": [
@@ -1540,12 +1648,17 @@
                   "agentId": {
                     "type": "string",
                     "description": "ID do agente de conversação do serviço de IA"
+                  },
+                  "disableOnMessage": {
+                    "type": "boolean",
+                    "description": "Desabilita a integração quando enviar uma mensagem de texto por dispositivo, WhatsApp Web ou Desktop"
                   }
                 },
                 "required": [
                   "type",
                   "apiKey",
-                  "agentId"
+                  "agentId",
+                  "disableOnMessage"
                 ],
                 "additionalProperties": false
               }
@@ -1606,6 +1719,15 @@
                           "type": "string",
                           "description": "ID do agente da integração"
                         },
+                        "webhookId": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "ID do webhook da integração"
+                        },
+                        "disableOnMessage": {
+                          "type": "boolean",
+                          "description": "Desabilita a integração quando enviar uma mensagem de texto por dispositivo, WhatsApp Web ou Desktop"
+                        },
                         "createdAt": {
                           "type": "string",
                           "format": "date-time",
@@ -1622,6 +1744,7 @@
                         "enabled",
                         "apiKey",
                         "agentId",
+                        "disableOnMessage",
                         "createdAt",
                         "updatedAt"
                       ],
@@ -1891,7 +2014,7 @@
                   "jid": {
                     "type": "string",
                     "minLength": 1,
-                    "description": "Número de telefone ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us"
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
                   },
                   "text": {
                     "type": "string",
@@ -2063,7 +2186,7 @@
                           "medium",
                           "long"
                         ],
-                        "description": "Delay para envio das mensagens. shortest: de 1 a 3 segundos | short: de 5 a 10 segundos | medium: de 15 a 45 segundos | long: de 60 a 90 segundos"
+                        "description": "Delay para envio das mensagens. shortest: de 1 a 2 segundos | short: de 3 a 5 segundos | medium: de 7 a 10 segundos | long: de 12 a 15 segundos"
                       },
                       "enableSendPresenceUpdate": {
                         "anyOf": [
@@ -2086,6 +2209,18 @@
                             "type": "string"
                           }
                         ]
+                      },
+                      "markAsRead": {
+                        "anyOf": [
+                          {
+                            "type": "boolean",
+                            "description": "Indica se deve marcar as mensagens como lidas automaticamente."
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ],
+                        "default": false
                       }
                     },
                     "required": [
@@ -2215,6 +2350,18 @@
                             {
                               "type": "boolean",
                               "description": "Ativar preview de links"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ],
+                          "default": false
+                        },
+                        "markAsRead": {
+                          "anyOf": [
+                            {
+                              "type": "boolean",
+                              "description": "Marcar mensagens como lidas automaticamente"
                             },
                             {
                               "type": "string"
