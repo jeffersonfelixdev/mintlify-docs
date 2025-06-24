@@ -955,6 +955,199 @@
         }
       }
     },
+    "/messages/buttons": {
+      "post": {
+        "summary": "Enviar mensagem com botões",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem com botões de ação ou de resposta rápida para um número de telefone.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "description": "Id do contato (número ou lid), com ou sem o sufixo `@s.whatsapp.net` ou `@lid`"
+                  },
+                  "body": {
+                    "type": "string",
+                    "description": "Texto do corpo da mensagem"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "Título da mensagem"
+                  },
+                  "footer": {
+                    "type": "string",
+                    "description": "Texto do rodapé da mensagem"
+                  },
+                  "buttons": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "url",
+                            "copy",
+                            "call",
+                            "reply"
+                          ]
+                        },
+                        "displayText": {
+                          "type": "string",
+                          "description": "Texto de exibição do botão"
+                        },
+                        "id": {
+                          "type": "string",
+                          "description": "identificador único do botão"
+                        },
+                        "copyCode": {
+                          "type": "string",
+                          "description": "Valor a ser copiado ao clicar no botão (tipo copy)"
+                        },
+                        "url": {
+                          "type": "string",
+                          "description": "URL a ser acessada ao clicar no botão (tipo url)"
+                        },
+                        "phoneNumber": {
+                          "type": "string",
+                          "description": "Número de telefone a ser chamado ao clicar no botão (tipo call)"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "displayText",
+                        "id"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "jid",
+                  "buttons"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/list": {
+      "post": {
+        "summary": "Enviar mensagem de lista",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem com lista de opções para um número de telefone.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "description": "Id do contato (número ou lid), com ou sem o sufixo `@s.whatsapp.net` ou `@lid`"
+                  },
+                  "buttonText": {
+                    "type": "string",
+                    "description": "Texto do botão de acesso a lista"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "Título da mensagem"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Descrição da mensagem"
+                  },
+                  "footer": {
+                    "type": "string",
+                    "description": "Rodapé da mensagem"
+                  },
+                  "sections": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "description": "Título da seção"
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "title": {
+                                "type": "string",
+                                "description": "Título da linha"
+                              },
+                              "description": {
+                                "type": "string",
+                                "description": "Descrição da linha"
+                              },
+                              "rowId": {
+                                "type": "string",
+                                "description": "Identificador da linha"
+                              }
+                            },
+                            "required": [
+                              "title",
+                              "rowId"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "rows"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "jid",
+                  "buttonText",
+                  "sections"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
     "/message-stats": {
       "get": {
         "summary": "Estatísticas de mensagens",
