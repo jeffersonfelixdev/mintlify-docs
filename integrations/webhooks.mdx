@@ -46,6 +46,37 @@ servidores pelo prazo de 7 dias.
 A seguir, iremos listar os exemplos de payload dos webhooks da ZapperAPI, para 
 os diferentes tipos de mensagens recebidas no WhatsApp:
 
+### Atualização da conexão
+
+Tipo: `connection.update`
+
+```json
+{
+  "type":"connection.update",
+  "connection":"close",
+  "lastDisconnect": {
+    "error": {
+      "data": {
+        "reason":"401",
+        "location":"odn"
+      },
+      "isBoom":true,
+      "isServer":false,
+      "output": {
+        "statusCode":401,
+        "payload": {
+          "statusCode":401,
+          "error":"Unauthorized",
+          "message":"Connection Failure"
+        },
+        "headers": {}
+      }
+    },
+    "date":"2025-07-02T02:44:35.820Z"
+  }
+}
+```
+
 ### Recebimento de mensagens
 
 Tipo: `messages.upsert`
