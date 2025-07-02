@@ -177,6 +177,121 @@
         }
       }
     },
+    "/profile/name": {
+      "patch": {
+        "summary": "Alterar nome do perfil",
+        "tags": [
+          "Perfil"
+        ],
+        "description": "Altera o nome do perfil da conta de WhatsApp conectada.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Novo nome do perfil"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/profile/status": {
+      "patch": {
+        "summary": "Alterar status do perfil",
+        "tags": [
+          "Perfil"
+        ],
+        "description": "Altera o status do perfil da conta de WhatsApp conectada.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "description": "Texto do status do perfil"
+                  }
+                },
+                "required": [
+                  "status"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/profile/picture": {
+      "patch": {
+        "summary": "Alterar foto do perfil",
+        "tags": [
+          "Perfil"
+        ],
+        "description": "Altera a foto do perfil da conta de WhatsApp conectada.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "picture": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "URL ou Base64 da imagem a ser enviada"
+                  }
+                },
+                "required": [
+                  "picture"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remover foto do perfil",
+        "tags": [
+          "Perfil"
+        ],
+        "description": "Remove o foto do perfil da conta de WhatsApp conectada.",
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
     "/messages/text": {
       "post": {
         "summary": "Enviar mensagem de texto",
@@ -204,7 +319,7 @@
                     "type": "array",
                     "items": {
                       "type": "string",
-                      "description": "Id do contato (número ou lid), com ou sem o sufixo `@s.whatsapp.net` ou `@lid`"
+                      "description": "Id do contato (número ou lid). Para números de telefone, pode ser enviado com ou sem o sufixo `@s.whatsapp.net`. Para lids, sempre use o sufixo `@lid`"
                     },
                     "description": "Lista de números que deseja mencionar na mensagem. Campo opcional e só tem efeito em envio de mensagens para grupos"
                   },
@@ -379,7 +494,7 @@
                     "type": "array",
                     "items": {
                       "type": "string",
-                      "description": "Id do contato (número ou lid), com ou sem o sufixo `@s.whatsapp.net` ou `@lid`"
+                      "description": "Id do contato (número ou lid). Para números de telefone, pode ser enviado com ou sem o sufixo `@s.whatsapp.net`. Para lids, sempre use o sufixo `@lid`"
                     },
                     "description": "Lista de números que deseja mencionar na mensagem. Campo opcional e só tem efeito em envio de mensagens para grupos"
                   },
@@ -961,7 +1076,7 @@
         "tags": [
           "Mensagens"
         ],
-        "description": "Envia uma mensagem com botões de ação ou de resposta rápida para um número de telefone.",
+        "description": "Envia uma mensagem com botões de ação ou de resposta rápida para um número de telefone. Para grupos, não é possível enviar botões de resposta rápida.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -970,7 +1085,8 @@
                 "properties": {
                   "jid": {
                     "type": "string",
-                    "description": "Id do contato (número ou lid), com ou sem o sufixo `@s.whatsapp.net` ou `@lid`"
+                    "minLength": 1,
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
                   },
                   "body": {
                     "type": "string",
@@ -1065,7 +1181,7 @@
                 "properties": {
                   "jid": {
                     "type": "string",
-                    "description": "Id do contato (número ou lid), com ou sem o sufixo `@s.whatsapp.net` ou `@lid`"
+                    "description": "Id do contato (número ou lid). Para números de telefone, pode ser enviado com ou sem o sufixo `@s.whatsapp.net`. Para lids, sempre use o sufixo `@lid`"
                   },
                   "buttonText": {
                     "type": "string",
@@ -1128,6 +1244,7 @@
                 "required": [
                   "jid",
                   "buttonText",
+                  "description",
                   "sections"
                 ],
                 "additionalProperties": false
@@ -2627,6 +2744,189 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/privacy/block-user": {
+      "patch": {
+        "summary": "Bloquear usuário",
+        "tags": [
+          "Privacidade"
+        ],
+        "description": "Bloqueia um usuário da conta de WhatsApp conectada para não receber ou enviar mensagens para ele.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "description": "Número/JID do contato a ser bloqueado"
+                  }
+                },
+                "required": [
+                  "jid"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/privacy/unblock-user": {
+      "patch": {
+        "summary": "Desbloquear usuário",
+        "tags": [
+          "Privacidade"
+        ],
+        "description": "Desbloqueia um usuário da conta de WhatsApp conectada para receber ou enviar mensagens para ele.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "description": "Número/JID do contato a ser desbloqueado"
+                  }
+                },
+                "required": [
+                  "jid"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/privacy/block-list": {
+      "get": {
+        "summary": "Obter lista de usuários bloqueados",
+        "tags": [
+          "Privacidade"
+        ],
+        "description": "Obtém a lista de usuários bloqueados da conta de WhatsApp conectada.",
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/privacy/settings": {
+      "get": {
+        "summary": "Obter configurações de privacidade",
+        "tags": [
+          "Privacidade"
+        ],
+        "description": "Obtém as configurações de privacidade da conta de WhatsApp conectada.",
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Atualizar configurações de privacidade",
+        "tags": [
+          "Privacidade"
+        ],
+        "description": "Atualiza as configurações de privacidade da conta de WhatsApp conectada. Não é necessário enviar todos os campos, apenas os que deseja atualizar.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "last": {
+                    "type": "string",
+                    "enum": [
+                      "all",
+                      "contacts",
+                      "contact_blacklist",
+                      "none"
+                    ],
+                    "description": "Quem pode ver o status de visto pela última vez"
+                  },
+                  "online": {
+                    "type": "string",
+                    "enum": [
+                      "all",
+                      "match_last_seen"
+                    ],
+                    "description": "Quem pode ver o status de online"
+                  },
+                  "profile": {
+                    "type": "string",
+                    "enum": [
+                      "all",
+                      "contacts",
+                      "contact_blacklist",
+                      "none"
+                    ],
+                    "description": "Quem pode ver a foto do perfil"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "all",
+                      "contacts",
+                      "contact_blacklist",
+                      "none"
+                    ],
+                    "description": "Quem pode ver a mensagem de status"
+                  },
+                  "readreceipts": {
+                    "type": "string",
+                    "enum": [
+                      "all",
+                      "none"
+                    ],
+                    "description": "Quem pode ver o status de mensagens lidas"
+                  },
+                  "groupadd": {
+                    "type": "string",
+                    "enum": [
+                      "all",
+                      "contacts",
+                      "contact_blacklist"
+                    ],
+                    "description": "Quem pode adicionar a conta de WhatsApp conectada a grupos"
+                  },
+                  "calladd": {
+                    "type": "string",
+                    "enum": [
+                      "all",
+                      "known"
+                    ],
+                    "description": "Quem pode adicionar a conta de WhatsApp conectada a chamadas"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
           }
         }
       }
