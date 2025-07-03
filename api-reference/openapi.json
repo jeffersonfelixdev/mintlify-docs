@@ -1076,7 +1076,7 @@
         "tags": [
           "Mensagens"
         ],
-        "description": "Envia uma mensagem com botões de ação ou de resposta rápida para um número de telefone. Para grupos, não é possível enviar botões de resposta rápida.",
+        "description": "Envia uma mensagem com botões de ação ou de resposta rápida para um número de telefone. Para grupos, não é possível enviar botões de resposta rápida. Caso queira enviar uma imagem ou vídeo no corpo da mensagem, utilize os campos `media` e `mediaType`",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1099,6 +1099,18 @@
                   "footer": {
                     "type": "string",
                     "description": "Texto do rodapé da mensagem"
+                  },
+                  "media": {
+                    "type": "string",
+                    "description": "URL da mídia a ser encaminhada junto com a mensagem (tipo url, copy, call)"
+                  },
+                  "mediaType": {
+                    "type": "string",
+                    "enum": [
+                      "image",
+                      "video"
+                    ],
+                    "description": "Tipo de mídia a ser encaminhada junto com a mensagem (`image` ou `video`)"
                   },
                   "buttons": {
                     "type": "array",
@@ -1246,6 +1258,118 @@
                   "buttonText",
                   "description",
                   "sections"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/messages/carousel": {
+      "post": {
+        "summary": "Enviar mensagem com carousel",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem com carousel.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
+                  },
+                  "message": {
+                    "type": "string",
+                    "description": "Mensagem do carousel"
+                  },
+                  "carousel": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "text": {
+                          "type": "string",
+                          "description": "Texto do cartão"
+                        },
+                        "image": {
+                          "type": "string",
+                          "description": "URL da imagem do cartão"
+                        },
+                        "buttons": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "description": "ID do botão"
+                              },
+                              "displayText": {
+                                "type": "string",
+                                "description": "Texto do botão"
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "url",
+                                  "copy",
+                                  "call",
+                                  "reply"
+                                ],
+                                "description": "Tipo de botão"
+                              },
+                              "url": {
+                                "type": "string",
+                                "description": "URL do botão"
+                              },
+                              "phoneNumber": {
+                                "type": "string",
+                                "description": "Número de telefone do botão"
+                              },
+                              "copyCode": {
+                                "type": "string",
+                                "description": "Texto a ser copiado ao clicar no botão"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "displayText",
+                              "type"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "text",
+                        "image",
+                        "buttons"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "jid",
+                  "message",
+                  "carousel"
                 ],
                 "additionalProperties": false
               }
