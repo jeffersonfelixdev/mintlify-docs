@@ -1014,7 +1014,7 @@
         "tags": [
           "Mensagens"
         ],
-        "description": "Exclui uma mensagem enviada pelo WhatsApp. É necessário informar a chave da mensagem, que é exatamente como recebida pelo webhook. Só é possível deletar mensagens enviadas pela própria conta conectada.",
+        "description": "Exclui uma mensagem enviada pelo WhatsApp. É necessário informar a chave da mensagem, que é exatamente como recebida pelo webhook. Só é possível deletar mensagens enviadas pela própria conta conectada, ou no caso de grupos, pelo proprietário ou administrador do grupo.",
         "requestBody": {
           "content": {
             "application/json": {
