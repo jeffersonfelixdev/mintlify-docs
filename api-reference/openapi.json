@@ -533,87 +533,6 @@
         }
       }
     },
-    "/messages/status": {
-      "post": {
-        "summary": "Enviar mensagem de status",
-        "tags": [
-          "Mensagens"
-        ],
-        "description": "Envia uma mensagem de status para exibição nos Stories.",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "enum": [
-                      "text",
-                      "image",
-                      "audio"
-                    ],
-                    "description": "Tipo de mensagem"
-                  },
-                  "content": {
-                    "type": "string",
-                    "description": "Conteúdo da mensagem, sendo o texto no caso do tipo `text` ou a URL da mídia nos demais tipos"
-                  },
-                  "caption": {
-                    "type": "string",
-                    "description": "Legenda da mídia, quando aplicável"
-                  },
-                  "backgroundColor": {
-                    "type": "string",
-                    "description": "Cor do fundo (obrigatório para o tipo `text`)"
-                  },
-                  "font": {
-                    "type": "number",
-                    "minimum": 1,
-                    "maximum": 5,
-                    "description": "Tipo de fonte (obrigatório para o tipo `text`\n\n\n                Fontes disponíveis:\n\n                1 - Serif\n\n                2 - Norican Regular\n\n                3 - Bryndan Write\n\n                4 - BebasNeue Regular\n\n                5 - Oswald Heavy"
-                  },
-                  "allContacts": {
-                    "anyOf": [
-                      {
-                        "type": "boolean",
-                        "description": "Indica se deseja enviar o status para todos os seus contatos"
-                      },
-                      {
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  "statusJidList": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "Caso `allContacts` seja falso, os contatos que vão\n              receber o status devem ser indicados neste campo"
-                  }
-                },
-                "required": [
-                  "type",
-                  "content"
-                ],
-                "additionalProperties": false
-              }
-            }
-          },
-          "required": true
-        },
-        "security": [
-          {
-            "apiKey": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Default Response"
-          }
-        }
-      }
-    },
     "/messages/sticker": {
       "post": {
         "summary": "Enviar sticker",
@@ -1474,59 +1393,6 @@
                   },
                   "required": [
                     "data"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/contacts": {
-      "get": {
-        "summary": "Listar contatos",
-        "tags": [
-          "Contatos"
-        ],
-        "description": "Lista todos os contatos do WhatsApp.",
-        "security": [
-          {
-            "apiKey": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "contacts": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "description": "Id do contato"
-                          },
-                          "name": {
-                            "type": "string",
-                            "description": "Nome do contato"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "name"
-                        ],
-                        "additionalProperties": false
-                      }
-                    }
-                  },
-                  "required": [
-                    "contacts"
                   ],
                   "additionalProperties": false
                 }
@@ -2517,7 +2383,7 @@
                       "type": "number"
                     },
                     "paused": {
-                      "type": "number"
+                      "type": "boolean"
                     }
                   },
                   "required": [
