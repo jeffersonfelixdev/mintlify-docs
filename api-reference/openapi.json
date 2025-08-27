@@ -394,7 +394,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos."
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
                   }
                 },
                 "required": [
@@ -449,7 +449,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos."
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
                   }
                 },
                 "required": [
@@ -556,7 +556,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos."
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
                   }
                 },
                 "required": [
@@ -612,7 +612,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos."
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
                   }
                 },
                 "required": [
@@ -679,7 +679,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos."
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
                   }
                 },
                 "required": [
@@ -924,7 +924,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos."
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
                   }
                 },
                 "required": [
@@ -1118,7 +1118,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos."
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
                   },
                   "buttons": {
                     "type": "array",
@@ -1268,7 +1268,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos."
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
                   }
                 },
                 "required": [
@@ -1325,7 +1325,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos."
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
                   },
                   "carousel": {
                     "type": "array",
@@ -2657,7 +2657,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos."
+                    "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
                   }
                 },
                 "required": [
