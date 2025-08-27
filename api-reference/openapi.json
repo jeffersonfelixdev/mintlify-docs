@@ -394,7 +394,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos. Se não informado, será respeitado o tempo de desaparecimento do grupo ou conversa."
+                    "description": "Tempo de desaparecimento da mensagem em segundos."
                   }
                 },
                 "required": [
@@ -449,7 +449,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos. Se não informado, será respeitado o tempo de desaparecimento do grupo ou conversa."
+                    "description": "Tempo de desaparecimento da mensagem em segundos."
                   }
                 },
                 "required": [
@@ -556,7 +556,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos. Se não informado, será respeitado o tempo de desaparecimento do grupo ou conversa."
+                    "description": "Tempo de desaparecimento da mensagem em segundos."
                   }
                 },
                 "required": [
@@ -612,7 +612,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos. Se não informado, será respeitado o tempo de desaparecimento do grupo ou conversa."
+                    "description": "Tempo de desaparecimento da mensagem em segundos."
                   }
                 },
                 "required": [
@@ -679,7 +679,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos. Se não informado, será respeitado o tempo de desaparecimento do grupo ou conversa."
+                    "description": "Tempo de desaparecimento da mensagem em segundos."
                   }
                 },
                 "required": [
@@ -924,7 +924,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos. Se não informado, será respeitado o tempo de desaparecimento do grupo ou conversa."
+                    "description": "Tempo de desaparecimento da mensagem em segundos."
                   }
                 },
                 "required": [
@@ -1118,7 +1118,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos. Se não informado, será respeitado o tempo de desaparecimento do grupo ou conversa."
+                    "description": "Tempo de desaparecimento da mensagem em segundos."
                   },
                   "buttons": {
                     "type": "array",
@@ -1268,7 +1268,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos. Se não informado, será respeitado o tempo de desaparecimento do grupo ou conversa."
+                    "description": "Tempo de desaparecimento da mensagem em segundos."
                   }
                 },
                 "required": [
@@ -1325,7 +1325,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos. Se não informado, será respeitado o tempo de desaparecimento do grupo ou conversa."
+                    "description": "Tempo de desaparecimento da mensagem em segundos."
                   },
                   "carousel": {
                     "type": "array",
@@ -2657,7 +2657,7 @@
                       "7d",
                       "90d"
                     ],
-                    "description": "Tempo de desaparecimento da mensagem em segundos. Se não informado, será respeitado o tempo de desaparecimento do grupo ou conversa."
+                    "description": "Tempo de desaparecimento da mensagem em segundos."
                   }
                 },
                 "required": [
