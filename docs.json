@@ -59,6 +59,10 @@
       {
         "tab": "API Reference",
         "openapi": "/api-reference/openapi.json"
+      },
+      {
+        "tab": "Instance API Reference",
+        "openapi": "/instance-api/openapi.json"
       }
     ]
   },
