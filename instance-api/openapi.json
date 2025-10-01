@@ -21,8 +21,6 @@
   "paths": {
     "/api/v2/instances": {
       "post": {
-        "operationId": "createInstance",
-        "x-displayName": "1. Criar Instância",
         "summary": "Cria uma nova instância",
         "tags": [
           "Instâncias"
@@ -44,6 +42,17 @@
             }
           }
         },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "userId",
+            "required": false,
+            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperAPI."
+          }
+        ],
         "security": [
           {
             "token": []
@@ -99,8 +108,6 @@
         }
       },
       "get": {
-        "operationId": "listInstances",
-        "x-displayName": "2. Listar Instâncias",
         "summary": "Obtém todas as instâncias",
         "tags": [
           "Instâncias"
@@ -132,6 +139,15 @@
             "in": "query",
             "name": "label",
             "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "userId",
+            "required": false,
+            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperAPI."
           }
         ],
         "security": [
@@ -154,6 +170,15 @@
         ],
         "description": "Obtém uma instância",
         "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "userId",
+            "required": false,
+            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperAPI."
+          },
           {
             "schema": {
               "type": "string"
@@ -185,6 +210,15 @@
             "schema": {
               "type": "string"
             },
+            "in": "query",
+            "name": "userId",
+            "required": false,
+            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperAPI."
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
             "in": "path",
             "name": "instanceId",
             "required": true
@@ -210,6 +244,15 @@
         ],
         "description": "Renomeia uma instância alterando o nome amigável (label) de exibição no dashboard",
         "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "userId",
+            "required": false,
+            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperAPI."
+          },
           {
             "schema": {
               "type": "string"
@@ -247,6 +290,15 @@
         ],
         "description": "Reinicia uma instância",
         "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "userId",
+            "required": false,
+            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperAPI."
+          },
           {
             "schema": {
               "type": "string"
