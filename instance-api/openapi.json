@@ -319,6 +319,113 @@
           }
         }
       }
+    },
+    "/api/v2/users": {
+      "post": {
+        "summary": "Criar usuário (subconta)",
+        "tags": [
+          "Usuários"
+        ],
+        "description": "Cria um novo usuário a partir de um parceiro. É necessário que você tenha autorização para criar subcontas nas ZapperAPI. Entre em contato com o suporte e saiba como funcionam as subcontas e solicite a autorização.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                },
+                "required": [
+                  "name",
+                  "email"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string",
+                          "format": "email"
+                        },
+                        "emailVerified": {
+                          "type": "boolean"
+                        },
+                        "phone": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "phoneVerified": {
+                          "type": "boolean"
+                        },
+                        "document": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "documentType": {
+                          "type": "string",
+                          "enum": [
+                            "CPF",
+                            "CNPJ"
+                          ],
+                          "nullable": true
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "email",
+                        "emailVerified",
+                        "phone",
+                        "phoneVerified",
+                        "createdAt",
+                        "updatedAt"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "user"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "servers": [
