@@ -8,7 +8,7 @@
   "components": {
     "securitySchemes": {
       "token": {
-        "description": "API Key global para autenticação na Instance API",
+        "description": "API Key global para autenticação na Instance API (Bearer token)",
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT"
