@@ -326,7 +326,7 @@
         "tags": [
           "Usuários"
         ],
-        "description": "Cria um novo usuário a partir de um parceiro. É necessário que você tenha autorização para criar subcontas nas ZapperAPI. Entre em contato com o suporte e saiba como funcionam as subcontas e solicite a autorização.",
+        "description": "Cria um novo usuário a partir de um parceiro. É necessário que você tenha autorização para criar subcontas na ZapperAPI. Entre em contato com o suporte e saiba como funcionam as subcontas e solicite a autorização.",
         "requestBody": {
           "content": {
             "application/json": {
