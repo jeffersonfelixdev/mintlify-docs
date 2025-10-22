@@ -277,7 +277,49 @@
         ],
         "responses": {
           "200": {
-            "description": "Default Response"
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID do número de telefone na Meta"
+                    },
+                    "display_phone_number": {
+                      "type": "string",
+                      "description": "Número de telefone de exibição"
+                    },
+                    "verified_name": {
+                      "type": "string",
+                      "description": "Nome do usuário"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Status da conexão"
+                    },
+                    "metaUrlCallback": {
+                      "type": "string",
+                      "description": "URL de callback para o webhook da Meta"
+                    },
+                    "metaVerificationToken": {
+                      "type": "string",
+                      "description": "Token de verificação para o webhook da Meta"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "display_phone_number",
+                    "verified_name",
+                    "status",
+                    "metaUrlCallback",
+                    "metaVerificationToken"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
