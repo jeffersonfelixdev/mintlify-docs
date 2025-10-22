@@ -49,7 +49,7 @@
                     "version": {
                       "type": "string"
                     },
-                    "waWebVersion": {
+                    "waVersion": {
                       "type": "string"
                     },
                     "docs": {
@@ -61,7 +61,7 @@
                     "status",
                     "message",
                     "version",
-                    "waWebVersion",
+                    "waVersion",
                     "docs"
                   ],
                   "additionalProperties": false
@@ -103,9 +103,24 @@
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "instanceType": {
+                      "type": "string",
+                      "enum": [
+                        "device",
+                        "cloud_api"
+                      ]
+                    },
                     "status": {
                       "type": "string",
                       "description": "Status da conexão"
+                    },
+                    "metaUrlCallback": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "metaVerificationToken": {
+                      "type": "string",
+                      "nullable": true
                     },
                     "user": {
                       "type": "object",
@@ -113,17 +128,50 @@
                         "id": {
                           "type": "string"
                         },
+                        "displayPhoneNumber": {
+                          "type": "string"
+                        },
                         "name": {
                           "type": "string"
                         },
                         "image": {
                           "type": "string"
+                        },
+                        "businessProfile": {
+                          "type": "object",
+                          "properties": {
+                            "address": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "description": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "website": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "nullable": true
+                            },
+                            "email": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "category": {
+                              "type": "string",
+                              "nullable": true
+                            }
+                          },
+                          "additionalProperties": false
                         }
                       },
                       "required": [
                         "id"
                       ],
-                      "additionalProperties": false
+                      "additionalProperties": false,
+                      "nullable": true
                     },
                     "qrCode": {
                       "type": "string",
@@ -135,6 +183,7 @@
                     }
                   },
                   "required": [
+                    "instanceType",
                     "status"
                   ],
                   "additionalProperties": false
@@ -177,6 +226,58 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/connection/cloud-api": {
+      "post": {
+        "summary": "Conectar Cloud API",
+        "tags": [
+          "Cloud API"
+        ],
+        "description": "Conecta a instância com o WhatsApp Cloud API. Se a instância estiver conectada em um dispositivo, ela será desconectada.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phoneNumberId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "ID do número de telefone na Meta"
+                  },
+                  "businessAccountId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "ID da conta de negócios na Meta"
+                  },
+                  "accessToken": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Token de acesso da Meta com permissão para o WhatsApp Business API"
+                  }
+                },
+                "required": [
+                  "phoneNumberId",
+                  "businessAccountId",
+                  "accessToken"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
           }
         }
       }
@@ -327,7 +428,7 @@
                   "jid": {
                     "type": "string",
                     "minLength": 1,
-                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
+                    "description": "Número de telefone, LID, id do grupo ou id da newsletter/canal. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`.\n\n\n      Para enviar mensagem para canais, o id deve ser enviado acrescido de `@newsletter`."
                   },
                   "message": {
                     "type": "string",
@@ -2240,6 +2341,303 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/newsletter": {
+      "post": {
+        "summary": "Criar canal",
+        "tags": [
+          "Canais"
+        ],
+        "description": "Cria um novo canal",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Nome do canal"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Descrição do canal (opcional)"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/newsletter/{id}": {
+      "delete": {
+        "summary": "Deletar canal",
+        "tags": [
+          "Canais"
+        ],
+        "description": "Deleta um canal",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID do canal (com ou sem o sufixo @newsletter)"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualizar canal",
+        "tags": [
+          "Canais"
+        ],
+        "description": "Atualiza os dados de um canal (nome e descrição).",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Nome do canal"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Descrição do canal (opcional)"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID do canal (com ou sem o sufixo @newsletter)"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/newsletter/{type}/{id}": {
+      "get": {
+        "summary": "Obter dados do canal",
+        "tags": [
+          "Canais"
+        ],
+        "description": "Obtém dados de um canal pelo código do convite ou pelo ID do canal.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "invite",
+                "jid"
+              ]
+            },
+            "in": "path",
+            "name": "type",
+            "required": true,
+            "description": "Tipo de busca (`invite` para código do convite, `jid` para ID do canal)"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "Código do convite ou ID do canal (com ou sem o sufixo @newsletter no final)"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/newsletters": {
+      "get": {
+        "summary": "Listar canais",
+        "tags": [
+          "Canais"
+        ],
+        "description": "Lista todos os canais que o usuário participa ou é dono.",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/newsletter/{id}/profile-picture": {
+      "post": {
+        "summary": "Upload da imagem de perfil do canal",
+        "tags": [
+          "Canais"
+        ],
+        "description": "Realiza o upload de imagem para o perfil do canal.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "description": "Imagem a ser enviada. Pode ser utilizado uma URL (http/https), arquivo no formato base64 ou uma URL base64."
+                  }
+                },
+                "required": [
+                  "image"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID do canal (com ou sem o sufixo @newsletter)"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/newsletter/{id}/follow": {
+      "patch": {
+        "summary": "Seguir canal",
+        "tags": [
+          "Canais"
+        ],
+        "description": "Segue um canal.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID do canal (com ou sem o sufixo @newsletter)"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/newsletter/{id}/unfollow": {
+      "patch": {
+        "summary": "Deixar de seguir canal",
+        "tags": [
+          "Canais"
+        ],
+        "description": "Deixa de seguir um canal.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID do canal (com ou sem o sufixo @newsletter)"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
           }
         }
       }
