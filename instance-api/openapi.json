@@ -157,7 +157,143 @@
         ],
         "responses": {
           "200": {
-            "description": "Default Response"
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "instances": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "apikey": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "beta": {
+                            "type": "boolean",
+                            "nullable": true
+                          },
+                          "connectionStatus": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "nullable": true
+                          },
+                          "createdBy": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "delay": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "enableLinkPreview": {
+                            "type": "boolean",
+                            "nullable": true
+                          },
+                          "enableSendPresenceUpdate": {
+                            "type": "boolean",
+                            "nullable": true
+                          },
+                          "endpointId": {
+                            "type": "number",
+                            "nullable": true
+                          },
+                          "id": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "label": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "markAsRead": {
+                            "type": "boolean",
+                            "nullable": true
+                          },
+                          "metaAccessToken": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "metaBusinessAccountId": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "metaPhoneNumberId": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "metaVerificationToken": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "metaForwardWebhook": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "ownerId": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "stackId": {
+                            "type": "number",
+                            "nullable": true
+                          },
+                          "type": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "nullable": true
+                          },
+                          "userImage": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "userJid": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "version": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "webhookUrl": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "webhookSecret": {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "pages": {
+                      "type": "number",
+                      "nullable": true
+                    },
+                    "total": {
+                      "type": "number",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "instances"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -185,7 +321,8 @@
             },
             "in": "path",
             "name": "instanceId",
-            "required": true
+            "required": true,
+            "description": "Id da instância"
           }
         ],
         "security": [
@@ -195,7 +332,132 @@
         ],
         "responses": {
           "200": {
-            "description": "Default Response"
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "instance": {
+                      "type": "object",
+                      "properties": {
+                        "apikey": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "beta": {
+                          "type": "boolean",
+                          "nullable": true
+                        },
+                        "connectionStatus": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "nullable": true
+                        },
+                        "createdBy": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "delay": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "enableLinkPreview": {
+                          "type": "boolean",
+                          "nullable": true
+                        },
+                        "enableSendPresenceUpdate": {
+                          "type": "boolean",
+                          "nullable": true
+                        },
+                        "endpointId": {
+                          "type": "number",
+                          "nullable": true
+                        },
+                        "id": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "label": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "markAsRead": {
+                          "type": "boolean",
+                          "nullable": true
+                        },
+                        "metaAccessToken": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "metaBusinessAccountId": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "metaPhoneNumberId": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "metaVerificationToken": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "metaForwardWebhook": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "ownerId": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "stackId": {
+                          "type": "number",
+                          "nullable": true
+                        },
+                        "type": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "nullable": true
+                        },
+                        "userImage": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "userJid": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "version": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "webhookUrl": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "webhookSecret": {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "instance"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       },
@@ -221,7 +483,8 @@
             },
             "in": "path",
             "name": "instanceId",
-            "required": true
+            "required": true,
+            "description": "Id da instância"
           }
         ],
         "security": [
@@ -259,7 +522,8 @@
             },
             "in": "path",
             "name": "instanceId",
-            "required": true
+            "required": true,
+            "description": "Id da instância"
           },
           {
             "schema": {
@@ -267,7 +531,8 @@
             },
             "in": "path",
             "name": "label",
-            "required": true
+            "required": true,
+            "description": "Nome amigável para exibição"
           }
         ],
         "security": [
@@ -305,7 +570,8 @@
             },
             "in": "path",
             "name": "instanceId",
-            "required": true
+            "required": true,
+            "description": "Id da instância"
           }
         ],
         "security": [
@@ -339,6 +605,10 @@
                   "email": {
                     "type": "string",
                     "format": "email"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "nullable": true
                   }
                 },
                 "required": [
@@ -351,6 +621,11 @@
           },
           "required": true
         },
+        "security": [
+          {
+            "token": []
+          }
+        ],
         "responses": {
           "201": {
             "description": "Default Response",
@@ -392,6 +667,10 @@
                             "CPF",
                             "CNPJ"
                           ],
+                          "nullable": true
+                        },
+                        "createdById": {
+                          "type": "string",
                           "nullable": true
                         },
                         "createdAt": {
