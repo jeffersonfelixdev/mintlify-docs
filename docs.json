@@ -33,14 +33,15 @@
             "pages": [
               "definitions/authentication",
               "definitions/number-format",
-              "definitions/queue"
+              "definitions/queue",
+              "definitions/storage"
             ]
           },
           {
             "group": "Funções principais",
             "pages": [
               "functions/messages",
-              "functions/contacts",
+              "functions/chats",
               "functions/groups"
             ]
           },
