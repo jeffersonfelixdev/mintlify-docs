@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "palm",
+  "theme": "willow",
   "name": "ZapperAPI Docs",
   "description": "Documentação oficial da ZapperAPI, sua API de WhatsApp completa e fácil de usar",
   "colors": {
@@ -21,6 +21,7 @@
         "groups": [
           {
             "group": "Comece por aqui",
+            "icon": "rocket",
             "pages": [
               "introduction",
               "creating-instance",
@@ -30,6 +31,7 @@
           },
           {
             "group": "Definições",
+            "icon": "book",
             "pages": [
               "definitions/authentication",
               "definitions/number-format",
@@ -39,6 +41,7 @@
           },
           {
             "group": "Funções principais",
+            "icon": "edit",
             "pages": [
               "functions/messages",
               "functions/chats",
@@ -47,9 +50,10 @@
           },
           {
             "group": "Integrações e webhooks",
+            "icon": "globe",
             "pages": [
               "integrations/webhooks",
-              "integrations/ai-agents",
+              "integrations/chatvolt",
               "integrations/eleven-labs",
               "integrations/n8n",
               "integrations/make"
@@ -92,7 +96,7 @@
     "links": [
       {
         "label": "Suporte",
-        "href": "https://api.whatsapp.com/send?phone=551231990360&text=Olá!+Preciso+de+ajuda"
+        "href": "https://api.whatsapp.com/send?phone=551231971643&text=Olá!+Preciso+de+ajuda"
       }
     ],
     "primary": {

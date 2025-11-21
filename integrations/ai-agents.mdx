@@ -1,38 +1,15 @@
 ---
 title: Agentes de IA
-description: "Integre diretamente com o Chatvolt ou GPT Maker e tenha um agente de IA especializado em seu negócio"
+description: "Integre diretamente com a GPT Maker ou Zaia e tenha um agente de IA especializado em seu negócio"
 ---
 
 ## Introdução
-
-**O que é o Chatvolt**
-
-O Chatvolt é uma plataforma completa de atendimento ao cliente com automação 
-baseada em Agentes de IA. Com o Chatvolt você pode:
-
-- Criar agentes de IA treinados para o seu negócio
-- Ter respostas precisas e naturais para seus clientes, com base em seus dados
-- Integração com mais de 40 LLMs, incluindo ChatGPT, Claude e DeepSeek
-
-Caso ainda não tenha uma conta no Chatvolt, <a target="_blank" href="https://app.chatvolt.ai/partner/zapperapi">faça o seu cadastro agora mesmo!</a>
-
-**Como funciona o GPT Make**
-
-Assim como o Chatvolt, o GPT Make é um serviço de atendimento humanizado através
-da inteligência artificial, com muitas funcionalidades e integrações:
-
-- Criação de agentes e treinamento com sua base de dados
-- Envio e recebimento de mídias
-- Criação de intenções para acesso a ferramentas externas
-- Integração com diversos canais e APIs
-
-Para maiores informações, acesse https://gptmaker.ai
 
 ## Como integrar um agente de IA à ZapperAPI
 
 ### Pela API
 
-Para realizar a integração de um Agente de IA da Chatvolt ou do GPT Maker na ZapperAPI, consulte a 
+Para realizar a integração de um Agente de IA da GPT Maker ou Zaia na ZapperAPI, consulte a 
 <a href="http://docs.zapperapi.com/api-reference/integra%C3%A7%C3%B5es/criar-integra%C3%A7%C3%A3o">Seção Integrações</a> na 
 documentação de referência da API para criar ou atualizar os dados de uma integração.
 
@@ -46,7 +23,7 @@ A ZapperAPI conta com uma interface amigável para configuração de seu agente 
 - Acesse o dashboard em https://app.zapperapi.com/dash;
 - Clique sobre a instância desejada;
 - Selecione a guia **Integração IA**;
-- Preencha os dados de seu agente Chatvolt ou GPT Maker e clique em **Atualizar Integração**.
+- Preencha os dados de seu agente GPT Maker ou Zaia e clique em **Atualizar Integração**.
 
 ## Como controlar o agente pelo WhatsApp
 
@@ -68,40 +45,3 @@ Web ou Desktop:
 
 - Acesse a guia **Integração IA**;
 - Marque a opção **Desativar IA ao enviar qualquer mensagem através do dispositivo, WhatsApp Web ou Desktop**.
-
-## Informações sobre o Chatvolt
-
-### Onde consigo um token de API da Chatvolt?
-
-Para realizar a integração com o Chatvolt, é necessário um token de API. 
-
-Para isso, siga até o <a target="_blank" href="https://app.chatvolt.ai/partner/zapperapi">painel da Chatvolt</a>,
-e clique na aba **Chaves API**.
-
-As chaves de API serão exibidas nesta tela. Caso ainda não possua, você pode criar uma nova chave de API.
-Ao final, copie a chave de API para utilizar na integração com a ZapperAPI (campo `apiKey`).
-
-### Onde identificar o id do Agente na Chatvolt?
-
-No <a target="_blank" href="https://app.chatvolt.ai/partner/zapperapi">painel da Chatvolt</a>,
-clique em **Agentes**, e em seguida clique no Agente que deseja fazer a integração, 
-e acesse a guia **Geral**.
-
-O ID do Agente vai aparecer na tela de informações gerais, Card "ID do Agente".
-
-Copie o Id do Agente para utilizar na API da ZapperAPI (campo `agentId`)
-
-### Como enviar follow-up e mensagens de notas
-
-Para utilizar o follow-up nativo da Chatvolt em sua instância da ZapperAPI, os
-seguintes passos devem ser seguidos:
-
-1. No dashboard da ZapperAPI, Selecione a instância que deseja integrar o follow-up;
-2. Clique na guia **Integração IA**;
-3. Na tela da integração, copie a URL do webhook de follow up;
-4. No Chatvolt, selecione seu agente de IA, e na guia **Webhooks**, dentro da 
-seção **Webhook de Saída**, cole a URL no campo  **Sua URL externa**.
-
-Pronto! Com isso suas mensagens de follow-up, bem como aquelas que você digita 
-como nota em uma conversa do Chatvolt, serão redirecionadas ao WhatsApp do cliente,
-via integração ZapperAPI.
