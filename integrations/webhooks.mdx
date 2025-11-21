@@ -20,6 +20,20 @@ WhatsApp:
 
 ## Como usar
 
+### Pelo dashboard
+
+Para cadastrar uma URL através do dashboard, siga os seguintes passos:
+
+- **Selecione a instância** desejada;
+- Clique na guia **Webhook**;
+- Digite a **URL** do seu webhook e uma **chave secreta** (opcional);
+- Clique no botão **Atualizar** para salvar as informações de seu webhook.
+
+Para excluir o webhook cadastrado, basta clicar em **Excluir Webhook** na guia 
+**Webhook** de sua instância.
+
+### Pela API
+
 Para cadastrar uma URL para receber os webhooks da ZapperAPI, consulte a 
 <a href="http://docs.zapperapi.com/api-reference/webhook">Seção Webhooks</a> na 
 documentação de referência da API.
@@ -40,6 +54,17 @@ que possível, faça uma rotação regular de seu valor.
 Os arquivos recebidos pelos Webhooks da ZapperAPI ficam armazenados em nossos
 servidores pelo prazo de 7 dias.
 </Card>
+
+## Eventos da própria sessão conectada
+
+Por padrão, o webhook da ZapperAPI trará também as mensagens enviadas pela própria 
+sessão conectada. Isso ocorre porque trabalhamos com sistema de fila obrigatória,
+de modo que após o envio da mensagem, não é possível ter o ID da mensagem, apenas
+o jobId da fila.
+
+Assim, as mensagens do webhook que tiverem o campo `jobId` referem-se a mensagens
+disparadas pela ZapperAPI, de modo que outras mensagens disparadas por outros
+dispositivos não terão esse campo no webhook.
 
 ## Exemplos de payload
 

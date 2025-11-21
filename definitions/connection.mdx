@@ -1,0 +1,35 @@
+---
+title: Conexão com WhatsApp
+description: "Saiba como utilizar as rotas protegidas de sua ZapperAPI"
+---
+
+## Introdução
+
+Cada número conectado na ZapperAPI recebe o nome de *Instância*, que nada mais
+é que um serviço rodando em nossa infraestrutura responsável pela comunicação
+com o WhatsApp.
+
+Cada instância conecta-se com um só número, e é executada em um ambiente isolado,
+garantindo assim maior segurança e performance. Dessa forma, sua instância não 
+será prejudicada pelo excesso de uso de recursos de outra instância, por exemplo.
+
+Até mesmo instâncias criadas na mesma conta recebem esse tratamento, garantindo
+assim que seus clientes tenham ambientes separados e com alta disponibilidade.
+
+## Forma de conexão
+
+As instâncias da ZapperAPI funcionam exatamente como o WhatsApp Web: necessitam de ser
+adicionadas como dispositivo conectado em seu app no celular. 
+
+Há 3 formas de conexão com a ZapperAPI:
+
+- **QR Code**: um QR Code é exibido para ser lido pelo seu dispositivo móvel 
+(Menu de configurações - Dispositivos conectados - Adicionar dispositibo);
+
+- **Código de pareamento**: um código de 8 letras e números é exibido para ser 
+digitado em seu dispositivo quando solicitado;
+
+- **FastLink**: Uma exclusividade da ZapperAPI é o FastLink, ideal para agências com muitos clientes.
+Trata-se de um link temporário que é gerado para ser enviado para seu cliente fazer 
+a conexão por QR Code. Com isso, seu cliente não precisa ter acesso ao painel 
+de administração da ZapperAPI para conectar o celular.
