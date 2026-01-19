@@ -1603,7 +1603,7 @@
         "tags": [
           "Cloud API"
         ],
-        "description": "Envia uma mensagem de template para um número de telefone ou grupo.",
+        "description": "Envia uma mensagem de template para um número de telefone.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1613,7 +1613,7 @@
                   "jid": {
                     "type": "string",
                     "minLength": 1,
-                    "description": "Número de telefone, LID ou id do grupo. Em caso de número\n      de telefone, o mesmo deve ser enviado no formato completo, com código do\n      país, e o prefixo `+` não é obrigatório. Números de telefone podem ser\n      ou não pós-fixados com `@s.whatsapp.net`. Em caso de grupo, o id deve\n      ser enviado acrescido de `@g.us`.\n\n      Exemplos de uso correto:\n\n      +5511912345678\n\n      5511912345678\n\n      5511912345678@s.whatsapp.net\n\n      12345678-987654321@g.us\n\n\n      Em caso de LID, que é um código interno do WhatsApp utilizado para proteger\n      a privacidade dos usuários e não exibir o número do telefone, o mesmo deve\n      ser enviado no formato completo, com o sufixo `@lid`."
+                    "description": "Número do telefone, com ou sem o sufixo `@s.whatsapp.net`. Não é permitido o uso de @lid na Cloud API."
                   },
                   "templateName": {
                     "type": "string",
