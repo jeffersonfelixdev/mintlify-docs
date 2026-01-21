@@ -4608,7 +4608,7 @@
   "servers": [
     {
       "url": "https://api.zapperapi.com/{instanceId}",
-      "description": "Development",
+      "description": "Production",
       "variables": {
         "instanceId": {
           "description": "Identificador da sua instância",
