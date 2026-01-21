@@ -4604,5 +4604,17 @@
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://api.zapperapi.com/{instanceId}",
+      "description": "Development",
+      "variables": {
+        "instanceId": {
+          "description": "Identificador da sua instância",
+          "default": "inst_abcdefghijk1234567890z"
+        }
+      }
+    }
+  ]
 }
