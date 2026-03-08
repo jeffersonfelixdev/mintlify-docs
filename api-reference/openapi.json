@@ -258,6 +258,7 @@
         ],
         "description": "Conecta a instância com o WhatsApp Cloud API. Se a instância estiver conectada em um dispositivo, ela será desconectada.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -299,8 +300,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -364,6 +364,7 @@
         ],
         "description": "Altera o nome do perfil da conta de WhatsApp conectada.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -380,8 +381,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -403,6 +403,7 @@
         ],
         "description": "Altera o status do perfil da conta de WhatsApp conectada.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -419,8 +420,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -442,6 +442,7 @@
         ],
         "description": "Altera a foto do perfil da conta de WhatsApp conectada.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -459,8 +460,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -485,8 +485,15 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Default Response"
+          "204": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
           }
         }
       }
@@ -499,6 +506,7 @@
         ],
         "description": "Envia uma mensagem de texto para um número de telefone ou grupo. Caso a mensagem possua um link, ele será clicável e uma imagem de preview do site será exibida na mensagem.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -566,6 +574,14 @@
                       }
                     ]
                   },
+                  "trackId": {
+                    "type": "string",
+                    "description": "Identificador da mensagem para fins de rastreamento. Não é necessário ser um ID único, utilizar um valor que faça sentido para o seu caso."
+                  },
+                  "trackSource": {
+                    "type": "string",
+                    "description": "Origem da mensagem (ex: crm, n8n, etc.)"
+                  },
                   "expiration": {
                     "type": "string",
                     "enum": [
@@ -584,8 +600,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -607,6 +622,7 @@
         ],
         "description": "Envia uma mensagem de áudio para um número de telefone ou grupo.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -630,6 +646,14 @@
                       "90d"
                     ],
                     "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
+                  },
+                  "trackId": {
+                    "type": "string",
+                    "description": "Identificador da mensagem para fins de rastreamento. Não é necessário ser um ID único, utilizar um valor que faça sentido para o seu caso."
+                  },
+                  "trackSource": {
+                    "type": "string",
+                    "description": "Origem da mensagem (ex: crm, n8n, etc.)"
                   }
                 },
                 "required": [
@@ -639,8 +663,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -662,6 +685,7 @@
         ],
         "description": "Envia uma mensagem de mídia para um número de telefone ou grupo.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -728,6 +752,14 @@
                       }
                     ]
                   },
+                  "trackId": {
+                    "type": "string",
+                    "description": "Identificador da mensagem para fins de rastreamento. Não é necessário ser um ID único, utilizar um valor que faça sentido para o seu caso."
+                  },
+                  "trackSource": {
+                    "type": "string",
+                    "description": "Origem da mensagem (ex: crm, n8n, etc.)"
+                  },
                   "expiration": {
                     "type": "string",
                     "enum": [
@@ -747,8 +779,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -770,6 +801,7 @@
         ],
         "description": "Envia uma mensagem de mídia em formato de sticker para um número de telefone ou grupo.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -783,6 +815,14 @@
                   "sticker": {
                     "type": "string",
                     "description": "Sticker a ser encaminhado. Pode ser utilizado uma URL (http/https) ou arquivo no formato base64."
+                  },
+                  "trackId": {
+                    "type": "string",
+                    "description": "Identificador da mensagem para fins de rastreamento. Não é necessário ser um ID único, utilizar um valor que faça sentido para o seu caso."
+                  },
+                  "trackSource": {
+                    "type": "string",
+                    "description": "Origem da mensagem (ex: crm, n8n, etc.)"
                   },
                   "expiration": {
                     "type": "string",
@@ -802,8 +842,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -825,6 +864,7 @@
         ],
         "description": "Envia uma mensagem de localização para um número de telefone ou grupo.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -851,6 +891,14 @@
                     ],
                     "additionalProperties": false
                   },
+                  "trackId": {
+                    "type": "string",
+                    "description": "Identificador da mensagem para fins de rastreamento. Não é necessário ser um ID único, utilizar um valor que faça sentido para o seu caso."
+                  },
+                  "trackSource": {
+                    "type": "string",
+                    "description": "Origem da mensagem (ex: crm, n8n, etc.)"
+                  },
                   "expiration": {
                     "type": "string",
                     "enum": [
@@ -869,8 +917,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -892,6 +939,7 @@
         ],
         "description": "Envia uma mensagem de contato para um número de telefone ou grupo.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -1105,6 +1153,14 @@
                       "90d"
                     ],
                     "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
+                  },
+                  "trackId": {
+                    "type": "string",
+                    "description": "Identificador da mensagem para fins de rastreamento. Não é necessário ser um ID único, utilizar um valor que faça sentido para o seu caso."
+                  },
+                  "trackSource": {
+                    "type": "string",
+                    "description": "Origem da mensagem (ex: crm, n8n, etc.)"
                   }
                 },
                 "required": [
@@ -1114,8 +1170,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -1137,6 +1192,7 @@
         ],
         "description": "Envia um emoji de reação a uma mensagem em conversa particular ou em grupo.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -1171,8 +1227,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -1194,6 +1249,7 @@
         ],
         "description": "Exclui uma mensagem enviada pelo WhatsApp. É necessário informar a chave da mensagem, que é exatamente como recebida pelo webhook. Só é possível deletar mensagens enviadas pela própria conta conectada, ou no caso de grupos, pelo proprietário ou administrador do grupo.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -1233,8 +1289,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -1256,6 +1311,7 @@
         ],
         "description": "Envia uma mensagem com botões de ação ou de resposta rápida para um número de telefone. Para grupos, não é possível enviar botões de resposta rápida. Caso queira enviar uma imagem ou vídeo no corpo da mensagem, utilize os campos `media` e `mediaType`",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -1299,6 +1355,14 @@
                       "90d"
                     ],
                     "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
+                  },
+                  "trackId": {
+                    "type": "string",
+                    "description": "Identificador da mensagem para fins de rastreamento. Não é necessário ser um ID único, utilizar um valor que faça sentido para o seu caso."
+                  },
+                  "trackSource": {
+                    "type": "string",
+                    "description": "Origem da mensagem (ex: crm, n8n, etc.)"
                   },
                   "buttons": {
                     "type": "array",
@@ -1351,8 +1415,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -1374,6 +1437,7 @@
         ],
         "description": "Envia uma mensagem com lista de opções para um número de telefone.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -1440,6 +1504,14 @@
                       "additionalProperties": false
                     }
                   },
+                  "trackId": {
+                    "type": "string",
+                    "description": "Identificador da mensagem para fins de rastreamento. Não é necessário ser um ID único, utilizar um valor que faça sentido para o seu caso."
+                  },
+                  "trackSource": {
+                    "type": "string",
+                    "description": "Origem da mensagem (ex: crm, n8n, etc.)"
+                  },
                   "expiration": {
                     "type": "string",
                     "enum": [
@@ -1460,8 +1532,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -1483,6 +1554,7 @@
         ],
         "description": "Envia uma mensagem com carousel.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -1506,6 +1578,14 @@
                       "90d"
                     ],
                     "description": "Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24 horas, 7 dias ou 90 dias."
+                  },
+                  "trackId": {
+                    "type": "string",
+                    "description": "Identificador da mensagem para fins de rastreamento. Não é necessário ser um ID único, utilizar um valor que faça sentido para o seu caso."
+                  },
+                  "trackSource": {
+                    "type": "string",
+                    "description": "Origem da mensagem (ex: crm, n8n, etc.)"
                   },
                   "carousel": {
                     "type": "array",
@@ -1582,8 +1662,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -1605,6 +1684,7 @@
         ],
         "description": "Envia uma mensagem de template para um número de telefone.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -1638,6 +1718,20 @@
                           ],
                           "description": "Tipo do componente onde o parâmetro será inserido"
                         },
+                        "sub_type": {
+                          "type": "string",
+                          "enum": [
+                            "quick_reply",
+                            "url"
+                          ],
+                          "description": "Sub tipo do componente (obrigatório para type = button)"
+                        },
+                        "index": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 2,
+                          "description": "Índice do botão no array de botões (obrigatório para type = button), podendo ser de 0 a 2"
+                        },
                         "parameters": {
                           "type": "array",
                           "items": {
@@ -1645,6 +1739,13 @@
                             "properties": {
                               "type": {
                                 "type": "string",
+                                "enum": [
+                                  "text",
+                                  "currency",
+                                  "date_time",
+                                  "image",
+                                  "document"
+                                ],
                                 "description": "Tipo do parâmetro"
                               },
                               "parameter_name": {
@@ -1653,12 +1754,77 @@
                               },
                               "text": {
                                 "type": "string",
-                                "description": "Texto do parâmetro"
+                                "description": "Texto do parâmetro (obrigatório para type = text)"
+                              },
+                              "image": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "description": "ID da imagem"
+                                  },
+                                  "link": {
+                                    "type": "string",
+                                    "description": "URL da imagem"
+                                  },
+                                  "caption": {
+                                    "type": "string",
+                                    "description": "Legenda da imagem"
+                                  }
+                                },
+                                "additionalProperties": false,
+                                "description": "Imagem do parâmetro (obrigatório para type = image)"
+                              },
+                              "document": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "description": "ID do documento"
+                                  },
+                                  "link": {
+                                    "type": "string",
+                                    "description": "URL do documento"
+                                  },
+                                  "caption": {
+                                    "type": "string",
+                                    "description": "Legenda do documento"
+                                  },
+                                  "filename": {
+                                    "type": "string",
+                                    "description": "Nome do arquivo"
+                                  }
+                                },
+                                "additionalProperties": false,
+                                "description": "Documento do parâmetro (obrigatório para type = document)"
+                              },
+                              "currency": {
+                                "type": "object",
+                                "properties": {
+                                  "fallback_value": {
+                                    "type": "string",
+                                    "description": "Valor padrão para caso falhe a localização"
+                                  },
+                                  "code": {
+                                    "type": "string",
+                                    "description": "Código da moeda no formato ISO 4217"
+                                  },
+                                  "amount_1000": {
+                                    "type": "number",
+                                    "description": "Valor monetário multiplicado por 1000 (ex: R$ 10,00 = 10000)"
+                                  }
+                                },
+                                "required": [
+                                  "fallback_value",
+                                  "code",
+                                  "amount_1000"
+                                ],
+                                "additionalProperties": false,
+                                "description": "Valor monetário do parâmetro (obrigatório para type = currency)"
                               }
                             },
                             "required": [
-                              "type",
-                              "text"
+                              "type"
                             ],
                             "additionalProperties": false
                           }
@@ -1670,6 +1836,14 @@
                       ],
                       "additionalProperties": false
                     }
+                  },
+                  "trackId": {
+                    "type": "string",
+                    "description": "Identificador da mensagem para fins de rastreamento. Não é necessário ser um ID único, utilizar um valor que faça sentido para o seu caso."
+                  },
+                  "trackSource": {
+                    "type": "string",
+                    "description": "Origem da mensagem (ex: crm, n8n, etc.)"
                   }
                 },
                 "required": [
@@ -1681,8 +1855,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -1922,6 +2095,7 @@
         ],
         "description": "Cria um novo template de mensagem.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -2092,8 +2266,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -2115,6 +2288,7 @@
         ],
         "description": "Arquiva uma conversa com um número de telefone ou grupo.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -2132,8 +2306,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -2155,6 +2328,7 @@
         ],
         "description": "Desarquiva uma conversa com um número de telefone ou grupo.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -2172,8 +2346,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -2195,6 +2368,7 @@
         ],
         "description": "Silencia uma conversa com um número de telefone ou grupo por 8 horas (`8h`) ou 7 dias (`7d`). Se o campo `time` for \"remove\", a conversa será desilenciada.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -2221,8 +2395,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -2244,6 +2417,7 @@
         ],
         "description": "Fixa ou desfixa uma conversa com um número de telefone ou grupo.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -2265,8 +2439,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -2288,6 +2461,7 @@
         ],
         "description": "Remove uma conversa com um número de telefone ou grupo.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -2307,7 +2481,6 @@
               }
             }
           },
-          "required": true,
           "description": "A chave da última mensagem da conversa"
         },
         "security": [
@@ -2330,6 +2503,7 @@
         ],
         "description": "Verifica se os números informados estão cadastrados no WhatsApp",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -2350,8 +2524,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -2397,6 +2570,34 @@
         }
       }
     },
+    "/contacts/parse-lid": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "lid": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "lid"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
     "/groups": {
       "post": {
         "summary": "Criar grupo",
@@ -2405,6 +2606,7 @@
         ],
         "description": "Cria um grupo no WhatsApp",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -2459,8 +2661,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -2660,6 +2861,7 @@
         ],
         "description": "Atualiza informações de um grupo no WhatsApp.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -2737,6 +2939,7 @@
         ],
         "description": "Atualiza os participantes de um grupo no WhatsApp, adicionando ou removendo no grupo, ou ainda promovendo ou revogandos como admins.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -2769,8 +2972,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "parameters": [
           {
@@ -2854,6 +3056,7 @@
         ],
         "description": "Cria um novo canal",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -2874,8 +3077,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -2925,6 +3127,7 @@
         ],
         "description": "Atualiza os dados de um canal (nome e descrição).",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -2945,8 +3148,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "parameters": [
           {
@@ -3028,7 +3230,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Default Response"
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array"
+                }
+              }
+            }
           }
         }
       }
@@ -3041,6 +3250,7 @@
         ],
         "description": "Realiza o upload de imagem para o perfil do canal.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -3057,8 +3267,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "parameters": [
           {
@@ -3151,6 +3360,7 @@
         ],
         "description": "Cria uma nova integração com um agente de IA ou atualiza uma existente. Opções disponíveis: Chatvolt e GPT Maker. As conversas são apagadas e recriadas com a nova integração.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -3187,8 +3397,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -3298,8 +3507,15 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Default Response"
+          "204": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
           }
         }
       }
@@ -3317,8 +3533,15 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Default Response"
+          "204": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
           }
         }
       }
@@ -3331,6 +3554,7 @@
         ],
         "description": "Cria um novo webhook para disparo de eventos do WhatsApp. Caso um webhook já tenha sido configurado, ele será substituído.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -3352,8 +3576,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -3367,7 +3590,7 @@
         }
       },
       "get": {
-        "summary": "Obter webhook",
+        "summary": "Obter webhook legado",
         "tags": [
           "Webhook"
         ],
@@ -3426,8 +3649,15 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Default Response"
+          "204": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
           }
         }
       }
@@ -3440,6 +3670,7 @@
         ],
         "description": "Cria um novo webhook para disparo de eventos do WhatsApp.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -3501,8 +3732,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -3645,12 +3875,13 @@
         }
       },
       "put": {
-        "summary": "Obter webhook",
+        "summary": "Editar webhook",
         "tags": [
           "Webhook"
         ],
-        "description": "Obtém o webhook pelo seu ID.",
+        "description": "Edita um webhook pelo seu ID.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -3711,8 +3942,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "parameters": [
           {
@@ -3771,6 +4001,7 @@
         ],
         "description": "Atualiza a API Key da ElevenLabs.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -3786,8 +4017,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -3815,7 +4045,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Default Response"
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
           }
         }
       }
@@ -3863,7 +4100,20 @@
         ],
         "responses": {
           "200": {
-            "description": "Default Response"
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "settings": {
+
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -3877,6 +4127,7 @@
         ],
         "description": "Envia áudio a partir de texto, utilizando a API do ElevenLabs. É necessário cadastrar a API Key da ElevenLabs no endpoint `POST /text-to-speech/key`",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -3894,6 +4145,14 @@
                   "voiceId": {
                     "type": "string",
                     "description": "ID da voz a ser utilizada. Caso não informada, será utilizada a voz padrão configurada na API."
+                  },
+                  "trackId": {
+                    "type": "string",
+                    "description": "Identificador da mensagem para fins de rastreamento. Não é necessário ser um ID único, utilizar um valor que faça sentido para o seu caso."
+                  },
+                  "trackSource": {
+                    "type": "string",
+                    "description": "Origem da mensagem (ex: crm, n8n, etc.)"
                   },
                   "expiration": {
                     "type": "string",
@@ -3913,8 +4172,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -4143,6 +4401,7 @@
         ],
         "description": "Atualiza as configurações de sua API.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -4261,8 +4520,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "security": [
           {
@@ -4419,6 +4677,7 @@
         ],
         "description": "Bloqueia um usuário da conta de WhatsApp conectada para não receber ou enviar mensagens para ele.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -4435,8 +4694,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -4453,6 +4711,7 @@
         ],
         "description": "Desbloqueia um usuário da conta de WhatsApp conectada para receber ou enviar mensagens para ele.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -4469,8 +4728,7 @@
                 "additionalProperties": false
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -4493,7 +4751,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Default Response"
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
           }
         }
       }
@@ -4512,7 +4777,20 @@
         ],
         "responses": {
           "200": {
-            "description": "Default Response"
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "privacySettings": {
+
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       },
@@ -4523,6 +4801,7 @@
         ],
         "description": "Atualiza as configurações de privacidade da conta de WhatsApp conectada. Não é necessário enviar todos os campos, apenas os que deseja atualizar.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
