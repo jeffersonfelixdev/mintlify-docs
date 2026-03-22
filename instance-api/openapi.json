@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "ZapperAPI Instance API Reference",
-    "description": "ZapperAPI Instance API Reference",
+    "title": "ZapperHub Instance API Reference",
+    "description": "ZapperHub Instance API Reference",
     "version": "1.0.0"
   },
   "components": {
@@ -50,7 +50,7 @@
             "in": "query",
             "name": "userId",
             "required": false,
-            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperAPI."
+            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperHub."
           }
         ],
         "security": [
@@ -147,7 +147,7 @@
             "in": "query",
             "name": "userId",
             "required": false,
-            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperAPI."
+            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperHub."
           }
         ],
         "security": [
@@ -313,7 +313,7 @@
             "in": "query",
             "name": "userId",
             "required": false,
-            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperAPI."
+            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperHub."
           },
           {
             "schema": {
@@ -475,7 +475,7 @@
             "in": "query",
             "name": "userId",
             "required": false,
-            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperAPI."
+            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperHub."
           },
           {
             "schema": {
@@ -514,7 +514,7 @@
             "in": "query",
             "name": "userId",
             "required": false,
-            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperAPI."
+            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperHub."
           },
           {
             "schema": {
@@ -562,7 +562,7 @@
             "in": "query",
             "name": "userId",
             "required": false,
-            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperAPI."
+            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperHub."
           },
           {
             "schema": {
@@ -592,7 +592,7 @@
         "tags": [
           "Usuários"
         ],
-        "description": "Cria um novo usuário a partir de um parceiro. É necessário que você tenha autorização para criar subcontas na ZapperAPI. Entre em contato com o suporte e saiba como funcionam as subcontas e solicite a autorização.",
+        "description": "Cria um novo usuário a partir de um parceiro. É necessário que você tenha autorização para criar subcontas na ZapperHub. Entre em contato com o suporte e saiba como funcionam as subcontas e solicite a autorização.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -709,7 +709,7 @@
   },
   "servers": [
     {
-      "url": "https://server.zapperapi.com",
+      "url": "https://server.zapperhub.com",
       "description": "Production"
     }
   ]

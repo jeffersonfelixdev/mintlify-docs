@@ -1,12 +1,12 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "willow",
-  "name": "ZapperAPI Docs",
-  "description": "Documentação oficial da ZapperAPI, sua API de WhatsApp completa e fácil de usar",
+  "name": "ZapperHub Docs",
+  "description": "Documentação oficial da ZapperHub, sua API de WhatsApp completa e fácil de usar",
   "colors": {
-    "primary": "#2563eb",
-    "light": "#2563eb",
-    "dark": "#2563eb"
+    "primary": "#7d52d1",
+    "light": "#7d52d1",
+    "dark": "#7d52d1"
   },
   "integrations": {
     "gtm": {
@@ -87,10 +87,10 @@
   "seo": {
     "indexing": "all",
     "metatags": {
-      "og:site_name": "Documentação da ZapperAPI",
-      "og:title": "Documentação da ZapperAPI",
-      "og:image": "https://zapperapi.com/assets/sharing-image.png",
-      "twitter:image": "https://zapperapi.com/assets/sharing-image.png"
+      "og:site_name": "Documentação da ZapperHub",
+      "og:title": "Documentação da ZapperHub",
+      "og:image": "https://zapperhub.com/assets/sharing-image.png",
+      "twitter:image": "https://zapperhub.com/assets/sharing-image.png"
     }
   },
   "navbar": {
@@ -103,7 +103,7 @@
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://app.zapperapi.com"
+      "href": "https://app.zapperhub.com"
     }
   },
   "footer": {

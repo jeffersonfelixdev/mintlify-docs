@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "ZapperAPI",
-    "description": "Documentação oficial da ZapperAPI",
+    "title": "ZapperHub",
+    "description": "Documentação oficial da ZapperHub",
     "version": "v2"
   },
   "components": {
@@ -4886,7 +4886,7 @@
   },
   "servers": [
     {
-      "url": "https://api.zapperapi.com/{instanceId}",
+      "url": "https://api.zapperhub.com/{instanceId}",
       "description": "Production",
       "variables": {
         "instanceId": {

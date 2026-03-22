@@ -13,7 +13,7 @@ Também chamados de _callbacks_, os webhooks substituem a abordagem chamada _pol
 aplicação fica solicitando de tempos em tempos o status de uma ocorrência. Com o
 uso de webhooks, a comunicação entre sistemas diferentes torna-se muito mais simples.
 
-Na ZapperAPI, há webhooks para notificar sua aplicação das seguintes ações no
+Na ZapperHub, há webhooks para notificar sua aplicação das seguintes ações no
 WhatsApp:
 - Recebimento de mensagens
 - Recebimento de reações em mensagens
@@ -34,41 +34,41 @@ Para excluir o webhook cadastrado, basta clicar em **Excluir Webhook** na guia
 
 ### Pela API
 
-Para cadastrar uma URL para receber os webhooks da ZapperAPI, consulte a 
-<a href="http://docs.zapperapi.com/api-reference/webhook">Seção Webhooks</a> na 
+Para cadastrar uma URL para receber os webhooks da ZapperHub, consulte a 
+<a href="http://docs.zapperhub.com/api-reference/webhook">Seção Webhooks</a> na 
 documentação de referência da API.
 
-Além da `url`, você deverá informar qual a `secretKey` que a ZapperAPI deve enviar
-para autenticar que é a ZapperAPI que está disparando a requisição. A `secret`
+Além da `url`, você deverá informar qual a `secretKey` que a ZapperHub deve enviar
+para autenticar que é a ZapperHub que está disparando a requisição. A `secret`
 será enviada no cabeçalho da requisição, no formato de `Authorization Bearer`.
 
 <Card title="IMPORTANTE">
 A `secretKey` é a única maneira de garantir que as requisições que sua aplicação
-recebe são oriundas do webhook da ZapperAPI. Você é o responsável por executar
+recebe são oriundas do webhook da ZapperHub. Você é o responsável por executar
 a validação da informação, bem como proteger sua aplicação com outras regras de 
 segurança, como _rate limits_ e SSL. Nunca forneça a sua `secretKey`, e sempre
 que possível, faça uma rotação regular de seu valor.
 </Card>
 
 <Card title="INFORMAÇÃO">
-Os arquivos recebidos pelos Webhooks da ZapperAPI ficam armazenados em nossos
+Os arquivos recebidos pelos Webhooks da ZapperHub ficam armazenados em nossos
 servidores pelo prazo de 7 dias.
 </Card>
 
 ## Eventos da própria sessão conectada
 
-Por padrão, o webhook da ZapperAPI trará também as mensagens enviadas pela própria 
+Por padrão, o webhook da ZapperHub trará também as mensagens enviadas pela própria 
 sessão conectada. Isso ocorre porque trabalhamos com sistema de fila obrigatória,
 de modo que após o envio da mensagem, não é possível ter o ID da mensagem, apenas
 o jobId da fila.
 
 Assim, as mensagens do webhook que tiverem o campo `jobId` referem-se a mensagens
-disparadas pela ZapperAPI, de modo que outras mensagens disparadas por outros
+disparadas pela ZapperHub, de modo que outras mensagens disparadas por outros
 dispositivos não terão esse campo no webhook.
 
 ## Exemplos de payload
 
-A seguir, iremos listar os exemplos de payload dos webhooks da ZapperAPI, para 
+A seguir, iremos listar os exemplos de payload dos webhooks da ZapperHub, para 
 os diferentes tipos de mensagens recebidas no WhatsApp:
 
 ### Atualização da conexão
@@ -120,7 +120,7 @@ Tipo: `messages.upsert`
   "pushName": "John Doe",
   "broadcast": false,
   "message": {
-    "conversation": "Hello world from ZapperAPI",
+    "conversation": "Hello world from ZapperHub",
     "messageContextInfo": {
       "deviceListMetadata": {
         "senderKeyHash": "aBCd1234==",
