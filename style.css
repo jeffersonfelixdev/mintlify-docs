@@ -1,0 +1,7 @@
+/* Logo na navbar — ajuste height conforme necessário (docs: seletor nav-logo) */
+#navbar .nav-logo img,
+#navbar .nav-logo svg {
+  height: 48px;
+  width: auto;
+  max-height: none;
+}
