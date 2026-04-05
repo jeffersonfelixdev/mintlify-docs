@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "willow",
+  "theme": "mint",
   "name": "ZapperHub Docs",
   "description": "Documentação oficial da ZapperHub, sua API de WhatsApp completa e fácil de usar",
   "colors": {
