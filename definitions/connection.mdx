@@ -18,23 +18,39 @@ assim que seus clientes tenham ambientes separados e com alta disponibilidade.
 
 ## Forma de conexão
 
-As instâncias da ZapperHub funcionam exatamente como o WhatsApp Web: necessitam de ser
-adicionadas como dispositivo conectado em seu app no celular. 
+Há diversas formas de conexão com a ZapperHub:
 
-Há 3 formas de conexão com a ZapperHub:
+- **[API Oficial] Conectar com Facebook (recomendada)**: Você será guiado por um fluxo diretamente
+no site da Meta para se conectar com a API Oficial do WhatsApp;
 
-- **QR Code**: um QR Code é exibido para ser lido pelo seu dispositivo móvel 
+- **[API Oficial] Conexão Manual Meta**: Neste caminho, você precisa criar um app na Meta, gerar tokens e 
+cadastrar webhooks.
+
+- **[API Não Oficial] QR Code**: um QR Code é exibido para ser lido pelo seu dispositivo móvel 
 (Menu de configurações - Dispositivos conectados - Adicionar dispositibo);
 
-- **Código de pareamento**: um código de 8 letras e números é exibido para ser 
+- **[API Não Oficial] Código de pareamento**: um código de 8 letras e números é exibido para ser 
 digitado em seu dispositivo quando solicitado;
 
-- **FastLink**: Uma exclusividade da ZapperHub é o FastLink, ideal para agências com muitos clientes.
+- **[API Oficial e Não Oficial] FastLink**: Uma exclusividade da ZapperHub é o FastLink, ideal para agências com muitos clientes.
 Trata-se de um link temporário que é gerado para ser enviado para seu cliente fazer 
-a conexão por QR Code. Com isso, seu cliente não precisa ter acesso ao painel 
-de administração da ZapperHub para conectar o celular.
+a conexão por QR Code ou por login via Facebook. Com isso, seu cliente não precisa ter acesso ao painel 
+de administração da ZapperHub para conectar o WhatsApp.
 
-- **Extensão do Chrome ZapperHub Connect**: Para alguns dispositivos, o WhatsApp exige uma verificação adicional
+- **[API Oficial] Extensão do Chrome ZapperHub Connect**: Para alguns dispositivos, o WhatsApp exige uma verificação adicional
 com chave de acesso para se conectar com o WhatsApp Web. Nestes casos, é necessário
 instalar a extensão **ZapperHub Connect** em seu navegador Chrome para se conectar
-na ZapperHub. Para mais informações, consulte a seção Conexão com ZapperHub Connect
+na ZapperHub. Para mais informações, consulte a seção <a href="/definitions/zapperhub-connect">ZapperHub Connect</a>
+e veja como utilizar a extensão em seu navegador.
+
+Nas conexões com QR Code ou código de pareamento (método não oficial), as instâncias 
+da ZapperHub funcionam exatamente como o WhatsApp Web: necessitam de ser
+adicionadas como dispositivo conectado em seu app no celular. 
+
+<Card title="IMPORTANTE">
+Devido aos riscos de restrições e banimentos, recomendamos fortemente o uso da
+**API Oficial da Meta**. A ZapperHub é Meta Business Provider, e fazendo a conexão
+conosco, você não precisa de se preocupar em criar apps, fazer configurações manuais.
+Nós cuidamos ainda de todo o suporte junto à Meta. Como Meta Business Provider,
+temos suporte prioritário e canal exclusivo para atendimento de nossos clientes.
+</Card>
