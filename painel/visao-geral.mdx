@@ -1,0 +1,101 @@
+---
+title: Visão geral do painel
+description: "Como o painel da ZapperHub é organizado e onde encontrar cada área"
+---
+
+**Onde fica**: é a tela inicial após entrar na conta
+**Rota**: `dash`
+
+O painel é onde você cria instâncias, conecta números, acompanha mensagens e ajusta o
+comportamento de cada conexão. Esta página descreve como ele é organizado e leva para a
+página de cada área.
+
+## Como você chega ao painel
+
+Ao abrir o endereço do painel, você é redirecionado automaticamente — não existe uma tela
+inicial própria:
+
+- **Sem sessão ativa**: você vai para a tela de entrada, descrita em
+  [Conta e assinatura](/painel/conta-e-assinatura).
+- **Com sessão ativa**: você vai direto para a lista de instâncias.
+
+O mesmo vale para o endereço `dash`: ele sempre redireciona para a lista de instâncias. Na
+prática, **a lista de instâncias é a porta de entrada do painel**.
+
+## O menu lateral
+
+O menu lateral é fixo e acompanha você em todas as telas. Ele tem dois grupos.
+
+### Navegação
+
+| Área | O que faz | Página |
+|---|---|---|
+| **Instâncias** | Lista todas as instâncias da conta e dá acesso a cada uma | [Instâncias](/painel/instancias) |
+| **Configurações** | Dados da sua conta e do seu cadastro | [Conta e assinatura](/painel/conta-e-assinatura) |
+| **Global API Key** | Chave usada na Instance API, para criar e administrar instâncias | [Chave de API global](/painel/chave-de-api-global) |
+| **Minha assinatura** | Abre o portal do cliente em uma nova aba | [Conta e assinatura](/painel/conta-e-assinatura) |
+
+**Minha assinatura** não é uma tela do painel: o item gera um link para o portal do cliente e
+o abre em uma aba nova. É lá que você vê faturas, altera a forma de pagamento e cancela.
+
+### Suporte
+
+Três atalhos que também abrem em aba nova: **Documentação** (este site), **Fale com o Zack**
+(atendimento por WhatsApp) e **Comunidade**. Abaixo deles fica **Sair**, que encerra a sessão.
+
+## O que existe dentro de uma instância
+
+Ao abrir uma instância na lista, você chega ao painel dela. Cada instância tem suas próprias
+telas, independentes das demais:
+
+<CardGroup cols={2}>
+  <Card title="Conexão" href="/painel/conexao-nao-oficial">
+    Ligar um número por QR Code, código de pareamento ou FastLink
+  </Card>
+  <Card title="Conexão oficial" href="/painel/conexao-oficial">
+    Ligar um número pela API oficial da Meta
+  </Card>
+  <Card title="Templates" href="/painel/templates">
+    Criar e enviar mensagens modelo aprovadas pela Meta
+  </Card>
+  <Card title="Mensagens" href="/painel/log-de-mensagens">
+    Consultar o que foi enviado e recebido, e investigar falhas
+  </Card>
+  <Card title="Webhook" href="/painel/webhooks">
+    Receber eventos da instância no seu sistema
+  </Card>
+  <Card title="Configurações" href="/painel/configuracoes-da-instancia">
+    Delay, presença, debounce e demais comportamentos
+  </Card>
+  <Card title="Texto para fala" href="/painel/text-to-speech">
+    Enviar mensagens de voz sintetizada
+  </Card>
+  <Card title="Integrações" href="/painel/integracoes">
+    Agentes de IA e Chatwoot
+  </Card>
+</CardGroup>
+
+Há ainda a conexão via [Instagram](/painel/instagram), disponível para contas com acesso
+liberado.
+
+## Duas chaves diferentes
+
+O painel expõe duas chaves, e elas não são intercambiáveis:
+
+| Chave | Onde fica | Para que serve |
+|---|---|---|
+| **Global API Key** | Menu lateral → Global API Key | Criar e administrar instâncias pela Instance API |
+| **Chave de API da instância** | Na linha da instância, na lista | Enviar mensagens e operar aquela instância pela API do Manager |
+
+A diferença entre as duas, com o cabeçalho HTTP de cada uma, está em
+[Chave de API global](/painel/chave-de-api-global).
+
+## Onde o conceito é explicado
+
+Esta seção descreve **onde clicar**. Quando você precisar entender **o que é** cada coisa,
+consulte as páginas de conceito:
+
+- [Autenticação](/definitions/authentication)
+- [Conexão com WhatsApp](/definitions/connection)
+- [ZapperHub Connect](/definitions/zapperhub-connect)
+- [Fila de mensagens](/definitions/queue)

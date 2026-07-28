@@ -1,0 +1,147 @@
+---
+title: Instâncias
+description: "Listar, criar, renomear, desconectar, reiniciar e excluir instâncias"
+---
+
+**Onde fica**: menu lateral → Instâncias
+**Rota**: `dash/instances` e `dash/instances/[id]`
+
+A lista de instâncias é a porta de entrada do painel: é para ela que você é levado ao entrar na
+conta. Cada instância corresponde a um número — o conceito está em
+[Conexão com WhatsApp](/definitions/connection).
+
+## A lista
+
+Quando a conta ainda não tem nenhuma, a tela mostra **Nenhuma instância encontrada.** e o atalho
+**Crie uma instância agora**.
+
+### Colunas
+
+| Coluna | O que mostra |
+|---|---|
+| **Nome** | O rótulo que você deu à instância |
+| **ID** | O identificador usado nas chamadas de API |
+| **Chave da API (X-Api-Key)** | A chave daquela instância, oculta por padrão |
+| **URL** | O endereço da instância |
+| **Versão** | A versão em execução |
+| **Tipo** | A forma de conexão da instância |
+| **Telefone** | O número conectado |
+| **Status** | **Conectado**, **Desconectado** ou **Não conectado** |
+| **Ações** | O menu de ações da linha |
+
+A chave da API fica mascarada; use **Mostrar chave** e **Ocultar chave** para alterná-la. Esta é
+a chave **da instância**, enviada no cabeçalho `x-api-key` — diferente da chave da conta, descrita
+em [Chave de API global](/painel/chave-de-api-global).
+
+### Buscar e filtrar
+
+- **Pesquisar por nome...** filtra a lista pelo rótulo.
+- **Status da conexão** filtra por estado; **Todos os status** desliga o filtro.
+- A lista é paginada, com o indicador **Página X de Y**.
+
+### Criar uma instância
+
+O botão **Nova instância** abre **Criar nova instância**, que avisa:
+
+> A criação de uma nova instância poderá acarretar em custos mensais adicionais à sua assinatura
+> atual. Tem certeza que deseja continuar?
+
+Confirme em **Sim, criar nova instância**. O resultado é **Instância criada com sucesso**.
+
+Se a assinatura estiver em atraso, o botão fica desabilitado e explica **É preciso regularizar a
+assinatura para criar uma instância.** — veja [Conta e assinatura](/painel/conta-e-assinatura).
+
+## Ações de cada instância
+
+| Ação | O que faz | Efeito sobre a conexão ativa |
+|---|---|---|
+| **Copiar ID** / **Copiar ID da instância** | Copia o identificador; confirma com **ID copiado** | Nenhum |
+| **Copiar URL** | Copia o endereço; confirma com **URL copiada** | Nenhum |
+| **Copiar X-Api-Key** | Copia a chave da instância; confirma com **X-Api-Key copiada** | Nenhum |
+| **Editar nome da instância** | Abre um diálogo para trocar o rótulo | Nenhum — só o rótulo muda |
+| **Conectar instância** | Abre o fluxo de conexão | Inicia uma conexão nova |
+| **Desconectar instância** | Encerra a sessão do número | **Derruba a conexão**; o status vai para **Desconectado** e a instância para de enviar e receber até reconectar |
+| **Reiniciar instância** | Reinicia o serviço da instância | **Interrompe o atendimento** enquanto reinicia; a conexão é restabelecida ao fim |
+| **Excluir instância** | Remove a instância da conta | **Irreversível** — veja abaixo |
+
+Durante a execução, a tela mostra **Desconectando instância...**, **Reiniciando instância...** ou
+**Excluindo instância...**. Ao terminar: **Instância desconectada**, **Instância reiniciada** ou
+**Instância excluída**. Se o reinício falhar, a mensagem é **Ocorreu um erro ao reiniciar a
+instância. Tente novamente mais tarde.**
+
+### Renomear
+
+O diálogo **Editar nome da instância** traz *Altere o nome da instância abaixo.* e o campo
+**Nome da instância**.
+
+| Campo | Obrigatório | Validação |
+|---|---|---|
+| Nome da instância | Sim | texto livre |
+
+Sucesso: **Nome da instância atualizado com sucesso**. Falha: **Erro ao atualizar nome. Tente
+novamente mais tarde.** Renomear **não** afeta o ID, a chave nem a conexão — apenas o rótulo
+exibido.
+
+### Excluir — ação irreversível
+
+O diálogo **Confirmar exclusão** declara, com todas as letras:
+
+> Tem certeza que deseja excluir esta instância? Esta ação é irreversível.
+
+Confirme em **Sim, excluir**.
+
+<Warning>
+**A exclusão não pode ser desfeita.** Ao excluir:
+
+- a instância sai da lista e seu **ID e chave de API deixam de funcionar** — qualquer integração
+  que os utilize passa a falhar;
+- a conexão com o número é encerrada;
+- **o log de mensagens daquela instância deixa de ser acessível pelo painel**, porque ele vive
+  dentro da instância (`dash/instances/[id]/messages`). Se você precisa do histórico, exporte ou
+  consulte o que precisar **antes** de excluir;
+- para voltar a usar o mesmo número é necessário **criar uma instância nova e conectá-la de
+  novo** — ela virá com outro ID e outra chave.
+
+Se a intenção é apenas parar temporariamente, use **Desconectar instância**, que é reversível.
+</Warning>
+
+Instâncias criadas por um parceiro não são excluídas por aqui: a mensagem **Instância criada pelo
+parceiro {'{partner}'}. Faça a exclusão na aplicação do parceiro** indica que a operação deve ser
+feita no sistema de quem a criou.
+
+## Dentro de uma instância
+
+Ao abrir uma instância, você chega ao painel dela, na rota `dash/instances/[id]`.
+
+### Indicadores
+
+Quatro cartões no topo, cada um com o atalho **Ver mensagens** que leva ao log já filtrado:
+
+| Indicador | O que conta |
+|---|---|
+| **Em Processamento** | Mensagens sendo processadas neste momento |
+| **Na fila** | Mensagens aguardando processamento |
+| **Com falha** | Mensagens que terminaram em erro |
+| **Mensagens processadas** | Total processado |
+
+O conceito de fila está em [Fila de mensagens](/definitions/queue).
+
+### Resumo
+
+O cartão **Resumo** consolida o volume da instância:
+
+- **Mensagens processadas hoje**
+- **Mensagens processadas este mês**
+- **Mensagens processadas no mês passado**
+- **Mensagens processadas nos últimos 90 dias**
+- **Média de Mensagens processadas por dia**
+
+Para investigar uma mensagem específica, vá ao
+[Log de mensagens](/painel/log-de-mensagens).
+
+## Veja também
+
+- [Conexão não oficial](/painel/conexao-nao-oficial) — QR Code, código de pareamento e FastLink
+- [Conexão oficial](/painel/conexao-oficial) — API oficial da Meta
+- [Configurações da instância](/painel/configuracoes-da-instancia) — comportamento de envio
+- [Conexão com WhatsApp](/definitions/connection) — o conceito de instância

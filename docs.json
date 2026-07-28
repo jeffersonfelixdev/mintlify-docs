@@ -64,6 +64,29 @@
         ]
       },
       {
+        "tab": "Painel",
+        "groups": [
+          {
+            "group": "Começando",
+            "icon": "compass",
+            "pages": [
+              "painel/visao-geral",
+              "painel/conta-e-assinatura"
+            ]
+          },
+          {
+            "group": "Instâncias",
+            "icon": "server",
+            "pages": [
+              "painel/instancias",
+              "painel/conexao-nao-oficial",
+              "painel/conexao-oficial",
+              "painel/instagram"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "API Reference",
         "openapi": "/api-reference/openapi.json"
       },

@@ -1,0 +1,147 @@
+---
+title: Conta e assinatura
+description: "Do cadastro à conta ativa: criar conta, confirmar e-mail, entrar, recuperar senha e gerenciar a assinatura"
+---
+
+**Onde fica**: telas públicas (fora do painel) e Configurações, no menu lateral
+**Rota**: `sign-up`, `sign-in`, `verify-email`, `confirm-email`, `reset-password`,
+`complete-registration`, `old-sign-up`, `complete-payment-details/[customerId]` e `dash/settings`
+
+Esta página cobre a jornada inteira: criar a conta, confirmar o e-mail, entrar, recuperar a
+senha, manter seus dados atualizados e administrar a assinatura.
+
+## Criar a conta
+
+Tela **Crie sua conta**, na rota `sign-up`. É o caminho recomendado de cadastro.
+
+| Campo | Obrigatório | Validação |
+|---|---|---|
+| Nome completo | Sim | pelo menos 2 caracteres |
+| Email | Sim | e-mail válido |
+| Número do WhatsApp | Sim | número de telefone válido |
+| Senha | Sim | mínimo 8 caracteres, com pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial |
+| Confirmar senha | Sim | igual à senha |
+| Cupom de desconto | Não | aparece só ao marcar **Tenho um cupom de desconto** |
+| Aceite dos termos | Sim | é preciso marcar **Li e aceito os termos de uso e as políticas de privacidade** |
+
+A tela também exige a verificação reCAPTCHA antes de enviar. Se as senhas não coincidirem, a
+tela responde **As senhas não coincidem**; sem o aceite, **Você precisa aceitar os termos de uso
+e a política de privacidade**.
+
+Ao concluir, a conta é criada (**Conta criada com sucesso**) e você é levado para a tela de
+verificação de e-mail, já com o endereço informado.
+
+## Confirmar o e-mail
+
+Há dois caminhos, e você usa aquele que receber:
+
+**Código de 6 dígitos** — rota `verify-email`. Digite o código que chegou por e-mail nos seis
+campos. Código errado responde **Código inválido**. Ao acertar, a tela mostra **Cadastro
+finalizado com sucesso!** e um botão **Login**.
+
+**Link de confirmação** — rota `confirm-email`. Basta abrir o link do e-mail. Em caso de
+sucesso a tela mostra **Email confirmado com sucesso** e redireciona para a tela de entrada
+em instantes. Se o link já tiver sido usado ou tiver expirado, a tela mostra **Erro ao
+confirmar email** e a explicação *O link de confirmação expirou ou é inválido* — nesse caso,
+recomece o cadastro ou peça um novo link ao suporte.
+
+## Entrar na conta
+
+Tela **Faça seu login**, na rota `sign-in`.
+
+| Campo | Obrigatório | Validação |
+|---|---|---|
+| E-mail | Sim | e-mail válido (**Email inválido** quando não é) |
+| Senha | Sim | — |
+
+A tela traz ainda **Esqueceu a senha? Clique aqui**, que inicia a recuperação, e **Não tem uma
+conta? Cadastre-se grátis**, que leva ao cadastro.
+
+Depois de entrar, você cai direto na lista de instâncias — veja
+[Visão geral do painel](/painel/visao-geral).
+
+## Recuperar a senha
+
+Rota `reset-password`, alcançada pelo link enviado por e-mail.
+
+| Campo | Obrigatório | Validação |
+|---|---|---|
+| Nova senha | Sim | mínimo 8 caracteres, com maiúscula, minúscula, número e caractere especial |
+| Confirmação | Sim | **As senhas devem ser iguais** |
+
+Ao concluir: **Senha redefinida com sucesso**. A senha anterior deixa de funcionar
+imediatamente — qualquer sessão que dependa dela precisa entrar de novo.
+
+## Finalizar um cadastro iniciado por terceiro
+
+Rota `complete-registration`. É a tela usada quando sua conta foi criada por um parceiro ou
+integrador e falta só você definir a senha.
+
+| Campo | Obrigatório | Validação |
+|---|---|---|
+| Nova senha | Sim | mínimo 8 caracteres, com maiúscula, minúscula, número e caractere especial |
+| Confirmação | Sim | **As senhas devem ser iguais** |
+
+Ao concluir, a tela mostra **Cadastro finalizado com sucesso** e avisa que *Você será
+redirecionado para a página principal em instantes*.
+
+## Seus dados cadastrais
+
+Tela **Configurações da conta** — menu lateral → **Configurações**, rota `dash/settings`.
+
+| Campo | Obrigatório | Validação |
+|---|---|---|
+| Nome | Sim | **Informe o nome** se ficar vazio |
+| Telefone | Sim | **Informe o telefone** se ficar vazio |
+| Tipo de documento | Sim | **CPF** ou **CNPJ**; **Selecione o tipo de documento** se ficar vazio |
+| Número do documento | Sim | **Informe o número do documento** se ficar vazio |
+| Senha (opcional) | Não | quando preenchida, **A senha deve ter pelo menos 6 caracteres** |
+
+O botão é **Salvar alterações**. O resultado aparece como **Dados atualizados com sucesso!**
+ou **Erro ao atualizar dados**.
+
+<Note>
+O campo de senha desta tela é **opcional** e aceita 6 caracteres — regra diferente da senha de
+cadastro, que exige 8 caracteres com maiúscula, minúscula, número e caractere especial. Deixe-o
+em branco se não quiser trocar a senha.
+</Note>
+
+## Assinatura e portal do cliente
+
+O item **Minha assinatura**, no menu lateral, não abre uma tela do painel: ele gera um link
+para o portal do cliente e o abre em uma **aba nova**. É no portal que ficam as faturas, a
+forma de pagamento e o cancelamento.
+
+Existe também a rota `complete-payment-details/[customerId]`, usada em links enviados por
+e-mail: ela busca o portal daquele cliente e redireciona direto para lá. Enquanto isso, exibe
+*Aguarde um momento...*; se o identificador não for válido, mostra **Link inválido**.
+
+### Quando a assinatura fica em atraso
+
+Se a assinatura estiver em atraso, o painel **bloqueia a criação de novas instâncias**: o botão
+de nova instância fica desabilitado e exibe a explicação **É preciso regularizar a assinatura
+para criar uma instância.**
+
+As instâncias que já existem continuam listadas e não são excluídas pelo painel. Para voltar a
+criar instâncias, regularize o pagamento pelo portal do cliente, em **Minha assinatura**.
+
+## Cadastro por link de pagamento
+
+<Warning>**Legado** — mantido por compatibilidade. Não use para novos cadastros.</Warning>
+
+A rota `old-sign-up` é o cadastro antigo, em que a conta só era criada **depois** de um
+pagamento concluído: a tela precisa receber o identificador da sessão de checkout na URL. Sem
+ele, ela responde **Pagamento não confirmado ou link inválido.**
+
+Quando o identificador é válido, a tela **Crie sua conta** pede apenas a senha, com a mesma
+regra do cadastro atual — mínimo 8 caracteres, com maiúscula, minúscula, número e caractere
+especial.
+
+Use `sign-up` para qualquer cadastro novo. A rota `old-sign-up` segue disponível apenas para
+links de pagamento antigos que ainda estejam em circulação.
+
+## Veja também
+
+- [Visão geral do painel](/painel/visao-geral) — como o painel é organizado
+- [Chave de API global](/painel/chave-de-api-global) — a chave da sua conta
+- [Autenticação](/definitions/authentication) — o conceito por trás das chaves

@@ -1,0 +1,173 @@
+---
+title: Conexão oficial
+description: "Conectar pela API oficial da Meta: login com Facebook, link de conexão ou configuração manual"
+---
+
+**Onde fica**: Instâncias → (selecione a instância) → Conexão
+**Rota**: `dash/instances/[id]/connection` e `meta-connection/[token]`
+
+A conexão oficial usa a **WhatsApp Cloud API** da Meta. É a via **Recomendado** no painel, e a
+comparação com a via não oficial está em [Conexão com WhatsApp](/definitions/connection).
+
+O cartão **WhatsApp Cloud API** se descreve como *Conecte-se de forma fácil e simplificada com a
+API Oficial do WhatsApp utilizando o login com Facebook.*
+
+## Três caminhos distintos
+
+Existem três formas de concluir a conexão oficial. Elas levam ao mesmo resultado, mas exigem
+coisas diferentes de você:
+
+| Caminho | Quando usar | O que você precisa |
+|---|---|---|
+| **Conectar com Facebook** | Padrão. Você tem acesso ao Facebook da empresa | Só a conta do Facebook |
+| **Link de conexão com Facebook** | Quem tem o Facebook não é quem administra o painel | Nada — o link basta a quem recebe |
+| **Configuração manual (Meta)** | Você já tem app e tokens próprios na Meta | Token do usuário do sistema e IDs da Meta |
+
+Há ainda a **Configuração manual (Gupshup)**, para quem opera pela Gupshup — descrita mais
+abaixo.
+
+### 1. Conectar com Facebook
+
+Clique em **Conectar com Facebook**. Você é levado ao fluxo oficial da Meta para autorizar a
+conexão do número — o painel avisa que *Ao continuar, você será direcionado ao fluxo oficial da
+Meta para autorizar a conexão do número.*
+
+Enquanto o processo corre, a tela mostra **Aguardando conexão com Facebook** e depois
+**Conectando instância**. Ao terminar: **Instância conectada** e **Conectado com sucesso**.
+
+Se o fluxo for interrompido, a mensagem é **O login com Facebook não foi concluído.**; se o SDK
+não carregar, **Facebook SDK não carregado. Atualize a página e tente novamente.**
+
+Se o Embedded Signup não preencher tudo sozinho, o painel pede os dois identificadores:
+
+| Campo | Obrigatório | Validação |
+|---|---|---|
+| **ID do número de telefone** | Sim | identificador numérico do número na Meta |
+| **ID da WABA** | Sim | identificador da Conta Business do WhatsApp |
+
+O próprio painel diz onde encontrá-los: *Após entrar com o Facebook, informe o Phone number ID e o
+WABA ID no Meta Business Suite, ou conclua o fluxo do Embedded Signup.* Ou seja, os dois valores
+saem do **Meta Business Suite**, na configuração do número da sua conta comercial. Depois de
+informá-los, use **Trocar token e conectar** — sucesso é **Conectado com sucesso**; falha,
+**Erro ao trocar o token**.
+
+### 2. Link de conexão com Facebook
+
+Serve para o mesmo caso do FastLink, mas pela via oficial: **Compartilhe este link para conectar
+pela Meta sem precisar fazer login no painel.**
+
+Enquanto o painel prepara, mostra **Gerando link de conexão...**; pronto, oferece **Abrir link de
+conexão**. Se falhar, exibe **Não foi possível gerar o link de conexão.** com **Tentar
+novamente**.
+
+Quem recebe o link abre a página **Conexão WhatsApp Cloud API**, na rota
+`meta-connection/[token]`, com a descrição *Conecte sua instância ao WhatsApp pela Meta usando o
+login com Facebook.* e o botão **Conectar com Facebook**. O estado aparece como **Aguardando**,
+**Conectando** ou **Conectado**; ao concluir, **Conectado com sucesso!**, com *Sua instância foi
+conectada à WhatsApp Cloud API.*
+
+Se o link não for mais válido, a página responde **Link de conexão inválido.** ou **Erro ao
+carregar link de conexão.** — gere um link novo no painel.
+
+### 3. Configuração manual (Meta)
+
+O diálogo é **WhatsApp Cloud API - Configuração manual (Meta)**, com a descrição *Configure a
+conexão da Cloud API com os dados da Meta.*
+
+| Campo | Obrigatório | Validação |
+|---|---|---|
+| **Token do usuário do sistema** | Sim | token de acesso gerado na Meta |
+| **ID do número de telefone** | Sim | identificador numérico do número |
+| **ID da conta comercial da Meta** | Sim | identificador da conta comercial |
+| **URL de encaminhamento do Webhook** | Não | URL para onde encaminhar os eventos |
+
+Conclua em **Conectar Cloud API**. Sucesso: **Cloud API conectada com sucesso.** Falha: **Erro ao
+conectar Cloud API. Tente novamente.**
+
+Depois disso é preciso apontar o webhook da Meta para a ZapperHub. A seção **Configuração do
+Webhook Meta** entrega os dois valores — **URL de Callback** e **Token de Verificação** — e as
+instruções:
+
+<Steps>
+  <Step title="Acesse o Facebook Developers Console" />
+  <Step title="Vá para a configuração do seu aplicativo" />
+  <Step title="Navegue até a seção &quot;Webhooks&quot;" />
+  <Step title="Cole a URL de Callback no campo correspondente" />
+  <Step title="Cole o Token de Verificação no campo de verificação" />
+  <Step title="Salve as configurações" />
+  <Step title="Na lista de eventos, certifique-se de que esteja inscrito para receber os eventos de mensagens" />
+</Steps>
+
+Ao final, **Concluir**.
+
+## Configuração manual (Gupshup)
+
+Para quem já opera o número pela Gupshup. O tipo de conexão passa a ser **Gupshup**.
+
+| Campo | Obrigatório | Validação |
+|---|---|---|
+| **Nome do app** | Sim | o nome do app na Gupshup |
+| **API Key do Gupshup** | Sim | a chave da sua conta Gupshup |
+| **ID do número de telefone** | Sim | identificador do número |
+| **Número do telefone conectado** | Sim | somente números, com o código internacional |
+| **URL do Webhook de encaminhamento** | Não | URL para onde encaminhar os eventos |
+
+A seção **Configuração do Webhook do Gupshup** orienta: *Siga as instruções na documentação do
+Gupshup para configurar o webhook.* — a configuração é feita **no painel da Gupshup**, não aqui.
+
+## Modo de coexistência
+
+Alguns números conectam em **Coexistência**. Em linguagem simples: **o número segue funcionando
+no aplicativo do WhatsApp no celular, ao mesmo tempo em que responde pela API oficial.** Você não
+precisa escolher entre atender pelo aparelho e atender pela integração — os dois convivem.
+
+O painel marca essas conexões com o rótulo **Coexistência**, tanto na tela de conexão quanto na
+página de conexão por link.
+
+## Depois de conectar
+
+A tela passa a mostrar o estado do número na Meta:
+
+| Informação | O que indica |
+|---|---|
+| **Status na Meta** | **Pendente de ativação** ou **Pronto para uso** |
+| **Conexão com o App da Meta** | **Conectada** ou **Não conectada**; o botão **Subscrever no App da Meta** resolve a segunda |
+| **Nome verificado** | O nome aprovado pela Meta |
+| **Limite de novas conversas (24h)** | 250, 2.000, 10.000, 100.000 conversas ou **Conversas ilimitadas** |
+| **Qualidade do número** | **Alta qualidade**, **Qualidade média**, **Baixa qualidade** ou **Sem dados suficientes** |
+
+### Registrar o número
+
+O botão **Registrar número** abre **Informe o PIN de 6 dígitos para registrar o número nesta
+instância.**
+
+| Campo | Obrigatório | Validação |
+|---|---|---|
+| **PIN de 6 dígitos** | Sim | exatamente 6 dígitos |
+
+O painel avisa: *O PIN será registrado caso ainda não exista. Guarde-o para quando precisar
+registrar alterações do nome do perfil.* e *O registro está sendo feito e pode demorar alguns
+segundos.* Sucesso: **Número registrado com sucesso.**
+
+A mesma operação existe na API — veja
+[Registrar número de telefone](/api-reference/cloud-api/registrar-numero-de-telefone).
+
+### Dados do perfil comercial
+
+**Editar dados de perfil** abre o formulário do perfil: **Sobre**, **Descrição**, **Endereço**,
+**E-mail**, **Websites** e **Categoria**. Em Websites, *digite a URL e pressione Enter ou espaço
+para adicionar*.
+
+**Editar nome de exibição** altera *o nome do negócio ou do perfil exibido aos usuários*.
+
+<Note>
+**Esta alteração está sujeita à aprovação da Meta e pode levar um tempo para ser refletida.** —
+o nome não muda na hora.
+</Note>
+
+## Veja também
+
+- [Conexão não oficial](/painel/conexao-nao-oficial) — QR Code, pareamento e FastLink
+- [Instagram](/painel/instagram) — conexão de conta profissional do Instagram
+- [Instâncias](/painel/instancias) — status e ações da instância
+- [Conexão com WhatsApp](/definitions/connection) — todas as formas de conexão
