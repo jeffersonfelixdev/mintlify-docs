@@ -1,0 +1,136 @@
+---
+title: Templates
+description: "Criar templates de mensagem, acompanhar a aprovação e enviá-los com variáveis e mídia"
+---
+
+**Onde fica**: Instâncias → (selecione a instância) → Templates
+**Rota**: `dash/instances/[id]/templates` e `dash/instances/[id]/new-template`
+
+Templates são as mensagens modelo aprovadas pela Meta, usadas para iniciar conversa na API
+oficial. A tela se chama **Templates de mensagem**.
+
+Quando a instância ainda não tem nenhum, a tela mostra **Nenhum template encontrado para esta
+instância.**
+
+## A lista
+
+Cada template aparece com estes atributos:
+
+| Atributo | O que mostra |
+|---|---|
+| **Nome** | O identificador do template |
+| **Idioma** | Português (Brasil), Inglês (EUA), Espanhol, Alemão, Italiano, Turco, Francês, Indonésio, Russo, entre outros |
+| **Status** | **Aprovado**, **Pendente**, **Rejeitado**, **Limite atingido**, **Desativado** ou **Pausado** |
+| **Categoria** | **Utilitário**, **Autenticação** ou **Marketing** |
+| **Preview** | O começo do corpo da mensagem |
+
+A lista pode ser vista como **Lista** ou **Cards**, e carrega aos poucos — use **Carregar mais**
+para trazer o próximo bloco.
+
+**Ver detalhes** abre **Detalhes do template**, com o **Formato dos parâmetros**
+(**Posicional** ou **Nomeado**) e os **Componentes** do template.
+
+## Criar um template
+
+O botão **Novo template** abre **Criar template de mensagem**, que já avisa: *Preencha os dados do
+template. Nome, categoria e corpo são obrigatórios.*
+
+| Campo | Obrigatório | Validação |
+|---|---|---|
+| **Nome** | Sim | identificador do template, no formato `boas_vindas` |
+| **Categoria** | Sim | **Utilitário**, **Autenticação** ou **Marketing** |
+| **Idioma** | Sim | um dos idiomas da lista |
+| **Corpo** | Sim | o texto da mensagem; aceita variáveis |
+| **Cabeçalho** | Não | texto ou mídia, conforme o **Formato do cabeçalho** |
+| **Rodapé** | Não | texto curto, marcado como *Opcional* |
+| **Botões** | Não | até o limite da Meta, via **Adicionar botão** |
+
+O **Formato do cabeçalho** pode ser **Texto**, **Imagem**, **Vídeo**, **Documento** ou
+**Localização**. Quando o formato é de mídia, o campo de exemplo pede a **URL ou base64 da
+mídia**.
+
+Os **Botões** têm **Texto do botão** e **Tipo**: **URL**, **Telefone**, **Resposta rápida** ou
+**OTP**. No tipo OTP existe ainda o **Tipo OTP** — **Copiar código** ou **Um toque** — e o
+**Texto de preenchimento automático**.
+
+Ao salvar: **Template criado. Ele ficará pendente de aprovação.** Em caso de falha, **Erro ao
+criar template.**
+
+## Variáveis: nomeadas e posicionais
+
+Um template pode ter trechos que mudam a cada envio. O **Formato dos parâmetros** define como
+você os declara — e os dois formatos não se misturam no mesmo template.
+
+### Posicionais
+
+As variáveis são **números entre chaves duplas**, e valem pela **ordem**. O painel orienta:
+*Digite o texto. Use números entre chaves duplas para variáveis (ex.: 1, 2, 3)*.
+
+```text Corpo do template
+Olá {{1}}, seu pedido {{2}} foi enviado.
+```
+
+Na hora de enviar, o painel mostra **Variáveis posicionais (ordem do template)** e pede os
+valores na sequência: o primeiro campo preenche `{{1}}`, o segundo `{{2}}`. Trocar a ordem troca
+o texto — não há nome para conferir.
+
+### Nomeadas
+
+As variáveis têm **nome** em vez de número, e cada valor é preenchido pelo nome correspondente.
+
+```text Corpo do template
+Olá {{nome}}, seu pedido {{pedido}} foi enviado.
+```
+
+Ao enviar, o painel mostra **Variáveis nomeadas (preencha cada valor)** e apresenta um campo por
+nome. A ordem em que você preenche não importa — o que casa é o nome.
+
+Em ambos os casos, o painel pede um **Exemplo para variável** durante a criação: é o valor de
+amostra que a Meta usa para avaliar o template.
+
+## Enviar um template
+
+O botão **Enviar mensagem** abre **Enviar mensagem de template**, com uma **Pré-visualização** do
+que será entregue.
+
+| Campo | Obrigatório | Validação |
+|---|---|---|
+| **Número do telefone** | Sim | número com código do país, como `5511999999999`; **Informe o número do telefone.** se ficar vazio |
+| **Link da mídia do cabeçalho** | Sim, quando o cabeçalho é de mídia | URL válida; **Informe o link da mídia do cabeçalho.** se ficar vazio |
+| **Variáveis** | Sim, quando o template tem | um valor por variável |
+
+Durante o envio a tela mostra **Enviando...**; ao final, **Mensagem enviada.** ou **Erro ao enviar
+mensagem.**
+
+### Mídia no cabeçalho
+
+O campo **não recebe arquivo** — ele recebe **um endereço público**:
+
+- **Imagem**: *URL pública da imagem que será usada no cabeçalho do template.* O painel usa como
+  exemplo um endereço terminado em `.png`.
+- **Vídeo**: *URL pública do vídeo que será usado no cabeçalho do template.* O exemplo do painel
+  termina em `.mp4`.
+
+O endereço precisa estar acessível publicamente — a Meta busca o arquivo por conta própria na hora
+de entregar a mensagem. Onde a ZapperHub guarda arquivos está em
+[Armazenamento](/definitions/storage).
+
+## Por que um template não aprovado não envia
+
+O botão **Enviar mensagem** fica **indisponível** enquanto o template não estiver aprovado, e o
+painel explica: **Template precisa estar aprovado para enviar mensagem**.
+
+A razão não é do painel, é da Meta: **todo template precisa passar por revisão antes de poder
+iniciar conversa**. Um template recém-criado nasce **Pendente** — como o próprio aviso de criação
+diz, *Ele ficará pendente de aprovação*. Só depois de virar **Aprovado** ele pode ser enviado.
+
+Os demais status também bloqueiam o envio, por motivos diferentes: **Rejeitado** (a Meta recusou o
+conteúdo), **Limite atingido**, **Desativado** e **Pausado** (a Meta suspendeu o template, em
+geral por qualidade). Em qualquer um deles, a correção acontece do lado da Meta — criar um
+template novo, ajustado, costuma ser o caminho.
+
+## Veja também
+
+- [Log de mensagens](/painel/log-de-mensagens) — conferir o que aconteceu com o envio
+- [Conexão oficial](/painel/conexao-oficial) — templates exigem conexão pela API oficial
+- [Mensagens](/functions/messages) — as funções de envio na API

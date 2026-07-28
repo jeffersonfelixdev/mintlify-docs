@@ -1,0 +1,115 @@
+---
+title: Chave de API global
+description: "Criar, rotacionar e excluir a Global API Key, e quando usá-la em vez da chave de instância"
+---
+
+**Onde fica**: menu lateral → Global API Key
+**Rota**: `dash/api-key`
+
+A tela **Configurar sua Global API Key** administra a chave da **conta**. Ela é diferente da
+chave de cada instância — e a confusão entre as duas é a causa mais comum de erro 401.
+
+## Qual chave usar
+
+| | **Chave global** | **Chave de instância** |
+|---|---|---|
+| **Nome no painel** | Global API Key | Chave da API (X-Api-Key) |
+| **Onde fica** | Menu lateral → Global API Key | Na linha da instância, em [Instâncias](/painel/instancias) |
+| **Escopo** | A conta inteira | Uma única instância |
+| **Qual API atende** | **Instance API** | **API do Manager** |
+| **Como é enviada** | Cabeçalho `Authorization`, no formato **Bearer** | Cabeçalho `x-api-key` |
+| **Para que serve** | Criar, renomear, listar e excluir instâncias | Enviar mensagens e operar aquela instância |
+| **Referência** | tab **Instance API Reference** — por exemplo, [Obtém todas as instâncias](/instance-api/instancias/obtem-todas-as-instancias) | tab **API Reference** — por exemplo, [Obter configurações](/api-reference/configuracoes/obter-configuracoes) |
+
+O painel resume assim: *A chave global da API é utilizada para gerenciar suas instâncias (criar,
+renomear, listar, excluir) através da Instance API.*
+
+**Regra prática**: se a chamada **cria ou administra** instâncias, use a chave global. Se ela
+**opera dentro de** uma instância — mandar mensagem, ler chat, configurar webhook — use a chave
+daquela instância.
+
+O conceito das duas está em [Autenticação](/definitions/authentication).
+
+## Criar a chave
+
+Enquanto não existe nenhuma, a tela mostra **Não há uma chave global criada. Clique no botão
+abaixo para criar uma.** e oferece **Criar chave global**.
+
+Criada, aparece o diálogo **Nova Chave Global Criada**, com *Sua nova chave global foi gerada com
+sucesso* e o campo **Sua chave global:**. O botão de cópia confirma com **Chave copiada para a
+área de transferência!** e você fecha em **Entendi, fechar**.
+
+Se algo falhar: **Ocorreu um erro ao criar chave global**.
+
+## A chave aparece uma única vez
+
+<Warning>
+**Atenção importante!**
+
+Esta é a única vez que você poderá ver esta chave. Certifique-se de copiá-la e armazená-la em um
+local seguro. **Não será possível recuperá-la posteriormente.**
+</Warning>
+
+Depois de fechar aquele diálogo, a chave **não pode mais ser exibida** — nem por você, nem pelo
+suporte. O painel repete o aviso na própria tela: *Não é possível recuperar a chave global após a
+criação. Caso não tenha mais acesso a esta chave, clique no botão Rotacionar para gerar uma nova
+chave.*
+
+**Copie a chave antes de fechar o diálogo** e guarde-a onde sua aplicação for lê-la. Perder a
+chave não é um problema grave — mas a saída é sempre gerar outra, nunca recuperar a antiga.
+
+Nunca coloque a chave em código versionado, em mensagem de suporte ou em qualquer lugar público.
+
+## Rotacionar
+
+O botão **Rotacionar** substitui a chave atual por uma nova. O diálogo **Confirmar rotação de
+chave** avisa:
+
+> Tem certeza que deseja rotacionar a chave global? **A chave atual será substituída por uma nova
+> e não será mais válida.**
+
+E complementa: **Certifique-se de atualizar todas as aplicações que utilizam a chave atual antes
+de continuar.**
+
+<Warning>
+**A rotação derruba a chave anterior na hora.** Toda aplicação que ainda estiver usando a chave
+antiga **passa a receber erro de autenticação imediatamente** — não há período de convivência
+entre a chave velha e a nova.
+
+**Como rotacionar sem interromper o serviço**: tenha o acesso ao ambiente das aplicações pronto
+**antes** de confirmar, rotacione, copie a chave nova do diálogo e atualize as aplicações em
+seguida. A janela de indisponibilidade é o tempo entre a rotação e a atualização.
+</Warning>
+
+Confirme em **Sim, rotacionar chave**. A chave nova aparece no mesmo diálogo **Nova Chave Global
+Criada** — e vale para ela a mesma regra: **é a única vez que você a verá**.
+
+Rotacionar é o caminho quando você perdeu a chave ou suspeita que ela vazou.
+
+## Excluir
+
+O botão é **Excluir chave global**, e o diálogo **Confirmar exclusão** declara:
+
+> Tem certeza que deseja excluir a chave global? **Esta ação é irreversível** e você precisará
+> criar uma nova chave para usar a API.
+
+Com o reforço: **Todas as aplicações que utilizam esta chave perderão o acesso à API após a
+exclusão.**
+
+<Warning>
+**A exclusão não pode ser desfeita.** A conta fica **sem nenhuma chave global**, e toda chamada à
+Instance API passa a falhar até que você crie outra. As instâncias já existentes **não são
+excluídas** e seguem operando com suas próprias chaves — o que para é a administração pela
+Instance API.
+
+Se a intenção é trocar a chave, use **Rotacionar**: ela já cria a substituta no mesmo passo.
+</Warning>
+
+Confirme em **Sim, excluir**. Sucesso: **Chave global excluída com sucesso**. Falha: **Ocorreu um
+erro ao excluir chave global**.
+
+## Veja também
+
+- [Autenticação](/definitions/authentication) — o conceito das chaves
+- [Instâncias](/painel/instancias) — onde fica a chave de cada instância
+- [Visão geral do painel](/painel/visao-geral) — como o painel é organizado

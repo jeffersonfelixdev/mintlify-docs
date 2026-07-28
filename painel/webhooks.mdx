@@ -1,0 +1,99 @@
+---
+title: Webhooks
+description: "Cadastrar, editar e excluir webhooks da instância pelo painel"
+---
+
+**Onde fica**: Instâncias → (selecione a instância) → Webhook
+**Rota**: `dash/instances/[id]/webhook`
+
+Um webhook faz a instância avisar o **seu** sistema quando algo acontece. Esta página descreve
+como cadastrá-los pelo painel. O conteúdo de cada evento — o formato do corpo que você recebe —
+está em [Webhooks](/integrations/webhooks).
+
+A tela se chama **Webhooks**. Sem nenhum cadastrado, ela mostra **Nenhum webhook cadastrado.
+Clique em "Novo Webhook" para criar um.**
+
+A lista tem as colunas **Nome**, **URL**, **Eventos** e **Ações**.
+
+## Cadastrar
+
+O botão **Novo Webhook** abre o formulário, descrito como *Configure um novo webhook para receber
+eventos da API*.
+
+| Campo | Obrigatório | Validação |
+|---|---|---|
+| **Nome** | Sim | **Nome é obrigatório**; texto — *Um nome descritivo para identificar este webhook* |
+| **URL do Webhook** | Sim | **URL é obrigatória** e precisa ser válida (**URL inválida** quando não é) |
+| **Eventos** | Sim | **Selecione pelo menos um evento** — um webhook sem evento não é aceito |
+
+A descrição da URL é explícita quanto ao que o seu servidor precisa fazer: *URL que receberá os
+eventos da API. Precisa ser válida e aceitar requisições POST.* Um endereço que só responda a
+`GET` não serve.
+
+Conclua em **Criar**. Sucesso: **Webhook criado com sucesso.**
+
+<Note>
+Cada instância aceita **no máximo 5 webhooks**. Ao chegar a esse número, o botão **Novo Webhook**
+fica desabilitado — exclua ou reaproveite um dos existentes para cadastrar outro.
+</Note>
+
+### Eventos disponíveis
+
+| Evento | Quando dispara |
+|---|---|
+| `messages.upsert` | Uma mensagem foi criada ou recebida |
+| `messages.status` | O estado de uma mensagem mudou |
+| `messages.error` | Uma mensagem falhou |
+| `connection.update` | O estado da conexão da instância mudou |
+
+Marque os que interessam — a instrução da tela é *Selecione os eventos que este webhook deve
+receber*. O corpo de cada um está descrito em [Webhooks](/integrations/webhooks); não o
+reproduzimos aqui para que exista uma única fonte.
+
+## Editar
+
+A ação **Editar Webhook** abre o mesmo formulário, com o texto *Atualize as informações do
+webhook*, e as mesmas regras de validação. Confirme em **Atualizar**; o resultado é **Webhook
+atualizado com sucesso.**
+
+Editar a URL passa a valer para os **próximos** eventos. Eventos já entregues, ou já em tentativa
+de entrega, não são reenviados para o endereço novo.
+
+## Excluir
+
+O diálogo é **Confirmar exclusão** e declara:
+
+> Tem certeza que deseja excluir o webhook *(nome)*? **Esta ação é irreversível.**
+
+Confirme em **Sim, excluir**. Sucesso: **Webhook excluído com sucesso.** Falha: **Ocorreu um erro
+ao excluir o webhook. Tente novamente mais tarde.**
+
+<Warning>
+**A exclusão não pode ser desfeita.** O cadastro some da lista e a instância **para imediatamente
+de enviar eventos** para aquele endereço. Os eventos que ocorrerem depois disso **não ficam
+guardados** para entrega posterior — eles simplesmente não são enviados àquele destino.
+
+Se a intenção é só trocar o endereço, **edite** o webhook em vez de excluí-lo.
+</Warning>
+
+## Vários webhooks na mesma instância
+
+Uma instância pode ter mais de um webhook, até o limite de 5, e eles funcionam de forma
+independente:
+
+- **Cada webhook recebe sua própria cópia do evento.** Se três webhooks assinam
+  `messages.upsert`, uma mensagem recebida gera três entregas, uma para cada URL.
+- **Cada um recebe apenas os eventos que assinou.** Assinaturas diferentes no mesmo evento não
+  interferem umas nas outras.
+- **A falha de um não afeta os outros.** Se uma URL está fora do ar, os demais webhooks seguem
+  recebendo normalmente — a entrega é avaliada destino a destino.
+
+Para saber se um evento chegou de fato ao seu sistema, use **Ver recibos de entrega** no
+[Log de mensagens](/painel/log-de-mensagens): é lá que ficam o horário da entrega, o da tentativa
+e o erro, quando houver.
+
+## Veja também
+
+- [Webhooks](/integrations/webhooks) — o conteúdo de cada evento
+- [Log de mensagens](/painel/log-de-mensagens) — recibos de entrega nos webhooks
+- [Configurações da instância](/painel/configuracoes-da-instancia) — comportamento da instância

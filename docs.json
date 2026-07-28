@@ -71,7 +71,8 @@
             "icon": "compass",
             "pages": [
               "painel/visao-geral",
-              "painel/conta-e-assinatura"
+              "painel/conta-e-assinatura",
+              "painel/chave-de-api-global"
             ]
           },
           {
@@ -82,6 +83,24 @@
               "painel/conexao-nao-oficial",
               "painel/conexao-oficial",
               "painel/instagram"
+            ]
+          },
+          {
+            "group": "Operação",
+            "icon": "message",
+            "pages": [
+              "painel/templates",
+              "painel/log-de-mensagens",
+              "painel/webhooks"
+            ]
+          },
+          {
+            "group": "Ajustes e integrações",
+            "icon": "sliders",
+            "pages": [
+              "painel/configuracoes-da-instancia",
+              "painel/text-to-speech",
+              "painel/integracoes"
             ]
           }
         ]
