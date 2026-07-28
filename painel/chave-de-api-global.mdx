@@ -4,9 +4,8 @@ description: "Criar, rotacionar e excluir a Global API Key, e quando usá-la em 
 ---
 
 **Onde fica**: menu lateral → Global API Key
-**Rota**: `dash/api-key`
 
-A tela **Configurar sua Global API Key** administra a chave da **conta**. Ela é diferente da
+A tela **Configurar sua Global API Key** (`dash/api-key`) administra a chave da **conta**. Ela é diferente da
 chave de cada instância — e a confusão entre as duas é a causa mais comum de erro 401.
 
 ## Qual chave usar
@@ -19,7 +18,7 @@ chave de cada instância — e a confusão entre as duas é a causa mais comum d
 | **Qual API atende** | **Instance API** | **API do Manager** |
 | **Como é enviada** | Cabeçalho `Authorization`, no formato **Bearer** | Cabeçalho `x-api-key` |
 | **Para que serve** | Criar, renomear, listar e excluir instâncias | Enviar mensagens e operar aquela instância |
-| **Referência** | tab **Instance API Reference** — por exemplo, [Obtém todas as instâncias](/instance-api/instancias/obtem-todas-as-instancias) | tab **API Reference** — por exemplo, [Obter configurações](/api-reference/configuracoes/obter-configuracoes) |
+| **Referência** | tab **Instance API Reference** — por exemplo, [Obtém todas as instâncias](/api-reference/instâncias/obtém-todas-as-instâncias) | tab **API Reference** — por exemplo, [Obter configurações](/api-reference/configurações/obter-configurações) |
 
 O painel resume assim: *A chave global da API é utilizada para gerenciar suas instâncias (criar,
 renomear, listar, excluir) através da Instance API.*

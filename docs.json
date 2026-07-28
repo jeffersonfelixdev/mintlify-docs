@@ -55,6 +55,7 @@
             "icon": "globe",
             "pages": [
               "integrations/webhooks",
+              "integrations/ai-agents",
               "integrations/chatvolt",
               "integrations/eleven-labs",
               "integrations/n8n",

@@ -5,13 +5,30 @@ description: "Integre diretamente com a GPT Maker ou Zaia e tenha um agente de I
 
 ## Introdução
 
+Um agente de IA responde automaticamente as conversas de uma instância. Em vez de a ZapperHub
+gerar as respostas, ela encaminha as mensagens recebidas para a plataforma de agente que você já
+usa — **Chatvolt**, **GPT Maker** ou **Zaia** — e devolve ao WhatsApp o que o agente respondeu.
+
+A integração é feita **por instância**: cada número conectado pode ter o seu próprio agente, ou
+nenhum. O agente atende todas as conversas daquela instância, e você pode desligá-lo em uma
+conversa específica sem afetar as demais — é para isso que servem os comandos `#on` e `#off`,
+descritos adiante.
+
+O que você precisa ter em mãos, do lado da plataforma de agente:
+
+- o **ID do Agente**, que identifica qual agente deve responder;
+- a **Chave de API** daquela plataforma, que autoriza a ZapperHub a conversar com ela.
+
+Esta página explica **o que a integração faz e como controlá-la**. O passo a passo de onde clicar
+no painel está em [Integrações](/painel/integracoes).
+
 ## Como integrar um agente de IA à ZapperHub
 
 ### Pela API
 
-Para realizar a integração de um Agente de IA da GPT Maker ou Zaia na ZapperHub, consulte a 
-<a href="http://docs.zapperhub.com/api-reference/integra%C3%A7%C3%B5es/criar-integra%C3%A7%C3%A3o">Seção Integrações</a> na 
-documentação de referência da API para criar ou atualizar os dados de uma integração.
+Para realizar a integração de um Agente de IA da GPT Maker ou Zaia na ZapperHub, consulte a
+[Seção Integrações](/api-reference/integrações/criaratualizar-integração) na documentação de
+referência da API para criar ou atualizar os dados de uma integração.
 
 Você deverá passar no corpo da requisição o id do Agente (`agentId`) e o token de API (`apiKey`)
 da sua plataforma de agente de IA.
@@ -22,26 +39,38 @@ A ZapperHub conta com uma interface amigável para configuração de seu agente 
 
 - Acesse o dashboard em https://app.zapperhub.com/dash;
 - Clique sobre a instância desejada;
-- Selecione a guia **Integração IA**;
-- Preencha os dados de seu agente GPT Maker ou Zaia e clique em **Atualizar Integração**.
+- Selecione a guia **Integrações** e, dentro dela, a aba **Agentes de IA**;
+- Preencha o **Tipo de Integração**, o **ID do Agente** e a **Chave de API** de seu agente
+  Chatvolt, GPT Maker ou Zaia e clique em **Atualizar**.
+
+Cada campo, com sua obrigatoriedade e validação, está detalhado em
+[Integrações](/painel/integracoes).
 
 ## Como controlar o agente pelo WhatsApp
 
 Com a integração no agente de IA, é possível disparar comandos, tanto pela API
 quanto pelo próprio dispositivo ou WhatsApp Web, para ativar ou desativar o agente.
 
-- Para **desativar** o agente de IA **via API**, basta mandar uma mensagem de texto 
+- Para **desativar** o agente de IA **via API**, basta mandar uma mensagem de texto
 para o contato com o texto `#off`;
-- Para **desativar** o agente de IA **via dispositivo, WhatsApp Web ou Desktop**, 
+- Para **desativar** o agente de IA **via dispositivo, WhatsApp Web ou Desktop**,
 é possível configurar para desativar mandando **qualquer mensagem de texto**, ou
 se preferir, enviando o texto `#off` (como na API);
 - Para **reativar** o agente de IA, **tanto pela API quanto pelo dispositivo ou WhatsApp Web/Desktop**,
 é só mandar mensagem com texto `#on`.
+
+Os comandos valem **por conversa**: desligar a IA para um contato não afeta o atendimento dos
+demais.
 
 ### Configurando o modo de desativação da IA pelo dispositivo ou web/desktop
 
 Para configurar a forma como a IA é desativada através do dispositivo móvel, WhatsApp
 Web ou Desktop:
 
-- Acesse a guia **Integração IA**;
-- Marque a opção **Desativar IA ao enviar qualquer mensagem através do dispositivo, WhatsApp Web ou Desktop**.
+- Acesse a instância desejada e abra **Configurações**;
+- Na aba **Integração**, ative a opção **Desativar IA em mensagens a partir do dispositivo**.
+
+Com ela ligada, o agente para de responder naquela conversa assim que o dono da linha responde
+pelo celular, pelo WhatsApp Web ou pelo Desktop. As demais opções de comportamento — inclusive o
+**Debounce**, que agrupa as mensagens antes de enviá-las ao agente — estão descritas em
+[Configurações da instância](/painel/configuracoes-da-instancia).
