@@ -1,0 +1,135 @@
+---
+title: Configurações da instância
+description: "Cada opção de comportamento da instância e o efeito de ligá-la ou desligá-la"
+---
+
+**Onde fica**: Instâncias → (selecione a instância) → Configurações
+
+A tela **Configurações da Instância** (`dash/instances/[id]/settings`) controla como a instância
+se comporta ao enviar e receber.
+Ela é dividida em duas abas: **Mensagens** e **Integração**.
+
+Toda alteração só vale depois de **Salvar configurações**. O painel confirma com **Configurações
+atualizadas com sucesso.**
+
+## Mensagens
+
+### Delay entre mensagens
+
+Intervalo que a instância espera entre um envio e o seguinte. O campo diz *Selecione o delay* e
+oferece quatro níveis:
+
+| Nível | Intervalo |
+|---|---|
+| **Muito curto** | de 0.5 a 2 segundos |
+| **Curto** | de 2 a 3 segundos |
+| **Médio** | de 5 a 7 segundos |
+| **Longo** | de 10 a 12 segundos |
+
+**Ligado no nível mais curto**, as mensagens saem rápido e a fila anda depressa. **Nos níveis
+mais longos**, o envio fica mais lento e mais parecido com o ritmo de uma pessoa. Quanto maior o
+delay, mais tempo leva para esvaziar uma fila grande — veja
+[Fila de mensagens](/definitions/queue).
+
+### Enviar atualização de presença
+
+*Envia uma atualização de presença para o usuário (digitando ou gravando áudio).*
+
+**Ligada**, o destinatário vê "digitando..." ou "gravando áudio..." antes da mensagem chegar.
+**Desligada**, a mensagem simplesmente aparece.
+
+<Warning>
+Este recurso adiciona um delay de 5 a 15 segundos para simular o status de digitando ou gravando
+áudio.
+</Warning>
+
+Esse tempo **soma-se** ao delay entre mensagens. Ligar as duas coisas nos níveis altos deixa a
+instância bem mais lenta — é o preço de parecer natural.
+
+### Habilitar pré-visualização de links
+
+*Mostra uma prévia do primeiro link da mensagem, baseado nos metadados do link.*
+
+**Ligada**, o primeiro link da mensagem chega com título e imagem de prévia. **Desligada**, o link
+vai como texto puro. Vale só para o **primeiro** link de cada mensagem.
+
+### Marcar mensagens como lidas
+
+*Marca automaticamente as mensagens recebidas como lidas.*
+
+**Ligada**, quem escreveu para você vê o visto duplo azul assim que a instância recebe.
+**Desligada**, a mensagem fica como não lida do lado de quem enviou, mesmo que o seu sistema já a
+tenha processado.
+
+## Integração
+
+Estas opções valem para o comportamento com agentes de IA — veja
+[Integrações](/painel/integracoes).
+
+### Debounce
+
+*Tempo de espera antes de enviar as mensagens do usuário para o agente de IA*, em **segundos**.
+
+| Campo | Obrigatório | Validação |
+|---|---|---|
+| **Debounce** | Sim | **maior que 0** e **menor que 20** segundos |
+
+Fora dessa faixa, o painel responde **O debounce deve ser maior que 0** ou **O debounce deve ser
+menor que 20**.
+
+**Para que serve**: quando alguém manda três mensagens seguidas, o debounce faz a instância
+esperar e enviá-las ao agente **de uma vez**, como um único contexto, em vez de disparar três
+respostas. **Valor baixo** deixa a resposta mais rápida e aumenta a chance de responder antes de a
+pessoa terminar o raciocínio; **valor alto** agrupa melhor e demora mais para responder.
+
+### Dividir mensagens do agente
+
+*Divide a mensagem de resposta do agente em partes menores, utilizando como separador linhas em
+branco.*
+
+**Ligada**, uma resposta longa chega como várias mensagens — a quebra acontece nas **linhas em
+branco** do texto do agente. **Desligada**, tudo chega em uma mensagem só.
+
+### Processar links de imagens
+
+*Processa os links de imagens da mensagem e envia como arquivos de imagem.*
+
+**Ligada**, um link de imagem na resposta do agente vira uma imagem de verdade na conversa.
+**Desligada**, o link chega como texto e o destinatário precisa clicar.
+
+### Responder com áudio
+
+*Responde com áudio mensagens recebidas por áudio.*
+
+**Ligada**, quem manda um áudio recebe um áudio de volta; quem manda texto continua recebendo
+texto. **Desligada**, a resposta é sempre em texto.
+
+### Voz padrão ElevenLabs
+
+*Escolha a voz padrão a ser utilizada para respostas em áudio.* O campo diz *Selecione uma voz*.
+
+<Note>
+**A lista de vozes depende do Text to Speech estar configurado.** Enquanto a chave da ElevenLabs
+não estiver cadastrada na instância, não há vozes para escolher aqui. Configure-a primeiro em
+[Texto para fala](/painel/text-to-speech).
+</Note>
+
+Esta é a voz **padrão** da instância: ela é usada quando o envio não especifica outra.
+
+### Desativar IA em mensagens a partir do dispositivo
+
+*Desativa a IA em uma conversa quando o usuário dono da linha conectada enviar uma mensagem a
+partir de seu dispositivo móvel, WhatsApp Web ou Desktop.*
+
+**Ligada**, no momento em que um atendente humano responde pelo celular ou pelo WhatsApp Web, o
+agente de IA **para de responder naquela conversa** — evita que os dois falem ao mesmo tempo com
+o cliente. **Desligada**, o agente continua respondendo mesmo depois da intervenção humana.
+
+## Veja também
+
+- [Texto para fala](/painel/text-to-speech) — a chave da ElevenLabs e as vozes
+- [Integrações](/painel/integracoes) — agentes de IA e Chatwoot
+- [Agentes de IA](/integrations/ai-agents) — como o agente funciona
+- [Obter configurações](/api-reference/configurações/obter-configurações) e
+  [Atualizar configurações](/api-reference/configurações/atualizar-configurações) — as mesmas
+  opções pela API

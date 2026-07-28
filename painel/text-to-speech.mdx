@@ -1,0 +1,78 @@
+---
+title: Texto para fala
+description: "Conectar a chave da ElevenLabs à instância e enviar mensagens de voz sintetizada"
+---
+
+**Onde fica**: Instâncias → (selecione a instância) → Texto para fala
+
+A tela **Texto para Fala (ElevenLabs)** (`dash/instances/[id]/text-to-speech`) liga a instância à
+sua conta da ElevenLabs. É ela que
+permite transformar texto em voz e enviar a mensagem como áudio.
+
+## A chave da ElevenLabs
+
+A chave **não é fornecida pela ZapperHub**: ela vem da sua conta na **ElevenLabs**, e o consumo é
+cobrado por lá. Gere-a no painel da ElevenLabs e cole aqui.
+
+| Campo | Obrigatório | Validação |
+|---|---|---|
+| **Chave da API da ElevenLabs** | Sim | **Chave secreta é obrigatória**; precisa ser um texto (**Chave secreta deve ser uma string**) |
+
+<Warning>
+**A chave precisa ter as permissões certas, ou o recurso não funciona.** O painel é explícito:
+
+> Certifique-se de criar uma chave com permissão aos recursos de **Text to Speech (has Access)** e
+> **Voices (pelo menos Read Only)**
+
+Sem **Text to Speech**, a instância não consegue gerar o áudio. Sem **Voices**, ela não consegue
+listar as vozes disponíveis — e a voz padrão fica sem opções para escolher.
+</Warning>
+
+Salve em **Atualizar**. O painel confirma com **Configurações atualizadas com sucesso.**
+
+### O que muda depois de atualizar
+
+Assim que a chave é aceita:
+
+- as vozes da sua conta ElevenLabs passam a aparecer na lista de seleção;
+- a instância pode responder em áudio e enviar voz sintetizada;
+- trocar a chave por outra substitui a anterior — a chave antiga deixa de ser usada
+  imediatamente. Se a nova não tiver as permissões corretas, o recurso para de funcionar mesmo
+  que a anterior estivesse certa.
+
+## Voz padrão e voz por mensagem
+
+Há dois níveis, e o mais específico vence:
+
+| Nível | Onde se define | Quando vale |
+|---|---|---|
+| **Voz padrão da instância** | Configurações da instância → **Voz padrão ElevenLabs** | Sempre que o envio não indicar outra voz |
+| **Voz da mensagem** | No próprio envio, pela API | Naquele envio apenas, ignorando a padrão |
+
+A voz padrão é escolhida em [Configurações da instância](/painel/configuracoes-da-instancia), no
+campo **Voz padrão ElevenLabs** — descrito como *Escolha a voz padrão a ser utilizada para
+respostas em áudio.* Ele só oferece opções depois que a chave estiver cadastrada aqui.
+
+Na prática: configure a chave nesta tela, escolha a voz padrão nas configurações, e sobrescreva
+caso a caso apenas quando um envio específico precisar de outra voz.
+
+A opção **Responder com áudio**, também nas configurações da instância, é o que faz a instância
+devolver áudio para quem mandou áudio.
+
+## Enviar pela API
+
+A mesma capacidade existe na API:
+
+- [Enviar áudio a partir de texto](/api-reference/mensagens/enviar-áudio-a-partir-de-texto) — envia
+  a mensagem já sintetizada em voz
+- [Listar vozes da ElevenLabs](/api-reference/elevenlabs/listar-vozes-da-elevenlabs) — as vozes
+  disponíveis na sua conta
+- [Selecionar voz da ElevenLabs](/api-reference/elevenlabs/selecionar-voz-da-elevenlabs) — define a
+  voz padrão
+- [Atualizar API Key da ElevenLabs](/api-reference/elevenlabs/atualizar-api-key-da-elevenlabs) — a
+  mesma operação desta tela
+
+## Veja também
+
+- [ElevenLabs](/integrations/eleven-labs) — a integração em detalhe
+- [Configurações da instância](/painel/configuracoes-da-instancia) — voz padrão e resposta em áudio

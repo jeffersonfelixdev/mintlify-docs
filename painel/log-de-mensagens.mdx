@@ -1,0 +1,127 @@
+---
+title: Log de mensagens
+description: "Localizar uma mensagem, interpretar seu estado e investigar por que ela não chegou"
+---
+
+**Onde fica**: Instâncias → (selecione a instância) → Mensagens
+
+Esta é a tela que responde "a mensagem não chegou". Ela lista as **Mensagens enviadas e recebidas
+por esta instância.** e mostra, para cada uma, o que aconteceu e quando.
+
+Quando nada casa com os filtros, a tela mostra **Nenhuma mensagem encontrada.**; se a consulta
+falhar, **Não foi possível carregar as mensagens.**
+
+## Filtrar
+
+| Filtro | O que faz |
+|---|---|
+| **Data de criação** | Período entre **De** e **Até**; o campo diz *Selecione o período* |
+| **Enviada/Recebida** | **Todas**, **Somente enviadas** ou **Somente recebidas** |
+| **Origem** | De onde a mensagem veio — o painel resume como *(direção) via (origem)* |
+| **Pesquisar** | Busca textual no conteúdo e na legenda |
+
+Se você inverter as datas, a tela avisa: **A data inicial não pode ser posterior à data final.**
+
+A lista carrega aos poucos — use **Carregar mais**.
+
+### Colunas
+
+**Contato**, **Tipo**, **Texto / legenda**, **Criada em** e **Situação**. A direção aparece como
+**Enviada** ou **Recebida**.
+
+## Tipos de mensagem
+
+| Tipo | | Tipo | |
+|---|---|---|---|
+| **Texto** | | **Localização** | |
+| **Imagem** | | **Contato** | |
+| **Áudio** | | **Botão** | |
+| **Vídeo** | | **Lista** | |
+| **Documento** | | **Carrossel** | |
+| **Sticker** | | **Desconhecido** | |
+
+O tipo **Desconhecido** aparece quando a mensagem não se encaixa em nenhuma das categorias
+acima — normalmente um formato novo do WhatsApp.
+
+## Estados de recibo
+
+Abrir uma linha mostra **Detalhes da mensagem**. É ali que os quatro estados aparecem, cada um
+com o seu carimbo de data e hora:
+
+| Estado | O que significa | Carimbo |
+|---|---|---|
+| **Enviada** | A ZapperHub entregou a mensagem ao WhatsApp | **Enviada em:** — o instante em que saiu daqui |
+| **Entregue** | O WhatsApp entregou ao aparelho do destinatário | **Entregue em:** — o instante em que chegou ao aparelho |
+| **Lida** | O destinatário abriu a conversa e viu a mensagem | **Lida em:** — o instante da leitura |
+| **Erro no envio** | A mensagem não completou o percurso | sem carimbo; veja **Código de erro** e **Mensagem de erro** |
+
+Os estados são cumulativos e nesta ordem. **Como interpretar**:
+
+- **Enviada em** preenchido, **Entregue em** vazio → a mensagem saiu da ZapperHub mas o WhatsApp
+  ainda não conseguiu entregá-la; o aparelho pode estar sem rede ou o número pode ser inválido.
+- **Entregue em** preenchido, **Lida em** vazio → chegou ao aparelho e ainda não foi aberta. Isso
+  é comportamento normal, não é falha.
+- **Erro no envio** → a falha está descrita em **Mensagem de erro**, com o **Código de erro** que
+  a acompanha.
+
+Os detalhes trazem ainda **ID**, **ID da instância**, **Tipo de mensagem**, **Origem**,
+**Telefone (PN)**, **LID**, **Nome**, **Conteúdo**, **URL**, **Legenda**, **Tipo MIME**, **Nome do
+arquivo**, **Criada em**, **Respondida em** e, quando a mensagem cita outra, **ID da mensagem
+citada** e **Conteúdo da mensagem citada**. Em templates, **Nome do template** e **Tipo do
+template**; em Instagram, **ID Instagram**.
+
+### Responder na hora
+
+Os detalhes trazem **Resposta rápida**, com o campo *Digite sua resposta…* e o botão **Enviar**.
+O resultado é **Mensagem enviada com sucesso.** ou **Não foi possível enviar a mensagem.**
+
+## Recibos de entrega nos webhooks
+
+Uma mensagem entregue ao destinatário e um evento entregue ao **seu** sistema são coisas
+diferentes. O atalho **Ver recibos de entrega** abre **Recibos de entrega nos webhooks**, que
+mostra a segunda:
+
+| Campo | O que mostra |
+|---|---|
+| **ID** | O identificador do recibo |
+| **Entregue em** | Quando o evento chegou ao seu endpoint |
+| **Tentativa de entrega realizada em** | Quando a entrega foi tentada |
+| **Erro** | A mensagem de erro, quando a tentativa falhou |
+
+Enquanto carrega, **Carregando recibos…**; sem resultados, **Nenhum recibo de entrega
+encontrado.**; em falha, **Não foi possível carregar os recibos.**
+
+**Como usar isso**: se a mensagem consta como **Entregue** mas o seu sistema não reagiu, o
+problema não está no WhatsApp — está na entrega do webhook. Compare a **Tentativa de entrega
+realizada em** com o **Entregue em**: tentativa sem entrega, com **Erro** preenchido, significa
+que o seu endpoint recusou ou não respondeu. Configure e revise seus webhooks em
+[Webhooks](/painel/webhooks).
+
+## Filas de processamento
+
+Os cartões da tela da instância levam ao **Relatório de mensagens**, na rota
+`dash/instances/[id]/messages/[status]` — a mesma lista, já restrita a um estado de
+processamento:
+
+| Estado | Como aparece na navegação |
+|---|---|
+| **Ativos** | **Mensagens em processamento** |
+| **Concluídos** | **Mensagens processadas** |
+| **Com falha** | **Mensagens com erro** |
+| **Aguardando** | **Mensagens na fila** |
+
+O relatório mostra a contagem de **registros** e as colunas **TIPO**, **JID**, **TEXTO/LEGENDA** e
+**DATA/HORA**. Se a consulta falhar: **Ocorreu um erro na requisição. Tente novamente.**
+
+Ao abrir um item, os dados do processamento aparecem: **Destinatário**, **Contato**, **Grupo**,
+**Mensagem/Legenda**, **Criado em**, **Processado em**, **Finalizado em**, **Erro** e
+**Tentativas realizadas**.
+
+O funcionamento da fila — por que uma mensagem espera, e como as tentativas acontecem — está em
+[Fila de mensagens](/definitions/queue).
+
+## Veja também
+
+- [Instâncias](/painel/instancias) — os indicadores que levam a esta tela
+- [Webhooks](/painel/webhooks) — receber os eventos no seu sistema
+- [Templates](/painel/templates) — envio de mensagens modelo

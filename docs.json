@@ -55,10 +55,53 @@
             "icon": "globe",
             "pages": [
               "integrations/webhooks",
+              "integrations/ai-agents",
               "integrations/chatvolt",
               "integrations/eleven-labs",
               "integrations/n8n",
               "integrations/make"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Painel",
+        "groups": [
+          {
+            "group": "Começando",
+            "icon": "compass",
+            "pages": [
+              "painel/visao-geral",
+              "painel/conta-e-assinatura",
+              "painel/chave-de-api-global"
+            ]
+          },
+          {
+            "group": "Instâncias",
+            "icon": "server",
+            "pages": [
+              "painel/instancias",
+              "painel/conexao-nao-oficial",
+              "painel/conexao-oficial",
+              "painel/instagram"
+            ]
+          },
+          {
+            "group": "Operação",
+            "icon": "message",
+            "pages": [
+              "painel/templates",
+              "painel/log-de-mensagens",
+              "painel/webhooks"
+            ]
+          },
+          {
+            "group": "Ajustes e integrações",
+            "icon": "sliders",
+            "pages": [
+              "painel/configuracoes-da-instancia",
+              "painel/text-to-speech",
+              "painel/integracoes"
             ]
           }
         ]

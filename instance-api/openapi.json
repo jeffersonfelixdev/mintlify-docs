@@ -14,11 +14,156 @@
         "bearerFormat": "JWT"
       }
     },
-    "schemas": {
-
-    }
+    "schemas": {}
   },
   "paths": {
+    "/api/v2/connection-link/{instanceLinkId}": {
+      "get": {
+        "summary": "Obter instância pelo link de conexão",
+        "tags": [
+          "Instâncias"
+        ],
+        "description": "Obtém uma instância pelo link de conexão",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "instanceLinkId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ID do link de conexão"
+                    },
+                    "instanceId": {
+                      "type": "string",
+                      "description": "ID da instância"
+                    },
+                    "expiresIn": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true,
+                      "description": "Data de expiração do link"
+                    },
+                    "apikey": {
+                      "type": "string",
+                      "description": "API key da instância"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "instanceId",
+                    "expiresIn",
+                    "apikey"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/instances/v2": {
+      "post": {
+        "summary": "Cria uma nova instância",
+        "tags": [
+          "Instâncias"
+        ],
+        "description": "Cria uma nova instância",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "description": "Nome amigável para exibição"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "userId",
+            "required": false,
+            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperHub."
+          }
+        ],
+        "security": [
+          {
+            "token": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "instance": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "ownerId": {
+                          "type": "string"
+                        },
+                        "apikey": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "ownerId",
+                        "apikey",
+                        "createdAt",
+                        "updatedAt"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "instance"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/instances": {
       "post": {
         "summary": "Cria uma nova instância",
@@ -121,7 +266,8 @@
             },
             "in": "query",
             "name": "limit",
-            "required": false
+            "required": false,
+            "description": "Limite de instâncias por página"
           },
           {
             "schema": {
@@ -130,7 +276,8 @@
             },
             "in": "query",
             "name": "page",
-            "required": false
+            "required": false,
+            "description": "Número da página"
           },
           {
             "schema": {
@@ -138,7 +285,50 @@
             },
             "in": "query",
             "name": "label",
-            "required": false
+            "required": false,
+            "description": "Label da instância"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "label",
+                "id",
+                "created_at"
+              ],
+              "default": "label"
+            },
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "description": "Ordenação das instâncias"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "asc"
+            },
+            "in": "query",
+            "name": "order_direction",
+            "required": false,
+            "description": "Direção da ordenação"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "open",
+                "close"
+              ]
+            },
+            "in": "query",
+            "name": "connection_status",
+            "required": false,
+            "description": "Status da conexão da instância"
           },
           {
             "schema": {
@@ -157,138 +347,83 @@
         ],
         "responses": {
           "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v2/instances/{instanceId}/connection-link": {
+      "post": {
+        "summary": "Criar link de conexão",
+        "tags": [
+          "Instâncias"
+        ],
+        "description": "Cria um novo link de conexão para uma instância",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "expiresIn": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Data de expiração do link"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "instanceId",
+            "required": true,
+            "description": "Id da instância"
+          }
+        ],
+        "responses": {
+          "200": {
             "description": "Default Response",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "instances": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "apikey": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "beta": {
-                            "type": "boolean",
-                            "nullable": true
-                          },
-                          "connectionStatus": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "createdAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "nullable": true
-                          },
-                          "createdBy": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "delay": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "enableLinkPreview": {
-                            "type": "boolean",
-                            "nullable": true
-                          },
-                          "enableSendPresenceUpdate": {
-                            "type": "boolean",
-                            "nullable": true
-                          },
-                          "endpointId": {
-                            "type": "number",
-                            "nullable": true
-                          },
-                          "id": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "label": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "markAsRead": {
-                            "type": "boolean",
-                            "nullable": true
-                          },
-                          "metaAccessToken": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "metaBusinessAccountId": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "metaPhoneNumberId": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "metaVerificationToken": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "metaForwardWebhook": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "ownerId": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "stackId": {
-                            "type": "number",
-                            "nullable": true
-                          },
-                          "type": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "updatedAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "nullable": true
-                          },
-                          "userImage": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "userJid": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "version": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "webhookUrl": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "webhookSecret": {
-                            "type": "string",
-                            "nullable": true
-                          }
-                        },
-                        "additionalProperties": false
-                      }
+                    "id": {
+                      "type": "string",
+                      "description": "ID do link de conexão"
                     },
-                    "pages": {
-                      "type": "number",
-                      "nullable": true
+                    "expiresIn": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true,
+                      "description": "Data de expiração do link"
                     },
-                    "total": {
-                      "type": "number",
-                      "nullable": true
+                    "qrCodeLink": {
+                      "type": "string",
+                      "description": "Link do QR Code"
+                    },
+                    "metaConnectionLink": {
+                      "type": "string",
+                      "description": "Link da conexão com a Meta (login com Facebook)"
+                    },
+                    "instagramConnectionLink": {
+                      "type": "string",
+                      "description": "Link da conexão com o Instagram"
                     }
                   },
                   "required": [
-                    "instances"
+                    "id",
+                    "expiresIn",
+                    "qrCodeLink",
+                    "metaConnectionLink",
+                    "instagramConnectionLink"
                   ],
                   "additionalProperties": false
                 }
@@ -592,7 +727,7 @@
         "tags": [
           "Usuários"
         ],
-        "description": "Cria um novo usuário a partir de um parceiro. É necessário que você tenha autorização para criar subcontas na ZapperHub. Entre em contato com o suporte e saiba como funcionam as subcontas e solicite a autorização.",
+        "description": "Cria um novo usuário a partir de um parceiro. É necessário que você tenha autorização para criar subcontas na ZapperHub. Entre em contato com o suporte e saiba como funcionam as subcontas e solicite a autorização. Caso não tenha autorização de parceiro, este endpoint retornará os dados do usuário logado.",
         "requestBody": {
           "content": {
             "application/json": {

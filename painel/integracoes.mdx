@@ -1,0 +1,134 @@
+---
+title: Integrações
+description: "Conectar agentes de IA e o Chatwoot à instância"
+---
+
+**Onde fica**: Instâncias → (selecione a instância) → Integrações
+
+A tela de integrações da instância (`dash/instances/[id]/integrations`) tem duas abas
+independentes: **Agentes de IA** e **Chatwoot**. Cada uma conecta a
+instância a um serviço diferente, e as duas podem coexistir.
+
+## Aba Agentes de IA
+
+Liga a instância a um agente que responde as conversas automaticamente.
+
+| Campo | Obrigatório | Validação |
+|---|---|---|
+| **Tipo de Integração** | Sim | **Chatvolt**, **GPT Maker** ou **Zaia**; **Tipo de integração é obrigatório** |
+| **ID do Agente** | Sim | **ID do agente é obrigatório** |
+| **Chave de API** | Sim | **Chave de API é obrigatória** |
+
+Depois de criada, a integração é alterada em **Atualizar** e removida em **Excluir Integração**.
+Os resultados são **Integração criada com sucesso.**, **Integração excluída com sucesso.** e, em
+caso de falha, **Ocorreu um erro ao excluir a integração. Tente novamente mais tarde.**
+
+### Como controlar o agente
+
+O painel mostra a seção **Como controlar o agente**, com dois comandos enviados **na própria
+conversa**:
+
+| Comando | Efeito |
+|---|---|
+| `#on` | **Ativar a IA**: enviar `#on` para o contato |
+| `#off` | **Desativar a IA**: enviar `#off` para o contato |
+
+Os comandos valem **por conversa**, não para a instância inteira: desligar a IA em um contato não
+afeta os demais. Isso permite que um atendente humano assuma um atendimento específico sem mexer
+na configuração.
+
+Relacionado: a opção **Desativar IA em mensagens a partir do dispositivo**, em
+[Configurações da instância](/painel/configuracoes-da-instancia), faz esse desligamento acontecer
+sozinho quando o dono da linha responde pelo celular.
+
+### Webhook de follow up
+
+Para agentes **Chatvolt**, a seção **Webhook para Follow up e mensagens de nota** entrega a URL a
+configurar do lado do Chatvolt: *Para enviar as mensagens de follow up disparadas pelo agente do
+Chatvolt, bem como as Mensagens processadas como nota dentro da plataforma, configure o webhook do
+agente do Chatvolt com a URL abaixo*. O botão de cópia confirma com **URL copiada com sucesso**.
+
+Como o agente funciona, o que ele responde e como afinar o comportamento está em
+[Agentes de IA](/integrations/ai-agents). O ajuste de agrupamento das mensagens enviadas ao
+agente é o **Debounce**, em
+[Configurações da instância](/painel/configuracoes-da-instancia).
+
+## Aba Chatwoot
+
+<Warning>**Beta** — esta funcionalidade pode mudar sem aviso. Podem ocorrer erros ou comportamentos inesperados.</Warning>
+
+A aba tem dois estados: **Nova integração Chatwoot**, enquanto não há nenhuma, e **Integração
+ativa**, depois de criada.
+
+### Criar
+
+| Campo | Obrigatório | Validação |
+|---|---|---|
+| **URL do Chatwoot** | Sim | URL válida, como `https://app.chatwoot.com`; **Informe a URL** ou **URL inválida** |
+| **ID da conta** | Sim | numérico; **ID da conta inválido** quando não é |
+| **Token de acesso** | Sim | o token de acesso da API do Chatwoot; **Informe o token de acesso** |
+| **Nome da caixa de entrada** | Sim | o nome exibido no Chatwoot; **Informe o nome da caixa de entrada** |
+| **Exibir nome do atendente nas mensagens** | Não | liga/desliga |
+
+O campo de exibição do atendente explica o próprio efeito: *Quando ativado, o nome do atendente do
+Chatwoot é incluído nas Mensagens processadas ao WhatsApp.* Ou seja, o cliente passa a ver quem
+está falando com ele.
+
+Conclua em **Criar integração**. Sucesso: **Integração Chatwoot criada com sucesso.** Falha:
+**Não foi possível criar a integração Chatwoot.**
+
+### Identificadores gerados
+
+Criada a integração, o painel passa a exibir três identificadores — eles são **gerados pela
+ZapperHub e pelo Chatwoot**, não preenchidos por você:
+
+| Identificador | O que é |
+|---|---|
+| **ID da integração** | Identifica a integração na ZapperHub |
+| **ID da caixa de entrada** | A caixa de entrada criada no Chatwoot |
+| **ID do webhook** | O webhook criado no Chatwoot para receber os eventos |
+
+Guarde-os: são o que permite localizar a integração ao investigar um problema.
+
+Alterar a preferência de exibição do atendente responde **Preferência atualizada.** ou **Não foi
+possível atualizar a preferência.** Se a tela não conseguir carregar, mostra **Não foi possível
+carregar a integração Chatwoot.** com **Tentar novamente**.
+
+### Desativar sem excluir
+
+A integração tem um interruptor de estado, com os rótulos **Integração ativada** e **Integração
+desativada**. A mudança confirma com **Status da integração atualizado com sucesso.** ou falha com
+**Erro ao atualizar status da integração.**
+
+**Desativar não é excluir.** Ao desativar:
+
+- a integração **para de operar** — as conversas deixam de ser espelhadas enquanto ela estiver
+  nesse estado;
+- **o cadastro permanece**, com os mesmos identificadores, URL, token e nome de caixa de entrada;
+- **a caixa de entrada e o webhook criados no Chatwoot continuam existindo** — nada é removido de
+  lá;
+- basta ativar de novo para voltar a operar, **sem refazer a configuração**.
+
+É o caminho para pausar temporariamente. Excluir, abaixo, é irreversível.
+
+### Excluir
+
+O botão é **Excluir integração Chatwoot** e o diálogo, **Excluir integração Chatwoot?**
+
+<Warning>
+O webhook e a caixa de entrada criados no Chatwoot serão removidos. **Esta ação não pode ser
+desfeita.**
+
+A exclusão não afeta apenas a ZapperHub: ela **apaga a caixa de entrada e o webhook dentro do seu
+Chatwoot**. Para voltar atrás é preciso criar a integração de novo, e a nova caixa de entrada terá
+outro identificador. Se você só quer interromper temporariamente, **desative** em vez de excluir.
+</Warning>
+
+Confirme em **Excluir** ou desista em **Cancelar**. Sucesso: **Integração Chatwoot removida.**
+Falha: **Não foi possível excluir a integração Chatwoot.**
+
+## Veja também
+
+- [Agentes de IA](/integrations/ai-agents) — como o agente responde
+- [Configurações da instância](/painel/configuracoes-da-instancia) — debounce e resposta em áudio
+- [Chatvolt](/integrations/chatvolt) — a integração com o Chatvolt
