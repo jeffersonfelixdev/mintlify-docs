@@ -3,7 +3,7 @@
   "info": {
     "title": "ZapperHub Reference API",
     "description": "Documentação Oficial da ZapperHub",
-    "version": "3.10.1"
+    "version": "3.11.1"
   },
   "components": {
     "securitySchemes": {
@@ -9550,6 +9550,483 @@
 
                   },
                   "description": "Header `x-api-key` ausente, inválido ou de outra instância."
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {
+
+                            },
+                            "additionalProperties": {
+
+                            },
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {
+
+                        },
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {
+
+                  },
+                  "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{instanceId}/messages/list": {
+      "post": {
+        "summary": "Enviar mensagem de lista",
+        "tags": [
+          "Mensagens"
+        ],
+        "description": "Envia uma mensagem com lista de opções para um contato ou grupo.\n\n            A rota é única para instâncias `device` e `cloud_api`, e o corpo é\n            idêntico nos dois canais: os limites aplicados são os da Cloud API,\n            para que o mesmo payload funcione em qualquer instância. Instâncias\n            `gupshup` e `instagram` não suportam lista e são recusadas com\n            `400`.\n\n            **Limites**: `buttonText` de 1 a 20 caracteres; `title` até 60;\n            `description` de 1 a 1024; `footer` até 60; de 1 a 10 seções, com\n            título de seção de até 24 caracteres — **obrigatório a partir de 2\n            seções**; no máximo **10 linhas somadas todas as seções**, cada uma\n            com `title` de 1 a 24 caracteres, `description` até 72 e `rowId`\n            de 1 a 200 caracteres, **único em toda a mensagem**. Nada é\n            truncado: o que excede o limite é recusado.\n\n            O `200` confirma o enfileiramento, não a entrega — o resultado\n            chega pelo webhook `messages.upsert` (sucesso) ou\n            `messages.error` (falha definitiva). A opção escolhida pelo\n            destinatário volta em `messages.upsert` com\n            `message.listResponseMessage.selectedButtonId` (o `rowId` exato)\n            e `selectedDisplayText`, com os mesmos nomes de campo nos dois\n            canais.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jid": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Número de telefone, LID, BSUID ou id do grupo do destinatário. Números\n    podem ser enviados com ou sem o prefixo `+` e com ou sem o sufixo\n    `@s.whatsapp.net`; grupos exigem o sufixo `@g.us`.\n\n\n    **Grupo só é aceito em instância `device`** — em instância `cloud_api` a\n    requisição é recusada com `400` e nenhuma mensagem é enfileirada."
+                  },
+                  "buttonText": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 20,
+                    "description": "Texto do botão que abre a lista. De 1 a 20 caracteres."
+                  },
+                  "title": {
+                    "type": "string",
+                    "maxLength": 60,
+                    "description": "Cabeçalho de texto da mensagem, até 60 caracteres.\n\n\n      Quando omitido, o resultado difere por canal: em instância `device` o\n      provedor exibe o cabeçalho padrão `Menu`; em `cloud_api` a mensagem vai\n      sem cabeçalho algum."
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1024,
+                    "description": "Corpo da mensagem — o texto que a pessoa lê. De 1 a 1024 caracteres."
+                  },
+                  "footer": {
+                    "type": "string",
+                    "maxLength": 60,
+                    "description": "Rodapé da mensagem. Até 60 caracteres."
+                  },
+                  "sections": {
+                    "minItems": 1,
+                    "maxItems": 10,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "maxLength": 24,
+                          "description": "Título da seção, até 24 caracteres. **Obrigatório quando houver 2 ou mais seções.**"
+                        },
+                        "rows": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "title": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 24,
+                                "description": "Texto da opção, exibido na lista. Até 24 caracteres."
+                              },
+                              "description": {
+                                "type": "string",
+                                "maxLength": 72,
+                                "description": "Detalhe da opção, exibido abaixo do título. Até 72 caracteres."
+                              },
+                              "rowId": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 200,
+                                "description": "Identificador devolvido quando a opção é escolhida. Até 200 caracteres e **único em toda a mensagem**, não apenas dentro da seção."
+                              }
+                            },
+                            "required": [
+                              "title",
+                              "rowId"
+                            ]
+                          },
+                          "description": "Opções da seção. Ao menos uma, e no máximo 10 somadas todas as seções."
+                        }
+                      },
+                      "required": [
+                        "rows"
+                      ]
+                    },
+                    "description": "Seções da lista, de 1 a 10. O total de linhas somadas todas as seções não pode passar de 10."
+                  },
+                  "trackId": {
+                    "type": "string",
+                    "description": "Identificador da mensagem para fins de rastreamento. Não é necessário ser um ID único, utilizar um valor que faça sentido para o seu caso."
+                  },
+                  "trackSource": {
+                    "default": "api",
+                    "type": "string",
+                    "description": "Origem da mensagem (ex: crm, n8n, etc.) - se não informado, será utilizado o valor padrão \"api\""
+                  },
+                  "expiration": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "24h",
+                      "7d",
+                      "90d"
+                    ],
+                    "description": "**Sem efeito nesta versão** — o campo é aceito por compatibilidade e\n      ignorado no envio da lista.\n\n\n      Tempo de desaparecimento da mensagem, podendo ser desligado (padrão), 24\n      horas, 7 dias ou 90 dias."
+                  }
+                },
+                "required": [
+                  "jid",
+                  "buttonText",
+                  "description",
+                  "sections"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "instanceId",
+            "required": true,
+            "description": "Id da instância"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Envio agendado. O `200` confirma o enfileiramento, não a entrega ao destinatário.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "scheduled"
+                      ],
+                      "description": "A mensagem entrou na fila de envio."
+                    },
+                    "jobId": {
+                      "type": "string",
+                      "description": "Id do job na fila. Use em `GET /{instanceId}/jobs/{status}` para acompanhar o envio. Ausente quando a fila não devolve um id."
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Envio agendado. O `200` confirma o enfileiramento, não a entrega ao destinatário."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Corpo fora do schema ou fora dos limites da lista (com `validation` apontando o campo), `jid` inválido, `jid` de grupo em instância `cloud_api`, tipo de instância que não suporta lista, ou WhatsApp desconectado. Nenhum job é criado em qualquer destes casos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {
+
+                            },
+                            "additionalProperties": {
+
+                            },
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {
+
+                        },
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {
+
+                  },
+                  "description": "Corpo fora do schema ou fora dos limites da lista (com `validation` apontando o campo), `jid` inválido, `jid` de grupo em instância `cloud_api`, tipo de instância que não suporta lista, ou WhatsApp desconectado. Nenhum job é criado em qualquer destes casos."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Header `x-api-key` ausente, inválido ou de outra instância.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {
+
+                            },
+                            "additionalProperties": {
+
+                            },
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {
+
+                        },
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {
+
+                  },
+                  "description": "Header `x-api-key` ausente, inválido ou de outra instância."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Instância não encontrada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {
+
+                            },
+                            "additionalProperties": {
+
+                            },
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {
+
+                        },
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {
+
+                  },
+                  "description": "Instância não encontrada."
                 }
               }
             }

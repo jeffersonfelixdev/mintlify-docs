@@ -46,6 +46,7 @@
             "icon": "edit",
             "pages": [
               "functions/messages",
+              "functions/sending-messages",
               "functions/chats",
               "functions/groups"
             ]

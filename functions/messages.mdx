@@ -12,12 +12,15 @@ As mensagens podem ser do tipo:
 - Imagem com legenda
 - Áudio
 - Nota de áudio (como se fosse gravado pelo dispositivo)
+- Nota de áudio gerada a partir de um texto
 - Vídeo
-- Nota de vídeo
 - Documento
 - Contato (formato vCARD)
 - Sticker
 - Localização
+- Botões de ação ou de resposta rápida
+- Lista de opções (menu interativo)
+- Template aprovado pela Meta (apenas em conexão oficial)
 
 E podem ser direcionadas para:
 - Número de telefone (@s.whatsapp.net)
@@ -26,5 +29,10 @@ E podem ser direcionadas para:
 - status (status@broadcast)
 - Canais (@newsletter)
 
-Para maiores informações, acesse a documentação de referência da API para detalhes
-de como enviar mensagens pela ZapperHub.
+O detalhamento de cada tipo — a rota, os campos, os limites e o que muda entre
+uma conexão oficial e uma não oficial — está em
+[Envio de mensagens](/functions/sending-messages).
+
+Além de enviar, você pode **reagir** a uma mensagem e **excluir** uma mensagem já
+enviada. Para maiores informações, acesse a documentação de referência da API
+para detalhes de como enviar mensagens pela ZapperHub.

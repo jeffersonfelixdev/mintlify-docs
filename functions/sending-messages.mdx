@@ -1,0 +1,372 @@
+---
+title: Envio de mensagens
+description: "Detalhamento de cada tipo de mensagem, com os campos, limites e diferenças entre os canais"
+---
+
+Esta página detalha **cada tipo de mensagem** que a ZapperHub envia: a rota, os
+campos que importam, os limites e o que muda entre uma instância oficial (Cloud
+API) e uma não oficial. Para a referência completa de cada campo, consulte a
+[documentação de referência da API](/api-reference).
+
+## Como funciona o envio
+
+Todo envio passa pela [fila da instância](/definitions/queue). Por isso a
+resposta da API é `200` com o **agendamento**, e não com a entrega:
+
+```json
+{ "status": "scheduled", "jobId": "42" }
+```
+
+O que aconteceu de fato chega por webhook: `messages.upsert` quando a mensagem
+foi enviada, `messages.error` quando as tentativas se esgotaram. Veja os
+[exemplos de payload](/integrations/webhooks).
+
+<Card title="EXCEÇÃO">
+**Reagir** e **excluir** não passam pela fila: são aplicados na hora e respondem
+`204`, sem corpo e sem `jobId`.
+</Card>
+
+## O destinatário
+
+Salvo onde indicado, o destinatário vai no campo `jid` e aceita:
+
+| Formato | Exemplo |
+| --- | --- |
+| Número de telefone | `5512912345678` ou `5512912345678@s.whatsapp.net` |
+| Identificador único do usuário (LID) | `123456789012345@lid` |
+| Grupo | `120363012345678901@g.us` |
+| Canal | `120363012345678901@newsletter` |
+
+O número deve estar no formato completo, com código do país; o prefixo `+` é
+opcional. Veja [Formato dos números](/definitions/number-format).
+
+## Campos comuns
+
+| Campo | Disponível em | O que faz |
+| --- | --- | --- |
+| `trackId` | todos os envios enfileirados | Identificador seu, devolvido no webhook do envio. Não precisa ser único |
+| `trackSource` | todos os envios enfileirados | Origem da mensagem (`crm`, `n8n`, …). Padrão: `api` |
+| `delay` | texto, áudio, mídia | Atraso antes do envio, de 0 a 20 segundos |
+| `expiration` | texto | Mensagem temporária: `none` (padrão), `24h`, `7d` ou `90d` |
+
+## Texto
+
+`POST /{instanceId}/messages/text`
+
+Só `message` é obrigatório — o destinatário vem em `jid` **ou** em `commentId`
+(resposta privada a um comentário do Instagram), e exatamente um dos dois deve
+estar presente.
+
+```json
+{
+  "jid": "5512912345678",
+  "message": "Olá! Sua entrega sai hoje às 14h."
+}
+```
+
+Além do texto, a rota traz os recursos de composição:
+
+| Campo | O que faz |
+| --- | --- |
+| `mentions` | Números a mencionar. Só tem efeito em grupos |
+| `mentionsEveryone` | Menciona todos os participantes do grupo. Ignora `mentions` |
+| `splitMessage` | Divide a mensagem em várias, usando as quebras de linha como corte |
+| `processImageLink` | Envia os links de imagem do texto como imagem, logo após a mensagem |
+| `autoCaption` | Com `processImageLink` ativo, usa o texto da mensagem como legenda da imagem |
+| `showLinkPreview` | Exibe (ou não) o preview do link na mensagem |
+
+## Mídia
+
+`POST /{instanceId}/messages/media`
+
+Imagem, vídeo, áudio e documento saem todos por esta rota, escolhidos em
+`mediaType`. O conteúdo vai em `media`, que aceita **URL (http/https), base64 ou
+data URL**.
+
+```json
+{
+  "jid": "5512912345678",
+  "mediaType": "image",
+  "media": "https://exemplo.com/nota-fiscal.png",
+  "caption": "Sua nota fiscal"
+}
+```
+
+| Campo | Observação |
+| --- | --- |
+| `mediaType` | `image`, `video`, `audio` ou `document` |
+| `caption` | Legenda. Não se aplica a `audio` |
+| `filename` | Nome do arquivo. Só para `document` |
+| `mimetype` | Mimetype do arquivo (ex.: `application/pdf`). Só para `document` |
+
+## Áudio (nota de voz)
+
+`POST /{instanceId}/messages/audio`
+
+A diferença para `mediaType: "audio"` é a forma: esta rota envia como **nota de
+voz**, aquela como arquivo de áudio anexado.
+
+```json
+{
+  "jid": "5512912345678",
+  "audio": "https://exemplo.com/recado.mp3"
+}
+```
+
+Aceita `mp3`, `mp4`, `wav` e `ogg`, por URL, base64 ou data URL.
+
+## Áudio a partir de texto
+
+`POST /{instanceId}/messages/text-to-speech`
+
+Converte o texto em áudio pela ElevenLabs e envia como nota de voz. Exige a chave
+da ElevenLabs cadastrada em `POST /{instanceId}/text-to-speech/key`.
+
+```json
+{
+  "jid": "5512912345678",
+  "text": "Seu pedido foi confirmado.",
+  "voiceId": "21m00Tcm4TlvDq8ikWAM"
+}
+```
+
+Sem `voiceId`, é usada a voz padrão configurada na instância. Veja
+[Text to Speech](/painel/text-to-speech).
+
+## Sticker
+
+`POST /{instanceId}/messages/sticker`
+
+```json
+{
+  "jid": "5512912345678",
+  "sticker": "https://exemplo.com/figurinha.webp"
+}
+```
+
+O arquivo precisa estar em `image/webp` ou `video/mp4` — outros formatos são
+recusados.
+
+## Localização
+
+`POST /{instanceId}/messages/location`
+
+```json
+{
+  "jid": "5512912345678",
+  "location": {
+    "name": "Loja Centro",
+    "lat": -23.1791,
+    "lon": -45.8872
+  }
+}
+```
+
+`lat` e `lon` são obrigatórios; `name` é opcional.
+
+## Contato
+
+`POST /{instanceId}/messages/contact`
+
+O contato vai em campos estruturados no objeto `vcard`, convertido para vCard 3.0
+antes do envio. Só `fn` (nome completo) é obrigatório.
+
+```json
+{
+  "jid": "5512912345678",
+  "name": "John Doe",
+  "vcard": {
+    "fn": "John Doe",
+    "n": { "firstName": "John", "lastName": "Doe" },
+    "tel": [{ "value": "+5512912345678", "type": ["cell"] }]
+  }
+}
+```
+
+## Botões
+
+`POST /{instanceId}/messages/buttons`
+
+De 1 a 5 botões, de quatro tipos, cada um exigindo um campo extra:
+
+| `type` | Campo exigido | Efeito ao tocar |
+| --- | --- | --- |
+| `url` | `url` | Abre o endereço |
+| `copy` | `copyCode` | Copia o valor |
+| `call` | `phoneNumber` | Liga para o número |
+| `reply` | `id` | Devolve o `id` como resposta rápida |
+
+```json
+{
+  "jid": "5512912345678",
+  "title": "Pedido #8823",
+  "body": "Seu pedido saiu para entrega.",
+  "footer": "Equipe ZapperHub",
+  "buttons": [
+    { "type": "reply", "id": "recebi", "displayText": "Recebi" },
+    { "type": "url", "url": "https://exemplo.com/pedido/8823", "displayText": "Acompanhar" }
+  ]
+}
+```
+
+Todo botão tem `type`, `displayText` e `id`. Para acompanhar a mensagem com
+imagem ou vídeo, use `media` e `mediaType`.
+
+<Card title="ATENÇÃO">
+Botões de **resposta rápida** (`reply`) não são aceitos em grupos — a mensagem
+inteira é recusada com `400`.
+</Card>
+
+A resposta do contato chega no webhook `messages.upsert`, em
+`message.buttonsResponseMessage`.
+
+## Lista de opções
+
+`POST /{instanceId}/messages/list`
+
+A mensagem de lista exibe um botão que, ao ser tocado, abre um menu com até 10
+opções agrupadas em seções. É a forma de oferecer um menu de escolhas — um
+cardápio, uma triagem de atendimento, uma agenda de horários — sem depender de o
+contato digitar a resposta certa.
+
+A rota é **única para instâncias oficiais e não oficiais**, e o corpo é idêntico
+nos dois casos: aplicamos sempre os limites da Cloud API, para que o mesmo
+payload funcione em qualquer instância.
+
+```json
+{
+  "jid": "5512912345678",
+  "buttonText": "Ver opções",
+  "title": "Cardápio",
+  "description": "Escolha uma das opções abaixo",
+  "footer": "Equipe ZapperHub",
+  "sections": [
+    {
+      "title": "Bebidas",
+      "rows": [
+        { "title": "Café", "description": "200ml", "rowId": "cafe-01" },
+        { "title": "Suco", "description": "300ml", "rowId": "suco-01" }
+      ]
+    },
+    {
+      "title": "Comidas",
+      "rows": [
+        { "title": "Pão de queijo", "rowId": "pdq-01" }
+      ]
+    }
+  ]
+}
+```
+
+### Limites
+
+| Campo | Obrigatório | Limite |
+| --- | --- | --- |
+| `buttonText` | Sim | 1 a 20 caracteres |
+| `title` | Não | até 60 caracteres |
+| `description` | Sim | 1 a 1024 caracteres |
+| `footer` | Não | até 60 caracteres |
+| `sections` | Sim | 1 a 10 seções |
+| `sections[].title` | Condicional | até 24 caracteres — **obrigatório a partir de 2 seções** |
+| `sections[].rows` | Sim | ao menos 1, e no máximo **10 linhas somadas todas as seções** |
+| `sections[].rows[].title` | Sim | 1 a 24 caracteres |
+| `sections[].rows[].description` | Não | até 72 caracteres |
+| `sections[].rows[].rowId` | Sim | 1 a 200 caracteres, **único em toda a mensagem** |
+
+Nada é truncado: o que exceder o limite é recusado com `400`, e nenhuma mensagem
+entra na fila.
+
+<Card title="ATENÇÃO">
+**Grupos só recebem lista em instância não oficial**: a Cloud API não envia
+mensagens de lista para grupos, e a requisição é recusada com `400`.
+</Card>
+
+Quando `title` é omitido, a instância não oficial mostra o cabeçalho padrão
+`Menu`, enquanto na Cloud API a mensagem vai sem cabeçalho algum. Informe o
+`title` sempre que o cabeçalho importar.
+
+### Como recebo a opção escolhida
+
+O identificador que você definiu em `rowId` volta no webhook `messages.upsert`,
+em `message.listResponseMessage.selectedButtonId`, com o mesmo nome de campo nos
+dois canais — veja [Escolha de opção em mensagem de
+lista](/integrations/webhooks). Por isso o `rowId` deve ser único em toda a
+mensagem: é ele que identifica, sem ambiguidade, o que a pessoa escolheu.
+
+## Template
+
+`POST /{instanceId}/messages/template`
+
+Exclusivo de instâncias oficiais (Cloud API). É o único tipo que alcança um
+contato **fora da janela de 24 horas**, e exige um template previamente aprovado
+pela Meta — crie pelo [painel](/painel/templates) ou por
+`POST /{instanceId}/message-templates`.
+
+```json
+{
+  "jid": "5512912345678",
+  "templateName": "confirmacao_pedido",
+  "language": "pt_BR",
+  "components": [
+    {
+      "type": "body",
+      "parameters": [{ "type": "text", "text": "8823" }]
+    }
+  ]
+}
+```
+
+Informe em `components` apenas o que tem variáveis: um template sem variáveis
+dispensa o campo. Para saber se ainda há janela aberta com o contato, use
+`GET /{instanceId}/check-message-window`.
+
+## Reagir a uma mensagem
+
+`POST /{instanceId}/messages/react`
+
+```json
+{
+  "remoteJid": "5512912345678@s.whatsapp.net",
+  "id": "3AB16AB78CD9012E89A0",
+  "text": "❤️"
+}
+```
+
+Responde `204`, sem corpo. Uma string vazia em `text` **remove** a reação
+existente. Só emojis funcionam.
+
+## Excluir uma mensagem
+
+`POST /{instanceId}/messages/delete`
+
+```json
+{
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": true,
+    "id": "3AB16AB78CD9012E89A0"
+  }
+}
+```
+
+Informe a `key` exatamente como recebida no webhook — `remoteJid` e `id` são o
+que identifica a mensagem. Responde `204`, sem corpo. Só é possível excluir
+mensagens enviadas pela própria conta conectada ou, em grupos, sendo
+administrador.
+
+## Compatibilidade por tipo de conexão
+
+| Tipo | Não oficial | Oficial (Cloud API) | Instagram |
+| --- | :---: | :---: | :---: |
+| Texto | ✅ | ✅ | ✅ |
+| Mídia — imagem, vídeo, documento | ✅ | ✅ | ✅ |
+| Mídia — áudio | ✅ | ✅ | ✅ |
+| Áudio (nota de voz) | ✅ | ✅ | ✅ |
+| Áudio a partir de texto | ✅ | — | — |
+| Sticker | ✅ | — | — |
+| Localização | ✅ | — | — |
+| Contato | ✅ | ✅ | — |
+| Botões | ✅ | ✅ | — |
+| Lista de opções | ✅ | ✅ | — |
+| Template | — | ✅ | — |
+| Reagir / excluir | ✅ | — | — |

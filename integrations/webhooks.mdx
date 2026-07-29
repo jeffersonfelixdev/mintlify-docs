@@ -13,42 +13,97 @@ Também chamados de _callbacks_, os webhooks substituem a abordagem chamada _pol
 aplicação fica solicitando de tempos em tempos o status de uma ocorrência. Com o
 uso de webhooks, a comunicação entre sistemas diferentes torna-se muito mais simples.
 
-Na ZapperHub, há webhooks para notificar sua aplicação das seguintes ações no
-WhatsApp:
-- Recebimento de mensagens
-- Recebimento de reações em mensagens
+## Eventos disponíveis
+
+| Evento | Quando dispara |
+| --- | --- |
+| `messages.upsert` | Uma mensagem foi recebida ou enviada pela instância |
+| `messages.status` | O estado de uma mensagem enviada mudou (enviada, entregue, lida, falhou). Apenas em conexão oficial |
+| `messages.error` | O envio de uma mensagem falhou em definitivo |
+| `connection.update` | A conexão da instância abriu ou fechou |
+| `group-participants.update` | Participantes entraram, saíram, foram promovidos ou rebaixados em um grupo. Apenas em conexão não oficial |
+| `comments.upsert` | Um comentário foi recebido em um post da conta. Apenas em instância do Instagram |
+| `token.expired` | O token do Instagram expirou ou foi revogado, e exige nova autorização |
+| `token.refresh.failed` | Uma tentativa de renovar o token do Instagram falhou |
+| `webhook.test` | Requisição de teste, enviada uma única vez no cadastro do webhook |
+
+Cada webhook recebe **apenas os eventos que assinou**. A assinatura é a lista
+`subscriptions` informada no cadastro.
 
 ## Como usar
 
-### Pelo dashboard
+### Pelo painel
 
-Para cadastrar uma URL através do dashboard, siga os seguintes passos:
-
-- **Selecione a instância** desejada;
-- Clique na guia **Webhook**;
-- Digite a **URL** do seu webhook e uma **chave secreta** (opcional);
-- Clique no botão **Atualizar** para salvar as informações de seu webhook.
-
-Para excluir o webhook cadastrado, basta clicar em **Excluir Webhook** na guia 
-**Webhook** de sua instância.
+Instâncias → (selecione a instância) → **Webhook** → **Novo Webhook**. O passo a
+passo, com as validações e o limite de webhooks por instância, está em
+[Webhooks no painel](/painel/webhooks).
 
 ### Pela API
 
-Para cadastrar uma URL para receber os webhooks da ZapperHub, consulte a 
-<a href="http://docs.zapperhub.com/api-reference/webhook">Seção Webhooks</a> na 
-documentação de referência da API.
+Cadastre com `POST /{instanceId}/webhooks`, informando um nome, a URL e os
+eventos que você quer receber:
 
-Além da `url`, você deverá informar qual a `secretKey` que a ZapperHub deve enviar
-para autenticar que é a ZapperHub que está disparando a requisição. A `secret`
-será enviada no cabeçalho da requisição, no formato de `Authorization Bearer`.
+```json
+{
+  "name": "Integração CRM",
+  "url": "https://exemplo.com/webhooks/zapperhub",
+  "subscriptions": ["messages.upsert", "messages.error", "connection.update"]
+}
+```
+
+O uso de **HTTPS é obrigatório**. Antes de criar o cadastro, a ZapperHub envia
+uma requisição `POST` de teste (`webhook.test`) para a URL informada: se ela não
+responder com sucesso, o webhook não é criado.
+
+Consulte a <a href="http://docs.zapperhub.com/api-reference/webhook">Seção
+Webhooks</a> na documentação de referência da API para as rotas de listagem,
+atualização e exclusão.
+
+## Autenticidade das requisições
+
+Toda entrega leva o cabeçalho **`x-webhook-signature`**: o HMAC-SHA256 do corpo
+da requisição, exatamente como recebido, usando a **API Key da instância** como
+chave. As requisições também levam o `User-Agent` `ZapperHub API`.
+
+Para validar, recalcule a assinatura sobre o corpo bruto e compare:
+
+```javascript
+import { createHmac, timingSafeEqual } from 'node:crypto'
+
+function isFromZapperHub(rawBody, signature, apiKey) {
+  const expected = createHmac('sha256', apiKey).update(rawBody, 'utf8').digest('hex')
+  return timingSafeEqual(Buffer.from(expected), Buffer.from(signature))
+}
+```
 
 <Card title="IMPORTANTE">
-A `secretKey` é a única maneira de garantir que as requisições que sua aplicação
+A assinatura é a única maneira de garantir que as requisições que sua aplicação
 recebe são oriundas do webhook da ZapperHub. Você é o responsável por executar
 a validação da informação, bem como proteger sua aplicação com outras regras de 
-segurança, como _rate limits_ e SSL. Nunca forneça a sua `secretKey`, e sempre
+segurança, como _rate limits_ e SSL. Nunca forneça a sua API Key, e sempre
 que possível, faça uma rotação regular de seu valor.
 </Card>
+
+<Note>
+A requisição de teste enviada no cadastro (`webhook.test`) é a única que **não**
+leva assinatura — ela ocorre antes de o webhook existir.
+</Note>
+
+## Entrega
+
+Cada entrega é feita por uma fila própria, com **5 tentativas** e intervalo
+crescente entre elas, começando em 10 segundos. Cada tentativa tem **7 segundos**
+de timeout: uma URL que demora mais do que isso para responder é tratada como
+falha.
+
+Sua aplicação deve responder com um status de sucesso o mais rápido possível, e
+processar o conteúdo depois — não deixe a resposta esperando pelo seu
+processamento.
+
+O resultado de cada tentativa fica registrado em um recibo de entrega, com o
+horário e o erro quando houver. Consulte por
+`GET /{instanceId}/webhook-receipts` ou em **Ver recibos de entrega**, no
+[Log de mensagens](/painel/log-de-mensagens).
 
 <Card title="INFORMAÇÃO">
 Os arquivos recebidos pelos Webhooks da ZapperHub ficam armazenados em nossos
@@ -66,39 +121,65 @@ Assim, as mensagens do webhook que tiverem o campo `jobId` referem-se a mensagen
 disparadas pela ZapperHub, de modo que outras mensagens disparadas por outros
 dispositivos não terão esse campo no webhook.
 
+## Estrutura do payload
+
+Os eventos de mensagem compartilham a mesma estrutura. O que muda de um tipo para
+outro é o conteúdo do objeto `message`.
+
+| Campo | Conteúdo |
+| --- | --- |
+| `type` | O evento, um dos listados acima |
+| `instanceId` | Id da instância que gerou o evento |
+| `chatId` | Id da conversa onde a mensagem ocorreu |
+| `key.remoteJid` | JID da conversa — o contato, ou o grupo |
+| `key.fromMe` | `true` quando a mensagem partiu da conta conectada |
+| `key.id` | Id da mensagem no WhatsApp |
+| `key.senderPn` / `key.senderLid` | Número e LID de quem enviou, em conversa individual |
+| `key.participantPn` / `key.participantLid` | Número e LID de quem enviou, em grupo |
+| `messageTimestamp` | Momento da mensagem, em segundos |
+| `pushName` | Nome de exibição de quem enviou |
+| `message` | O conteúdo, no formato do tipo da mensagem |
+| `mediaUrl` | URL do arquivo já processado, nas mensagens de mídia |
+| `jobId` | Id do job na fila, presente nas mensagens enviadas pela API |
+| `trackId` / `trackSource` | Os valores informados no envio. Em mensagens recebidas, `trackSource` é `whatsapp` |
+
+Em conexão oficial (Cloud API), os eventos carregam também o corpo original
+enviado pela Meta, nos campos `object` e `entry`.
+
 ## Exemplos de payload
 
 A seguir, iremos listar os exemplos de payload dos webhooks da ZapperHub, para 
-os diferentes tipos de mensagens recebidas no WhatsApp:
+os diferentes eventos.
+
+### Teste do webhook
+
+Tipo: `webhook.test`
+
+Enviado uma única vez, no momento do cadastro, para verificar se a URL aceita
+requisições `POST`.
+
+```json
+{
+  "type": "webhook.test",
+  "instanceId": "inst_01hxyz1234567890",
+  "message": "If you see this message, your webhook is working correctly."
+}
+```
 
 ### Atualização da conexão
 
 Tipo: `connection.update`
 
+Disparado quando a instância conecta (`open`) ou é desconectada (`close`). O
+campo `reason` aparece nas desconexões com causa conhecida — por exemplo, uma
+conta removida na Meta ou um token do Instagram expirado.
+
 ```json
 {
-  "type":"connection.update",
-  "connection":"close",
-  "lastDisconnect": {
-    "error": {
-      "data": {
-        "reason":"401",
-        "location":"odn"
-      },
-      "isBoom":true,
-      "isServer":false,
-      "output": {
-        "statusCode":401,
-        "payload": {
-          "statusCode":401,
-          "error":"Unauthorized",
-          "message":"Connection Failure"
-        },
-        "headers": {}
-      }
-    },
-    "date":"2025-07-02T02:44:35.820Z"
-  }
+  "type": "connection.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "connection": "close",
+  "reason": "token_expired"
 }
 ```
 
@@ -111,10 +192,13 @@ Tipo: `messages.upsert`
 ```json
 {
   "type": "messages.upsert",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5512912345678@s.whatsapp.net",
   "key": {
     "remoteJid": "5512912345678@s.whatsapp.net",
     "fromMe": false,
-    "id": "3AB16AB78CD9012E89A0"
+    "id": "3AB16AB78CD9012E89A0",
+    "senderPn": "5512912345678@s.whatsapp.net"
   },
   "messageTimestamp": 1744398716,
   "pushName": "John Doe",
@@ -131,7 +215,8 @@ Tipo: `messages.upsert`
       "deviceListMetadataVersion": 2,
       "messageSecret": "abcdef123456/9876Xpto="
     }
-  }
+  },
+  "trackSource": "whatsapp"
 }
 ```
 
@@ -351,36 +436,290 @@ Tipo: `messages.upsert`
 }
 ```
 
-### Recebimento de reações em mensagens
+**Envio de mensagem de lista**
 
-Tipo: `messages.reaction`
-
-**Envio de reação**
-
-- `key`: Dados da mensagem que recebeu a reação
-- `reaction.key`: Dados de quem enviou a reação
-- `reaction.text`: Emoji utilizado
+Disparado quando a lista é efetivamente enviada, tanto em instância oficial
+(Cloud API) quanto não oficial. Os campos `title` e `footer` são omitidos quando
+não foram informados na requisição, e `sections` ecoa exatamente o que foi
+enviado.
 
 ```json
 {
-  "type": "messages.reaction",
+  "type": "messages.upsert",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "jobId": "42",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": true,
+    "id": "3AB16AB78CD9012E89A0",
+    "senderPn": "5512912345678@s.whatsapp.net"
+  },
+  "messageTimestamp": 1785312000,
+  "broadcast": false,
+  "message": {
+    "listMessage": {
+      "buttonText": "Ver opções",
+      "title": "Cardápio",
+      "description": "Escolha uma das opções abaixo",
+      "footer": "Equipe ZapperHub",
+      "sections": [
+        {
+          "title": "Bebidas",
+          "rows": [
+            {
+              "title": "Café",
+              "description": "200ml",
+              "rowId": "cafe-01"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "trackId": "pedido-8823",
+  "trackSource": "crm"
+}
+```
+
+### Escolha de opção em mensagem de lista
+
+Tipo: `messages.upsert`
+
+Disparado quando o contato seleciona uma das opções da lista. O formato é o mesmo
+em instância oficial (Cloud API) e não oficial:
+
+- `message.listResponseMessage.selectedButtonId`: o `rowId` **exato** da opção
+  escolhida, como você o definiu no envio
+- `message.listResponseMessage.selectedDisplayText`: o texto exibido da opção
+- `message.listResponseMessage.contextInfo.stanzaId`: o id da mensagem de lista
+  original, útil para saber a qual menu a resposta se refere
+
+```json
+{
+  "type": "messages.upsert",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5512912345678@s.whatsapp.net",
   "key": {
     "remoteJid": "5512912345678@s.whatsapp.net",
     "fromMe": false,
-    "id": "78AE2812AC5A62A1CB8A5A1D967572A0"
+    "id": "4D2AAEC025A74710866EF732A614AABA",
+    "senderPn": "5512912345678@s.whatsapp.net"
   },
-  "reaction": {
-    "key": {
-      "remoteJid": "5512912345678@s.whatsapp.net",
-      "fromMe": false,
-      "id": "4D2AAEC025A74710866EF732A614AABA"
-    },
-    "text": "❤️",
-    "senderTimestampMs": {
-      "low": 642979577,
-      "high": 406,
-      "unsigned": false
+  "messageTimestamp": 1785312060,
+  "pushName": "John Doe",
+  "broadcast": false,
+  "message": {
+    "listResponseMessage": {
+      "selectedButtonId": "cafe-01",
+      "selectedDisplayText": "Café",
+      "contextInfo": {
+        "stanzaId": "3AB16AB78CD9012E89A0",
+        "participant": "5512912345678@s.whatsapp.net"
+      }
     }
-  }
+  },
+  "trackSource": "whatsapp"
 }
 ```
+
+<Card title="INFORMAÇÃO">
+Em instâncias não oficiais, o bloco `listResponseMessage` traz **também** os
+campos nativos do provedor (`title`, `description`, `listType`,
+`singleSelectReply.selectedRowID`). A diferença é apenas aditiva: uma integração
+que leia somente `selectedButtonId` e `selectedDisplayText` funciona sem
+alteração nos dois canais.
+</Card>
+
+A resposta a uma mensagem com **botões** chega da mesma forma, em
+`message.buttonsResponseMessage`.
+
+### Estado de entrega da mensagem
+
+Tipo: `messages.status`
+
+Disparado em instâncias oficiais (Cloud API) a cada mudança de estado de uma
+mensagem enviada. O campo `status` acompanha os valores da Meta — `sent`,
+`delivered`, `read` e `failed` —, e `error` só aparece nas falhas.
+
+```json
+{
+  "type": "messages.status",
+  "instanceId": "inst_01hxyz1234567890",
+  "messageId": "wamid.HBgNNTUxMjkxMjM0NTY3OBUCABEYEjc0NjcyOTk2MEE1MEJDNTY2AA==",
+  "recipientId": "5512912345678",
+  "status": "delivered",
+  "timestamp": 1785312030
+}
+```
+
+### Falha no envio de mensagens
+
+Tipo: `messages.error`
+
+Como o envio é feito por fila, o `200` da API confirma o enfileiramento e não a
+entrega. Quando as 5 tentativas automáticas de envio se esgotam, a ZapperHub
+dispara este evento — nenhuma mensagem chegou ao destinatário. Uma falha
+intermediária seguida de sucesso **não** dispara o evento.
+
+Ele vale para **todos os tipos de mensagem** enviados pela API.
+
+```json
+{
+  "type": "messages.error",
+  "instanceId": "inst_01hxyz1234567890",
+  "jobId": "42",
+  "key": {
+    "id": "job_42",
+    "fromMe": true,
+    "remoteJid": "5512912345678@s.whatsapp.net"
+  },
+  "error": {
+    "code": 131000,
+    "title": "Something went wrong",
+    "message": "Message failed to send because of an unknown error.",
+    "error_data": {
+      "details": "connect ETIMEDOUT 10.0.0.1:443"
+    },
+    "href": "https://developers.facebook.com/docs/whatsapp/cloud-api/support/error-codes/"
+  },
+  "timestamp": 1753758000,
+  "trackId": "pedido-8823",
+  "trackSource": "crm"
+}
+```
+
+- O bloco `error` segue o **formato de erro da Cloud API**, o mesmo que a Meta já
+  usa nos erros que repassamos: uma integração escrita contra aquele formato lê
+  este evento sem tratamento novo.
+- `error.code` repassa o **código original da Meta** quando a falha veio da
+  própria Cloud API (por exemplo, `131047` para janela de 24 horas expirada, ou
+  `131026` para destinatário inalcançável). O código `131000` fica reservado ao
+  que não tem código de provedor: instâncias não oficiais, timeout e falhas de
+  rede.
+- `error.error_data.details` traz o erro real do envio; `error.message` é a
+  descrição estável do código.
+- `key.id` é derivado do job (`job_<jobId>`), e não do provedor — o envio nunca
+  chegou a produzir um id de mensagem. É também o que distingue uma falha nascida
+  na nossa fila de um erro reportado pela Meta.
+- `trackId` e `trackSource` são os mesmos informados no envio, o que permite
+  relacionar a falha ao registro da sua aplicação.
+
+### Mudança de participantes em grupo
+
+Tipo: `group-participants.update`
+
+Disparado em instâncias não oficiais quando alguém entra, sai, é promovido a
+administrador ou rebaixado. Os campos `join`, `leave`, `promote` e `demote`
+trazem os participantes afetados — **apenas o correspondente ao que aconteceu
+vem preenchido**, os demais são omitidos.
+
+```json
+{
+  "type": "group-participants.update",
+  "groupId": "120363012345678901@g.us",
+  "join": ["5512912345678@s.whatsapp.net"],
+  "timestamp": "2026-07-29T12:00:00Z"
+}
+```
+
+### Comentário recebido no Instagram
+
+Tipo: `comments.upsert`
+
+Disparado em instâncias do Instagram quando um comentário é recebido em um post
+da conta. A estrutura é a mesma de `messages.upsert`, acrescida do bloco
+`comment`.
+
+```json
+{
+  "type": "comments.upsert",
+  "key": {
+    "id": "17984523698451234",
+    "fromMe": false,
+    "remoteJid": "17841400000000000",
+    "senderId": "17841400000000000",
+    "recipientId": "17841411111111111"
+  },
+  "messageTimestamp": 1785312000,
+  "pushName": "john.doe",
+  "broadcast": false,
+  "message": {
+    "extendedTextMessage": {
+      "text": "Vocês entregam em São Paulo?"
+    }
+  },
+  "comment": {
+    "id": "17984523698451234",
+    "text": "Vocês entregam em São Paulo?",
+    "postId": "17895695668004550",
+    "parentCommentId": null,
+    "from": {
+      "id": "17841400000000000",
+      "username": "john.doe"
+    },
+    "timestamp": 1785312000
+  },
+  "trackSource": "instagram"
+}
+```
+
+<Card title="ATENÇÃO">
+Diferente de uma mensagem, o comentário é **público**: qualquer visitante do
+perfil o vê. Ele não é encaminhado ao Chatwoot e **não é deduplicado** — a Meta
+pode reentregar a mesma notificação. Trate `comment.id` como chave de
+idempotência e ignore entregas repetidas do mesmo id.
+</Card>
+
+Para responder em privado o autor do comentário, use `commentId` em
+`POST /{instanceId}/messages/text`.
+
+### Token do Instagram expirado
+
+Tipo: `token.expired`
+
+Disparado quando o token de acesso do Instagram expirou ou foi revogado. É um
+evento terminal: a instância é desconectada e **exige nova autorização**. Um
+`connection.update` com `connection: "close"` acompanha o evento.
+
+```json
+{
+  "type": "token.expired",
+  "instanceId": "inst_01hxyz1234567890",
+  "reason": "token_expired",
+  "expiredAt": "2026-07-29T03:00:00.000Z",
+  "requiresReauth": true
+}
+```
+
+O campo `reason` é `token_expired` ou `token_revoked`.
+
+### Falha ao renovar o token do Instagram
+
+Tipo: `token.refresh.failed`
+
+Disparado a cada tentativa de renovação que falha por causa temporária — uma
+instabilidade da Meta, por exemplo. A renovação continua sendo tentada, e
+`failureCount` acumula: use-o para escalonar o alerta interno antes que a falha
+se torne terminal.
+
+```json
+{
+  "type": "token.refresh.failed",
+  "instanceId": "inst_01hxyz1234567890",
+  "origin": "automatic",
+  "failureCount": 3,
+  "reason": "temporary",
+  "errorCode": 190,
+  "expiresAt": "2026-08-15T03:00:00.000Z"
+}
+```
+
+`origin` indica se a tentativa partiu da rotina automática (`automatic`) ou da
+rota de renovação manual (`manual`).
+
+<Card title="IMPORTANTE">
+Sem assinar `token.refresh.failed` e `token.expired`, você só percebe o problema
+quando ele já é terminal, pelo `connection.update` — e não recebe aviso algum
+durante a janela de retentativa.
+</Card>

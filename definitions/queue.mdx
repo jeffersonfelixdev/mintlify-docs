@@ -22,6 +22,10 @@ mais humanizada em chatbots.
 Consulte a <a href="/api-reference/configurações/atualizar-configurações">
 documentação de referência da API</a> e saiba como atualizar essas configurações.
 
+Como o envio passa pela fila, a resposta da API confirma o enfileiramento e não a
+entrega. Cada mensagem é tentada até 5 vezes; esgotadas as tentativas, sua
+aplicação é avisada pelo webhook <a href="/integrations/webhooks">`messages.error`</a>.
+
 <Card title="IMPORTANTE">
 Não é possível desligar o sistema de filas e disparar mensagens simultâneas para
 diferentes pessoas ou grupos, nem fazer disparo de transmissões (broadcast).
