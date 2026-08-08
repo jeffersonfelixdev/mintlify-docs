@@ -1,6 +1,6 @@
 ---
 title: Templates
-description: "Criar templates de mensagem, acompanhar a aprovação e enviá-los com variáveis e mídia"
+description: "Criar templates de mensagem, acompanhar a aprovação, enviá-los com variáveis e mídia e excluí-los na Meta"
 ---
 
 **Onde fica**: Instâncias → (selecione a instância) → Templates
@@ -26,6 +26,8 @@ Cada template aparece com estes atributos:
 
 A lista pode ser vista como **Lista** ou **Cards**, e carrega aos poucos — use **Carregar mais**
 para trazer o próximo bloco.
+
+Cada template traz três ações: **Ver detalhes**, **Enviar mensagem** e **Excluir**.
 
 **Ver detalhes** abre **Detalhes do template**, com o **Formato dos parâmetros**
 (**Posicional** ou **Nomeado**) e os **Componentes** do template.
@@ -128,6 +130,45 @@ Os demais status também bloqueiam o envio, por motivos diferentes: **Rejeitado*
 conteúdo), **Limite atingido**, **Desativado** e **Pausado** (a Meta suspendeu o template, em
 geral por qualidade). Em qualquer um deles, a correção acontece do lado da Meta — criar um
 template novo, ajustado, costuma ser o caminho.
+
+## Excluir um template
+
+O botão **Excluir** aparece em cada template da lista — com o rótulo na visão **Lista** e
+apenas com o ícone de lixeira na visão **Cards**. Antes de qualquer coisa, o painel abre a
+confirmação **Excluir template**:
+
+> Tem certeza que deseja excluir o template `nome_do_template`? A exclusão acontece na Meta,
+> remove todas as versões de idioma e é irreversível.
+
+**Cancelar** fecha sem excluir; **Sim, excluir** confirma. Enquanto a Meta responde o botão
+mostra **Excluindo...** e o diálogo não fecha. Ao final, **Template excluído.** e a lista é
+recarregada — ou **Erro ao excluir template.**
+
+<Warning>
+A exclusão é **por nome**, e por isso remove **todas as versões de idioma** do template de uma
+vez. Um template em `pt_BR` e `en_US` some da lista inteiro, não só a linha que você clicou.
+</Warning>
+
+### O que a Meta faz depois
+
+A exclusão não é do painel, é da Meta — e ela impõe algumas regras:
+
+| Situação | O que acontece |
+|---|---|
+| Há mensagem já enviada e ainda não entregue | O template fica em `PENDING_DELETION` e a Meta segue tentando entregar por até 30 dias |
+| O template excluído estava **Aprovado** | A Meta bloqueia a recriação de um template com o mesmo nome por 30 dias |
+| O template está **Desativado** | Não pode ser excluído |
+
+Por causa da última regra, o botão **Excluir** fica **indisponível** em templates
+**Desativados**, e o painel explica: **A Meta não permite excluir templates desativados**.
+
+Envios já agendados que usem o template **não são verificados nem cancelados** pela exclusão.
+
+<Note>
+A mesma exclusão está disponível na API em
+[Excluir template de mensagem](/api-reference/cloud-api/excluir-template-de-mensagem)
+(`DELETE /{instanceId}/message-templates/{name}`).
+</Note>
 
 ## Veja também
 

@@ -320,6 +320,25 @@ Informe em `components` apenas o que tem variáveis: um template sem variáveis
 dispensa o campo. Para saber se ainda há janela aberta com o contato, use
 `GET /{instanceId}/check-message-window`.
 
+### Excluir um template
+
+`DELETE /{instanceId}/message-templates/{name}`
+
+Exclui o template na Meta e responde `{ "success": true }`. A exclusão é **por
+nome**, então remove **todas as versões de idioma** do template de uma vez, e é
+irreversível — envios pendentes que usem o template não são verificados nem
+cancelados. O `name` segue a regra da Meta: minúsculas, dígitos e underscore,
+até 512 caracteres.
+
+Três limitações vêm da própria Meta: uma mensagem já enviada e ainda não
+entregue coloca o template em `PENDING_DELETION`, com a entrega sendo tentada
+por até 30 dias; depois de excluir um template `APPROVED`, o mesmo nome fica
+bloqueado para recriação por 30 dias; e templates `DISABLED` não podem ser
+excluídos.
+
+Repetir a exclusão de um template já removido responde `404` — a operação não é
+idempotente. Excluir também pelo [painel](/painel/templates).
+
 ## Reagir a uma mensagem
 
 `POST /{instanceId}/messages/react`

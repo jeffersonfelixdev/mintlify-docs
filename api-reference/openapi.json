@@ -3,7 +3,7 @@
   "info": {
     "title": "ZapperHub Reference API",
     "description": "Documentação Oficial da ZapperHub",
-    "version": "3.11.1"
+    "version": "3.14.0"
   },
   "components": {
     "securitySchemes": {
@@ -512,6 +512,16 @@
                         "nameStatus": {
                           "nullable": true,
                           "description": "Status do nome verificado",
+                          "type": "string"
+                        },
+                        "newDisplayName": {
+                          "nullable": true,
+                          "description": "Nome de exibição solicitado à Meta e ainda não\n                      aplicado. Só vem preenchido enquanto há uma troca de nome\n                      em análise.",
+                          "type": "string"
+                        },
+                        "newNameStatus": {
+                          "nullable": true,
+                          "description": "Status da troca de nome solicitada — ex.:\n                      `PENDING_REVIEW`, `APPROVED`, `DECLINED`. Quando a\n                      troca é aprovada, `verifiedName` e `nameStatus` passam\n                      a refletir o nome novo e o número precisa ser registrado\n                      de novo.",
                           "type": "string"
                         },
                         "codeVerificationStatus": {
@@ -3096,6 +3106,373 @@
 
                   },
                   "description": "Header `x-api-key` ausente, inválido ou de outra instância."
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {
+
+                            },
+                            "additionalProperties": {
+
+                            },
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {
+
+                        },
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {
+
+                  },
+                  "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{instanceId}/message-templates/{name}": {
+      "delete": {
+        "summary": "Excluir template de mensagem",
+        "tags": [
+          "Cloud API"
+        ],
+        "description": "Exclui um template de mensagem na Meta pelo nome. A exclusão é irreversível e remove **todas as versões de idioma** do template. Envios pendentes que usem o template não são verificados nem cancelados. Limitações da Meta: uma mensagem já enviada e ainda não entregue coloca o template em `PENDING_DELETION` e a entrega segue sendo tentada por até 30 dias; após excluir um template `APPROVED`, a Meta bloqueia a recriação do mesmo nome por 30 dias; templates em `DISABLED` não podem ser excluídos. A operação exige token com a permissão `whatsapp_business_management`.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "instanceId",
+            "required": true,
+            "description": "Id da instância"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 512,
+              "pattern": "^[a-z0-9_]+$"
+            },
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "description": "Nome do template. Segue a regra da Meta: apenas minúsculas, dígitos e underscore, com no máximo 512 caracteres."
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Template excluído na Meta, em todos os idiomas em que existia.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Confirmação da exclusão devolvida pela Meta."
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Template excluído na Meta, em todos os idiomas em que existia."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Nome fora do schema, instância que não é Cloud API, ou falha/recusa da Meta — token expirado, permissão insuficiente, template `DISABLED`, indisponibilidade ou timeout. A mensagem original da Meta é preservada em `message`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {
+
+                            },
+                            "additionalProperties": {
+
+                            },
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {
+
+                        },
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {
+
+                  },
+                  "description": "Nome fora do schema, instância que não é Cloud API, ou falha/recusa da Meta — token expirado, permissão insuficiente, template `DISABLED`, indisponibilidade ou timeout. A mensagem original da Meta é preservada em `message`."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Header `x-api-key` ausente, inválido ou de outra instância.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {
+
+                            },
+                            "additionalProperties": {
+
+                            },
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {
+
+                        },
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {
+
+                  },
+                  "description": "Header `x-api-key` ausente, inválido ou de outra instância."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Template não encontrado na conta da Meta, ou instância inexistente. Repetir a exclusão de um template já removido cai aqui — a operação não é idempotente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {
+
+                            },
+                            "additionalProperties": {
+
+                            },
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {
+
+                        },
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {
+
+                  },
+                  "description": "Template não encontrado na conta da Meta, ou instância inexistente. Repetir a exclusão de um template já removido cai aqui — a operação não é idempotente."
                 }
               }
             }
