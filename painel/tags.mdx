@@ -1,0 +1,103 @@
+---
+title: Tags
+description: "Criar, aplicar, editar e excluir tags coloridas para identificar suas instâncias"
+---
+
+**Onde fica**: menu lateral → Tags
+
+Tags são rótulos coloridos que você aplica às suas instâncias para identificá-las pelo caso de uso
+do seu negócio — clientes VIP, ambiente de teste, cliente por cliente, o que fizer sentido. Elas
+aparecem na [lista de instâncias](/painel/instancias) e servem de filtro.
+
+Cada tag pertence **a você**. Outros usuários não veem as tags que você cria, e você não vê as
+deles.
+
+## Limites
+
+| Limite | Valor |
+|---|---|
+| Tags no seu catálogo | 50 |
+| Tags por instância | 5 |
+| Caracteres no nome | 30 |
+
+Ao atingir um dos limites, o painel explica o que aconteceu e o botão correspondente fica
+desabilitado.
+
+## Criar uma tag
+
+Há dois caminhos, e os dois produzem a mesma tag:
+
+- **Da instância**: na lista de instâncias, abra o seletor de tags da linha, digite o nome, escolha
+  a cor e confirme. A tag já nasce aplicada àquela instância.
+- **Da tela de Tags**: **Nova tag** abre o formulário com nome e cor.
+
+O nome é único por usuário e a comparação **ignora maiúsculas e minúsculas**: se você já tem
+`Cliente VIP`, digitar `cliente vip` mostra a tag existente em vez de oferecer criar outra. A
+acentuação **é** considerada — `Órgão` e `Orgao` são tags diferentes.
+
+### Cores
+
+A cor é escolhida em uma paleta fixa de dez cores. A paleta existe para que toda tag permaneça
+legível tanto no tema claro quanto no escuro — por isso não há campo de cor livre.
+
+O nome da tag fica sempre visível junto da cor, então a informação nunca depende só de distinguir
+tons.
+
+## Aplicar e remover
+
+No seletor de tags de uma instância, clique em uma tag para aplicá-la e clique de novo para
+removê-la. Remover a tag da instância **não** a exclui do seu catálogo.
+
+Quando a instância já tem 5 tags, as demais aparecem desabilitadas até você remover alguma.
+
+## A tela de Tags
+
+A tabela lista todas as suas tags com a cor, o nome e **em quantas instâncias cada uma está
+aplicada**.
+
+- **Editar** permite corrigir o nome e trocar a cor. A alteração aparece imediatamente em todas as
+  instâncias que usam a tag — elas apontam para a tag, não guardam uma cópia do nome.
+- **Excluir** remove a tag do catálogo e de todas as instâncias.
+
+## Excluir — ação irreversível
+
+<Warning>
+Excluir uma tag a remove de **todas** as instâncias em que estiver aplicada, e não há como
+desfazer. Antes de confirmar, o painel informa quantas instâncias serão afetadas.
+</Warning>
+
+As instâncias em si não são alteradas: elas apenas deixam de ter aquela tag. As outras tags
+aplicadas a elas permanecem.
+
+Excluir uma **instância** funciona ao contrário: as tags dela deixam de estar aplicadas, mas
+continuam no seu catálogo.
+
+## Filtrar instâncias por tag
+
+Na lista de instâncias, o filtro **Tags** permite selecionar uma ou mais tags. A lista passa a
+mostrar instâncias que tenham **qualquer uma** das tags selecionadas — não é preciso ter todas.
+
+- **Sem tag** mostra apenas as instâncias que ainda não foram organizadas.
+- O filtro se combina com a busca por nome e com o filtro de status de conexão.
+- O filtro fica registrado no endereço da página: recarregar mantém a visualização e o link pode
+  ser compartilhado.
+
+## Pela API
+
+Tudo o que a tela faz está disponível na **Instance API**, na tab **Instance API Reference**:
+listar, criar, alterar e excluir tags, aplicar e remover tags em instâncias, e filtrar a listagem
+com os parâmetros `tag_ids` e `untagged`.
+
+O campo `tags` passou a acompanhar cada instância no retorno de `GET /instances` e
+`GET /instances/{instanceId}`. É um campo novo; nenhum campo anterior mudou.
+
+<Warning>
+`DELETE /tags/{tagId}` exclui imediatamente, sem etapa de confirmação. A contagem de instâncias
+afetadas está em `GET /tags`, no campo `instanceCount` — consulte antes se quiser reproduzir o
+aviso que o painel exibe.
+</Warning>
+
+## Veja também
+
+- [Instâncias](/painel/instancias) — a lista onde as tags aparecem e o filtro fica
+- [Chave de API global](/painel/chave-de-api-global) — a credencial usada para gerenciar tags por API

@@ -338,6 +338,24 @@
             "name": "userId",
             "required": false,
             "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperHub."
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "tag_ids",
+            "required": false,
+            "description": "Ids de tags separados por vírgula. Retorna instâncias que tenham QUALQUER uma delas."
+          },
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "in": "query",
+            "name": "untagged",
+            "required": false,
+            "description": "Quando verdadeiro, retorna apenas instâncias sem nenhuma tag aplicada."
           }
         ],
         "security": [
@@ -581,6 +599,43 @@
                         "webhookSecret": {
                           "type": "string",
                           "nullable": true
+                        },
+                        "tags": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "color": {
+                                "type": "string",
+                                "enum": [
+                                  "SLATE",
+                                  "RED",
+                                  "ORANGE",
+                                  "AMBER",
+                                  "GREEN",
+                                  "TEAL",
+                                  "BLUE",
+                                  "INDIGO",
+                                  "PURPLE",
+                                  "PINK"
+                                ],
+                                "description": "Cor da tag, escolhida da paleta fixa da plataforma"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "color"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "default": []
                         }
                       },
                       "additionalProperties": false
@@ -837,6 +892,490 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/v2/tags": {
+      "get": {
+        "summary": "Lista as tags do usuário",
+        "tags": [
+          "Tags"
+        ],
+        "description": "Lista todas as tags do usuário autenticado, em ordem alfabética, com a quantidade de instâncias em que cada uma está aplicada. Não é paginado: o catálogo tem limite de 50 tags.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "userId",
+            "required": false,
+            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperHub."
+          }
+        ],
+        "security": [
+          {
+            "token": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "color": {
+                            "type": "string",
+                            "enum": [
+                              "SLATE",
+                              "RED",
+                              "ORANGE",
+                              "AMBER",
+                              "GREEN",
+                              "TEAL",
+                              "BLUE",
+                              "INDIGO",
+                              "PURPLE",
+                              "PINK"
+                            ],
+                            "description": "Cor da tag, escolhida da paleta fixa da plataforma"
+                          },
+                          "instanceCount": {
+                            "type": "integer"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "color",
+                          "instanceCount",
+                          "createdAt",
+                          "updatedAt"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "tags"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Cria uma tag",
+        "tags": [
+          "Tags"
+        ],
+        "description": "Cria uma tag no catálogo do usuário autenticado. O nome é único por usuário, sem diferenciar maiúsculas de minúsculas. A cor deve ser um dos valores da paleta fixa da plataforma.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 30,
+                    "description": "Nome da tag"
+                  },
+                  "color": {
+                    "type": "string",
+                    "enum": [
+                      "SLATE",
+                      "RED",
+                      "ORANGE",
+                      "AMBER",
+                      "GREEN",
+                      "TEAL",
+                      "BLUE",
+                      "INDIGO",
+                      "PURPLE",
+                      "PINK"
+                    ],
+                    "description": "Cor da tag, escolhida da paleta fixa da plataforma"
+                  }
+                },
+                "required": [
+                  "name",
+                  "color"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "userId",
+            "required": false,
+            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperHub."
+          }
+        ],
+        "security": [
+          {
+            "token": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tag": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "color": {
+                          "type": "string",
+                          "enum": [
+                            "SLATE",
+                            "RED",
+                            "ORANGE",
+                            "AMBER",
+                            "GREEN",
+                            "TEAL",
+                            "BLUE",
+                            "INDIGO",
+                            "PURPLE",
+                            "PINK"
+                          ],
+                          "description": "Cor da tag, escolhida da paleta fixa da plataforma"
+                        },
+                        "instanceCount": {
+                          "type": "integer"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "color",
+                        "instanceCount",
+                        "createdAt",
+                        "updatedAt"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "tag"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/tags/{tagId}": {
+      "patch": {
+        "summary": "Altera uma tag",
+        "tags": [
+          "Tags"
+        ],
+        "description": "Renomeia e/ou troca a cor de uma tag. A alteração se reflete imediatamente em todas as instâncias que usam a tag. Informe ao menos um dos campos.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 30,
+                    "description": "Nome da tag"
+                  },
+                  "color": {
+                    "type": "string",
+                    "enum": [
+                      "SLATE",
+                      "RED",
+                      "ORANGE",
+                      "AMBER",
+                      "GREEN",
+                      "TEAL",
+                      "BLUE",
+                      "INDIGO",
+                      "PURPLE",
+                      "PINK"
+                    ],
+                    "description": "Cor da tag, escolhida da paleta fixa da plataforma"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "userId",
+            "required": false,
+            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperHub."
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "tagId",
+            "required": true,
+            "description": "Id da tag"
+          }
+        ],
+        "security": [
+          {
+            "token": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tag": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "color": {
+                          "type": "string",
+                          "enum": [
+                            "SLATE",
+                            "RED",
+                            "ORANGE",
+                            "AMBER",
+                            "GREEN",
+                            "TEAL",
+                            "BLUE",
+                            "INDIGO",
+                            "PURPLE",
+                            "PINK"
+                          ],
+                          "description": "Cor da tag, escolhida da paleta fixa da plataforma"
+                        },
+                        "instanceCount": {
+                          "type": "integer"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "color",
+                        "instanceCount",
+                        "createdAt",
+                        "updatedAt"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "tag"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Exclui uma tag",
+        "tags": [
+          "Tags"
+        ],
+        "description": "Exclui a tag do catálogo e a remove de todas as instâncias em que estiver aplicada. A exclusão é imediata e não pode ser desfeita — confirme com o usuário antes de chamar. Use GET /tags para saber em quantas instâncias a tag está aplicada.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "userId",
+            "required": false,
+            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperHub."
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "tagId",
+            "required": true,
+            "description": "Id da tag"
+          }
+        ],
+        "security": [
+          {
+            "token": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v2/instances/{instanceId}/tags/{tagId}": {
+      "put": {
+        "summary": "Aplica uma tag a uma instância",
+        "tags": [
+          "Tags"
+        ],
+        "description": "Aplica uma tag a uma instância. A operação é idempotente: aplicar a mesma tag duas vezes deixa o mesmo estado e responde 204. Uma instância pode ter no máximo 5 tags.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "userId",
+            "required": false,
+            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperHub."
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "instanceId",
+            "required": true,
+            "description": "Id da instância"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "tagId",
+            "required": true,
+            "description": "Id da tag"
+          }
+        ],
+        "security": [
+          {
+            "token": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove uma tag de uma instância",
+        "tags": [
+          "Tags"
+        ],
+        "description": "Remove a aplicação de uma tag em uma instância. A tag permanece no catálogo do usuário. Remover uma tag que não está aplicada responde 204.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "userId",
+            "required": false,
+            "description": "Id do usuário selecionado. Aplica-se somente para clientes parceiros com autorização para gerenciar sub-contas na ZapperHub."
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "instanceId",
+            "required": true,
+            "description": "Id da instância"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "tagId",
+            "required": true,
+            "description": "Id da tag"
+          }
+        ],
+        "security": [
+          {
+            "token": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
           }
         }
       }

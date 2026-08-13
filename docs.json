@@ -82,6 +82,7 @@
             "icon": "server",
             "pages": [
               "painel/instancias",
+              "painel/tags",
               "painel/conexao-nao-oficial",
               "painel/conexao-oficial",
               "painel/instagram"
