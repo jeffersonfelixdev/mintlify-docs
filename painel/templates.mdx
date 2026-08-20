@@ -10,7 +10,25 @@ oficial. A tela se chama **Templates de mensagem** (`dash/instances/[id]/templat
 acontece em uma tela própria (`dash/instances/[id]/new-template`).
 
 Quando a instância ainda não tem nenhum, a tela mostra **Nenhum template encontrado para esta
-instância.**
+instância. Talvez seja necessário sincronizar os templates.**, com o botão **Sincronizar
+templates** logo abaixo.
+
+## Sincronizar templates
+
+Os templates ficam salvos em uma base local, que pode ficar desatualizada em relação à Meta —
+por exemplo, depois que um template muda de status por lá. O botão **Sincronizar templates**
+aparece na barra de ações do topo da tela e também no estado vazio, e busca todos os templates
+atuais da conta na Meta para atualizar a base local.
+
+Enquanto a sincronização roda o botão fica **indisponível** e o ícone gira. Ao final, o painel
+mostra **Templates sincronizados.** e a lista é recarregada — ou **Erro ao sincronizar
+templates.**, caso a Meta não responda.
+
+<Note>
+A mesma sincronização está disponível na API em
+[Sincronizar templates de mensagens](/api-reference/cloud-api/sincronizar-templates-de-mensagens)
+(`POST /{instanceId}/message-templates/sync`).
+</Note>
 
 ## A lista
 
