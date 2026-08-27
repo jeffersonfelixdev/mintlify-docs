@@ -41,9 +41,18 @@ fica desabilitado — exclua ou reaproveite um dos existentes para cadastrar out
 | Evento | Quando dispara |
 |---|---|
 | `messages.upsert` | Uma mensagem foi criada ou recebida |
-| `messages.status` | O estado de uma mensagem mudou |
+| `messages.status` | O estado de uma mensagem mudou. Apenas em conexão oficial |
 | `messages.error` | Uma mensagem falhou |
 | `connection.update` | O estado da conexão da instância mudou |
+| `group-participants.update` | Participantes entraram, saíram, foram promovidos ou rebaixados em um grupo. Apenas em conexão não oficial |
+| `calls.update` | Uma chamada foi recebida, atendida ou encerrada. Em conexão oficial e não oficial |
+| `comments.upsert` | Um comentário foi recebido em um post da conta. Apenas em instância do Instagram |
+| `token.expired` | O token do Instagram expirou ou foi revogado |
+| `token.refresh.failed` | Uma tentativa de renovar o token do Instagram falhou |
+
+A tela mostra a lista completa, com uma descrição curta de cada evento ao lado do
+nome. `webhook.test` não aparece: ele é enviado uma única vez no cadastro, para
+validar a URL, e não é assinável.
 
 Marque os que interessam — a instrução da tela é *Selecione os eventos que este webhook deve
 receber*. O corpo de cada um está descrito em [Webhooks](/integrations/webhooks); não o
