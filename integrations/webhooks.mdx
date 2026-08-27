@@ -22,6 +22,7 @@ uso de webhooks, a comunicação entre sistemas diferentes torna-se muito mais s
 | `messages.error` | O envio de uma mensagem falhou em definitivo |
 | `connection.update` | A conexão da instância abriu ou fechou |
 | `group-participants.update` | Participantes entraram, saíram, foram promovidos ou rebaixados em um grupo. Apenas em conexão não oficial |
+| `calls.update` | Uma chamada de voz ou vídeo foi recebida, atendida ou encerrada. Em conexão oficial e não oficial |
 | `comments.upsert` | Um comentário foi recebido em um post da conta. Apenas em instância do Instagram |
 | `token.expired` | O token do Instagram expirou ou foi revogado, e exige nova autorização |
 | `token.refresh.failed` | Uma tentativa de renovar o token do Instagram falhou |
@@ -622,6 +623,198 @@ vem preenchido**, os demais são omitidos.
   "timestamp": "2026-07-29T12:00:00Z"
 }
 ```
+
+### Chamada recebida
+
+Tipo: `calls.update`
+
+Disparado quando uma chamada de voz ou vídeo chega ao número da instância, é
+atendida ou é encerrada — **em conexão oficial e em conexão não oficial**. Cada
+ocorrência é um evento independente: a plataforma não junta a chamada em um
+bloco só. Correlacione as ocorrências de uma mesma chamada pelo `callId`.
+
+O campo `event` é o discriminador. `key.id` é sempre igual a `callId`, e
+`timestamp` vem em segundos.
+
+#### Exemplo — instância de conexão oficial (Cloud API)
+
+```json
+{
+  "type": "calls.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5511999999999@s.whatsapp.net",
+  "key": {
+    "remoteJid": "5511999999999@s.whatsapp.net",
+    "fromMe": false,
+    "id": "wacid.HBgNNTUxMTk5OTk5OTk5ORUCACASE",
+    "addressingMode": "pn",
+    "senderPn": "5511999999999@s.whatsapp.net"
+  },
+  "callId": "wacid.HBgNNTUxMTk5OTk5OTk5ORUCACASE",
+  "event": "terminate",
+  "status": "COMPLETED",
+  "direction": "USER_INITIATED",
+  "timestamp": 1787072520,
+  "startTime": 1787072463,
+  "endTime": 1787072520,
+  "duration": 57,
+  "trackSource": "whatsapp",
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "102290129340398",
+      "changes": [
+        {
+          "field": "calls",
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": { "display_phone_number": "5511888888888" },
+            "calls": [
+              {
+                "id": "wacid.HBgNNTUxMTk5OTk5OTk5ORUCACASE",
+                "event": "terminate",
+                "direction": "USER_INITIATED",
+                "status": "COMPLETED",
+                "start_time": 1787072463,
+                "end_time": 1787072520,
+                "duration": 57
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+#### Exemplo — instância de conexão não oficial (device)
+
+```json
+{
+  "type": "calls.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5511999999999@s.whatsapp.net",
+  "key": {
+    "remoteJid": "5511999999999@s.whatsapp.net",
+    "fromMe": false,
+    "id": "3EB0C767D26B8F6E2A11",
+    "addressingMode": "pn",
+    "senderPn": "5511999999999@s.whatsapp.net",
+    "senderLid": "221122334455667@lid"
+  },
+  "callId": "3EB0C767D26B8F6E2A11",
+  "event": "terminate",
+  "status": "MISSED",
+  "reason": "timeout",
+  "direction": "USER_INITIATED",
+  "timestamp": 1787072520,
+  "trackSource": "whatsapp",
+  "rawEvent": {
+    "type": "CallTerminate",
+    "event": {
+      "From": "5511999999999@s.whatsapp.net",
+      "Timestamp": "2026-08-26T17:02:00Z",
+      "CallCreator": "5511999999999@s.whatsapp.net",
+      "CallCreatorAlt": "221122334455667@lid",
+      "CallID": "3EB0C767D26B8F6E2A11",
+      "GroupJID": "",
+      "Reason": "timeout",
+      "Data": {
+        "Tag": "terminate",
+        "Attrs": { "call-id": "3EB0C767D26B8F6E2A11", "reason": "timeout" },
+        "Content": null
+      }
+    }
+  }
+}
+```
+
+#### Exemplo — chamada de grupo (device)
+
+Em chamada de grupo, `chatId` e `key.remoteJid` são o grupo, `groupId` traz o
+mesmo JID e quem iniciou a chamada vai em `key.participantPn` —
+a mesma convenção das mensagens de grupo. Os campos `key.senderPn` e
+`key.senderLid` **não** aparecem.
+
+```json
+{
+  "type": "calls.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "120363012345678901@g.us",
+  "key": {
+    "remoteJid": "120363012345678901@g.us",
+    "fromMe": false,
+    "id": "5AC1D882E37B0F6E2A22",
+    "addressingMode": "pn",
+    "participantPn": "5511999999999@s.whatsapp.net",
+    "participantLid": "221122334455667@lid"
+  },
+  "callId": "5AC1D882E37B0F6E2A22",
+  "event": "connect",
+  "groupId": "120363012345678901@g.us",
+  "direction": "USER_INITIATED",
+  "timestamp": 1787072463,
+  "trackSource": "whatsapp",
+  "rawEvent": {
+    "type": "CallOfferNotice",
+    "event": {
+      "CallID": "5AC1D882E37B0F6E2A22",
+      "CallCreator": "5511999999999@s.whatsapp.net",
+      "GroupJID": "120363012345678901@g.us",
+      "Type": "group",
+      "Media": "audio",
+      "Timestamp": "2026-08-26T17:01:03Z"
+    }
+  }
+}
+```
+
+#### Valores de `event` por origem
+
+| `event` | Conexão oficial (Cloud API) | Conexão não oficial (device) |
+| ------- | --------------------------- | ---------------------------- |
+| `connect` | Chamada do usuário chegando ao número. Sem `status` | Chamada chegando ao número. Sem `status` |
+| `status` | Progresso da chamada: `RINGING`, `ACCEPTED` ou `REJECTED` | Chamada atendida: `ACCEPTED` |
+| `terminate` | Encerramento: `COMPLETED` ou `FAILED` | Encerramento: `REJECTED`, `MISSED`, `ACCEPTED`, `COMPLETED`, `FAILED` — ou omitido |
+| `error` | Falha reportada pela Meta | Não ocorre |
+
+`MISSED` — chamada que tocou até expirar — é **exclusivo da conexão não
+oficial**. A conexão oficial não publica esse desfecho.
+
+Em conexão não oficial, `status` **ausente** em um `terminate` significa que o
+motivo não é previsto pela plataforma. Use `reason`, que vem sempre.
+
+#### Diferenças entre as duas origens
+
+| | Conexão oficial (Cloud API) | Conexão não oficial (device) |
+| --- | --- | --- |
+| Campos exclusivos | `startTime`, `endTime`, `duration`, `bizOpaqueCallbackData`, `username` | `reason`, `groupId`, `key.senderLid` / `key.participantLid` |
+| `key.addressingMode` | Sempre `pn` | `pn` ou `lid`, conforme o contato |
+| Chamada de grupo | Não se aplica | `groupId` e `key.participantPn` |
+| Ocorrência bruta | Espalhada no payload (`object` e `entry`) | Em `rawEvent` |
+
+Campo sem valor na origem é **omitido** — nunca enviado como `null` ou string
+vazia.
+
+<Card title="IMPORTANTE">
+A assinatura de `calls.update` é **opt-in**: só recebe quem incluir a string
+explicitamente em `subscriptions`. Nenhuma assinatura existente é alterada
+automaticamente.
+
+O seletor de eventos do painel ainda **não** oferece `calls.update` — assine
+pela API, com `PATCH /{instanceId}/webhooks/{webhookId}`.
+
+Chamada **não** é mensagem: o evento **não** é encaminhado ao Chatwoot e **não**
+é gravado no histórico de conversas.
+</Card>
+
+<Card title="ATENÇÃO">
+Em conexão não oficial, chamadas recebidas enquanto a instância estava
+**desconectada não são recuperadas**. O WhatsApp não as reentrega quando a
+sessão volta, e a plataforma não as compensa — o evento simplesmente não existiu
+para a instância.
+</Card>
 
 ### Comentário recebido no Instagram
 
