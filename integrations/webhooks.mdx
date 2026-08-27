@@ -802,11 +802,40 @@ A assinatura de `calls.update` é **opt-in**: só recebe quem incluir a string
 explicitamente em `subscriptions`. Nenhuma assinatura existente é alterada
 automaticamente.
 
-O seletor de eventos do painel ainda **não** oferece `calls.update` — assine
-pela API, com `PATCH /{instanceId}/webhooks/{webhookId}`.
+Assine pelo seletor de eventos do painel, ou pela API com
+`PUT /{instanceId}/webhooks/{webhookId}`.
 
 Chamada **não** é mensagem: o evento **não** é encaminhado ao Chatwoot e **não**
 é gravado no histórico de conversas.
+</Card>
+
+<Card title="CONEXÃO OFICIAL: A ASSINATURA ATIVA AS CHAMADAS NO NÚMERO">
+Em conexão oficial, a Meta só emite eventos de chamada — e só mostra o botão de
+ligação ao usuário — em número com o recurso de chamadas **habilitado**. Um
+número Cloud API nasce com ele desligado.
+
+Por isso, assinar `calls.update` faz a plataforma habilitar o recurso no seu
+número antes de salvar o webhook. Você não precisa fazer nada na Meta. Se o
+recurso já estiver habilitado, nada é alterado — suas preferências de horário de
+atendimento, visibilidade do botão e SIP permanecem intactas.
+
+Quando a habilitação não é possível, **o webhook não é salvo** e a resposta diz
+qual é o caso:
+
+| Resposta | `code` | O que fazer |
+|---|---|---|
+| `422` | `CALLING_API_UNAVAILABLE` | O número não se qualifica para a Calling API. Salve novamente **sem** `calls.update` — repetir o mesmo pedido falhará de novo |
+| `503` | `PROVIDER_UNAVAILABLE` | Não foi possível falar com a Meta agora. Repita o mesmo pedido em instantes |
+
+A recusa vale para o pedido inteiro: nome, URL e as demais assinaturas enviadas
+junto também não são gravados.
+
+Os pré-requisitos da Calling API são da Meta, não da plataforma: número Cloud API
+**nativo** (coexistência não se qualifica), limite diário de pelo menos 2.000
+destinatários únicos e campo `calls` assinado na configuração do aplicativo.
+
+Em conexão **não oficial** nada disso se aplica — chamadas chegam sem
+configuração e a assinatura não passa por essa verificação.
 </Card>
 
 <Card title="ATENÇÃO">

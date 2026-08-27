@@ -50,6 +50,20 @@ fica desabilitado — exclua ou reaproveite um dos existentes para cadastrar out
 | `token.expired` | O token do Instagram expirou ou foi revogado |
 | `token.refresh.failed` | Uma tentativa de renovar o token do Instagram falhou |
 
+<Card title="ATENÇÃO">
+Em instância de **conexão oficial**, marcar `calls.update` faz a plataforma
+habilitar o recurso de chamadas no seu número junto à Meta antes de salvar —
+sem ele, a Meta não emite evento de chamada nem mostra o botão de ligação ao
+usuário.
+
+Se o número não se qualificar para a Calling API, **o webhook não é salvo** e a
+tela avisa: salve novamente sem o evento de chamadas. Se o aviso for de falha de
+comunicação com a Meta, basta tentar de novo em instantes.
+
+Em **conexão não oficial** a marcação é imediata, sem nenhuma verificação.
+Detalhes em [Webhooks](/integrations/webhooks).
+</Card>
+
 A tela mostra a lista completa, com uma descrição curta de cada evento ao lado do
 nome. `webhook.test` não aparece: ele é enviado uma única vez no cadastro, para
 validar a URL, e não é assinável.
