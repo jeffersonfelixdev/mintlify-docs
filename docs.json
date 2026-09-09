@@ -48,7 +48,8 @@
               "functions/messages",
               "functions/sending-messages",
               "functions/chats",
-              "functions/groups"
+              "functions/groups",
+              "functions/calls"
             ]
           },
           {

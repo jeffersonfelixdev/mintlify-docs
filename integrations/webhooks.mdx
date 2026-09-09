@@ -845,6 +845,79 @@ sessão volta, e a plataforma não as compensa — o evento simplesmente não ex
 para a instância.
 </Card>
 
+### Gravação disponível
+
+Tipo: `calls.update`, com `event: "recording"`
+
+Disparado quando a gravação de uma chamada fica pronta — **em conexão não
+oficial**, e apenas para chamadas em que a gravação foi solicitada. É um evento
+**separado** do encerramento: aquele sai assim que a chamada termina, sem esperar
+o processamento da gravação. Correlacione os dois pelo `callId`.
+
+```json
+{
+  "type": "calls.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5511999999999@s.whatsapp.net",
+  "key": {
+    "remoteJid": "5511999999999@s.whatsapp.net",
+    "fromMe": false,
+    "id": "3EB0C767D26B8CE6A1B4",
+    "addressingMode": "pn",
+    "senderPn": "5511999999999@s.whatsapp.net"
+  },
+  "callId": "3EB0C767D26B8CE6A1B4",
+  "event": "recording",
+  "direction": "USER_INITIATED",
+  "timestamp": 1787072580,
+  "trackSource": "whatsapp",
+  "recording": {
+    "status": "AVAILABLE",
+    "url": "https://storage.zapperhub.com/...&X-Amz-Expires=3600",
+    "expiresAt": "2026-09-04T19:23:47.000Z",
+    "durationSeconds": 216,
+    "truncated": false
+  }
+}
+```
+
+O arquivo contém **os dois lados** da conversa. O endereço vem pronto e assinado:
+não é preciso autenticar para baixar, nem informar um destino próprio.
+
+| Campo | Descrição |
+| --- | --- |
+| `recording.status` | `AVAILABLE` ou `UNAVAILABLE` |
+| `recording.url` | Endereço de download, válido por 1 hora |
+| `recording.expiresAt` | Quando **este** endereço expira |
+| `recording.durationSeconds` | Duração do áudio gravado |
+| `recording.truncated` | `true` quando a gravação foi cortada no limite de 1 hora |
+
+O endereço expirar não é problema: consulte
+`GET /{instanceId}/calls/{callId}` para obter um novo, enquanto a gravação
+existir.
+
+Quando a gravação fica definitivamente indisponível, o mesmo evento traz o
+motivo — e o evento de encerramento, já entregue, **não** é reenviado:
+
+```json
+{
+  "event": "recording",
+  "callId": "3EB0C767D26B8CE6A1B4",
+  "recording": { "status": "UNAVAILABLE", "reason": "STORAGE_FAILED" }
+}
+```
+
+<Card title="A GRAVAÇÃO EXPIRA EM 7 DIAS">
+Passados 7 dias do encerramento, o arquivo é descartado em definitivo. O
+**registro** da chamada continua consultável por 90 dias e informa que a gravação
+já não existe, em vez de devolver um endereço que não resolve.
+
+Baixe e guarde o arquivo do seu lado se precisar dele por mais tempo.
+</Card>
+
+Consulte [Chamadas](/functions/calls) para originar, atender, gravar e encerrar
+chamadas por API.
+
 ### Comentário recebido no Instagram
 
 Tipo: `comments.upsert`
