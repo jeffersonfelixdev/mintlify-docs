@@ -1,13 +1,42 @@
 ---
 title: Agentes de IA
-description: "Integre diretamente com a GPT Maker ou Zaia e tenha um agente de IA especializado em seu negócio"
+description: "Integre diretamente com a Chatvolt e tenha um agente de IA especializado em seu negócio"
 ---
+
+<Warning>
+  **Mudança no campo `type` a partir de 10/09/2026**
+
+  A rota `POST /{instanceId}/integrations` passa a aceitar **apenas** `CHATVOLT` no campo
+  `type`. Requisições com `GPTMAKER` ou `ZAIA` passam a responder **`400`** onde antes
+  respondiam `204`.
+
+  **O que muda para você**
+
+  - Se a sua integração já usa `CHATVOLT`, **nada muda** — nenhuma ação necessária.
+  - Se você envia `GPTMAKER` ou `ZAIA` na criação da integração, essa chamada passa a falhar.
+
+  **O que fazer**
+
+  Integrações desses dois provedores que já estão cadastradas continuam funcionando enquanto a
+  API legada estiver no ar, mas não podem mais ser criadas ou atualizadas por esta rota. Para
+  seguir com um agente de IA na ZapperHub, migre para a Chatvolt — veja
+  [Chatvolt AI](/integrations/chatvolt).
+
+  O motivo da recusa é evitar uma falha silenciosa: aceitar um provedor que a API não processa
+  gravaria uma integração que nunca responde, e o problema só apareceria quando o cliente
+  percebesse que a IA não atende.
+</Warning>
 
 ## Introdução
 
 Um agente de IA responde automaticamente as conversas de uma instância. Em vez de a ZapperHub
-gerar as respostas, ela encaminha as mensagens recebidas para a plataforma de agente que você já
-usa — **Chatvolt**, **GPT Maker** ou **Zaia** — e devolve ao WhatsApp o que o agente respondeu.
+gerar as respostas, ela encaminha as mensagens recebidas para a **Chatvolt** e devolve ao
+WhatsApp o que o agente respondeu.
+
+<Note>
+  GPT Maker e Zaia seguem atendidos enquanto a API legada estiver no ar, mas **não aceitam mais
+  novos cadastros**. Integrações criadas hoje precisam usar a Chatvolt.
+</Note>
 
 A integração é feita **por instância**: cada número conectado pode ter o seu próprio agente, ou
 nenhum. O agente atende todas as conversas daquela instância, e você pode desligá-lo em uma
@@ -26,12 +55,12 @@ no painel está em [Integrações](/painel/integracoes).
 
 ### Pela API
 
-Para realizar a integração de um Agente de IA da GPT Maker ou Zaia na ZapperHub, consulte a
+Para realizar a integração de um agente da Chatvolt na ZapperHub, consulte a
 [Seção Integrações](/api-reference/integrações/criaratualizar-integração) na documentação de
 referência da API para criar ou atualizar os dados de uma integração.
 
-Você deverá passar no corpo da requisição o id do Agente (`agentId`) e o token de API (`apiKey`)
-da sua plataforma de agente de IA.
+Você deverá passar no corpo da requisição o tipo da integração (`type`, sempre `CHATVOLT`), o id
+do Agente (`agentId`) e o token de API (`apiKey`) da sua conta na Chatvolt.
 
 ### Pelo Dashboard
 
@@ -41,7 +70,7 @@ A ZapperHub conta com uma interface amigável para configuração de seu agente 
 - Clique sobre a instância desejada;
 - Selecione a guia **Integrações** e, dentro dela, a aba **Agentes de IA**;
 - Preencha o **Tipo de Integração**, o **ID do Agente** e a **Chave de API** de seu agente
-  Chatvolt, GPT Maker ou Zaia e clique em **Atualizar**.
+  Chatvolt e clique em **Atualizar**.
 
 Cada campo, com sua obrigatoriedade e validação, está detalhado em
 [Integrações](/painel/integracoes).
@@ -71,6 +100,7 @@ Web ou Desktop:
 - Na aba **Integração**, ative a opção **Desativar IA em mensagens a partir do dispositivo**.
 
 Com ela ligada, o agente para de responder naquela conversa assim que o dono da linha responde
-pelo celular, pelo WhatsApp Web ou pelo Desktop. As demais opções de comportamento — inclusive o
-**Debounce**, que agrupa as mensagens antes de enviá-las ao agente — estão descritas em
-[Configurações da instância](/painel/configuracoes-da-instancia).
+pelo celular, pelo WhatsApp Web ou pelo Desktop. Mensagens enviadas pelas **rotas de envio da
+API** não acionam essa pausa — para elas, use `#off`. As demais opções de comportamento —
+inclusive o **Debounce**, que agrupa as mensagens antes de enviá-las ao agente — estão descritas
+em [Configurações da instância](/painel/configuracoes-da-instancia).
