@@ -49,7 +49,8 @@
               "functions/sending-messages",
               "functions/chats",
               "functions/groups",
-              "functions/calls"
+              "functions/calls",
+                "functions/softphone"
             ]
           },
           {

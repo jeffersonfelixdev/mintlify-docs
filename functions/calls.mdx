@@ -10,6 +10,15 @@ grava a conversa e encerra — tudo por API, sem operador humano discando.
 Antes desta capacidade, a plataforma apenas **avisava** que uma chamada tinha
 acontecido. Agora ela participa da chamada.
 
+<Card title="PROCURANDO CONVERSA AO VIVO?">
+As operações desta página conduzem a chamada **por API**: sua aplicação liga e
+reproduz um arquivo, sem operador humano. Para um atendente conversar em tempo
+real pelo headset, dentro do seu sistema, veja o [Softphone](/functions/softphone).
+
+As duas capacidades convivem: o softphone é outra forma de conduzir a mesma
+chamada, com os mesmos eventos e o mesmo histórico.
+</Card>
+
 <Card title="DISPONÍVEL APENAS EM CONEXÃO NÃO OFICIAL">
 As operações desta página valem somente para instâncias de **conexão não
 oficial** (`device`). Em conexão oficial (Cloud API), qualquer uma delas responde
@@ -214,6 +223,27 @@ mesmo vocabulário:
 | `UNAVAILABLE` | Contato indisponível — em outra ligação |
 | `TERMINATED_BY_BUSINESS` | Encerrada por comando seu |
 | `FAILED` | Falha: perda de sessão, reinício do servidor ou erro de sinalização |
+
+## Autoria da chamada
+
+Toda chamada registra **como foi conduzida**, e por quem:
+
+| Campo | Conteúdo |
+| --- | --- |
+| `conductedVia` | `API` para o caminho automatizado desta página, `SOFTPHONE` para uma conversa conduzida por um atendente |
+| `agent` | `{ id, displayName? }` do atendente. **Ausente** — e não nulo — nas chamadas originadas pela API |
+
+A ausência do campo `agent` é informação, e não falta de dado: uma chamada por
+API **não teve** atendente, o que é diferente de não sabermos qual foi.
+
+Para ver apenas as chamadas de um atendente:
+
+```http
+GET /{instanceId}/calls?agentId=op-1183
+```
+
+O filtro convive com `state`, `direction`, `limit` e `cursor`, e é preservado no
+endereço da página seguinte.
 
 <Card title="NENHUMA CHAMADA SOBREVIVE À QUEDA DA SESSÃO">
 Se a instância perder a sessão do WhatsApp, ou o servidor de instância for

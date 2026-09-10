@@ -1,0 +1,320 @@
+---
+title: Softphone
+description: "Conversa de voz ao vivo: o atendente fala pelo headset, dentro do seu sistema, usando o número de WhatsApp da instância"
+---
+
+As [chamadas por API](/functions/calls) resolvem aviso automatizado: a plataforma
+liga e toca um arquivo. Não resolvem **conversa**.
+
+O softphone fecha essa lacuna. Um atendente clica em um botão no seu sistema, a
+ligação sai pelo número de WhatsApp da instância, e as duas pessoas conversam em
+tempo real — o atendente fala pelo microfone do computador e ouve o contato pelo
+fone, como se estivesse no aplicativo do WhatsApp.
+
+Você inclui uma biblioteca na sua tela; a plataforma cuida de microfone,
+reprodução, transporte e reconexão.
+
+<Card title="DISPONÍVEL APENAS EM CONEXÃO NÃO OFICIAL">
+O softphone vale somente para instâncias de **conexão não oficial** (`device`).
+Em conexão oficial (Cloud API), qualquer operação responde `422` com
+`code: UNSUPPORTED_FOR_INSTANCE_TYPE`, e nada acontece com a instância.
+</Card>
+
+## Limites desta versão
+
+| Limite | Valor |
+| --- | --- |
+| Chamadas simultâneas | **Uma por instância**, contando a que ainda está tocando |
+| Atendentes conectados | Vários por instância, disputando a mesma linha |
+| Contexto do navegador | **HTTPS obrigatório** — exigência do navegador para usar o microfone |
+| Vídeo | Não disponível |
+| Chamada em grupo | Não disponível |
+| Transferência de chamada | Não disponível |
+| Colocar em espera | Não disponível |
+| Teclado de tons (DTMF) | Não disponível |
+| Duração da conversa | Sem limite |
+| Gravação | Mesmas regras da [página de chamadas](/functions/calls) — 30 por dia, 1 hora, 7 dias de retenção |
+
+## Como funciona
+
+<Steps>
+  <Step title="Seu backend emite a credencial do atendente">
+    Uma rota **sua** troca o `x-api-key` da instância por uma credencial de curta
+    duração, vinculada a um atendente.
+  </Step>
+  <Step title="A biblioteca abre a sessão">
+    O componente no navegador usa essa credencial para estabelecer a sessão de
+    voz com a instância.
+  </Step>
+  <Step title="O atendente conversa">
+    Ligar, atender, silenciar e encerrar acontecem pelo componente. Você desenha
+    os botões; a biblioteca entrega estado e comandos.
+  </Step>
+</Steps>
+
+<Warning>
+O `x-api-key` da instância **nunca** deve chegar ao navegador. Quem o tiver pode
+discar em nome da sua empresa e ler conversas de outras instâncias — inclusive
+uma extensão maliciosa instalada na máquina do atendente. É para isso que a
+credencial de curta duração existe.
+</Warning>
+
+## Passo 1 — Emitir a credencial
+
+Chame esta rota **a partir do seu backend**, com o `x-api-key` da instância.
+
+```http
+POST /{instanceId}/softphone/tokens
+```
+
+```json
+{
+  "agentId": "op-1183",
+  "displayName": "Ana"
+}
+```
+
+| Campo | Obrigatório | Descrição |
+| --- | --- | --- |
+| `agentId` | sim | Identificador do atendente **no seu sistema**. Opaco para a plataforma: use o que fizer sentido para você. Aparece no histórico como autoria. |
+| `displayName` | não | Nome exibido no histórico e para os outros atendentes quando a linha está ocupada. |
+
+Resposta:
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9...",
+  "expiresAt": "2026-09-09T18:15:00.000Z",
+  "expiresIn": 900,
+  "endpoint": "wss://server-03.zapperhub.com/softphone"
+}
+```
+
+Devolva esse corpo ao navegador **como veio**. A biblioteca consome o `endpoint`
+sozinha.
+
+<Card title="A CREDENCIAL VALE 15 MINUTOS">
+A biblioteca a renova em segundo plano chamando o seu `getToken` de novo. Uma
+conversa em andamento **nunca** cai por vencimento — a renovação só afeta as
+operações seguintes.
+
+A plataforma não guarda cadastro de atendentes, não autentica pessoas e não
+armazena e-mail, telefone ou qualquer outro dado além do identificador e do nome
+que você informar.
+</Card>
+
+## Passo 2 — Incluir o componente
+
+Com bundler:
+
+```bash
+npm install @zapperhub/softphone
+```
+
+```ts
+import { createSoftphone } from '@zapperhub/softphone'
+```
+
+Sem bundler:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@zapperhub/softphone@1/dist/softphone.global.js"></script>
+<!-- disponível como ZapperSoftphone.createSoftphone -->
+```
+
+## Passo 3 — Criar o softphone
+
+```ts
+const softphone = createSoftphone({
+  instanceId: 'inst_123',
+  getToken: async () => {
+    // a rota do SEU backend, do passo 1
+    const r = await fetch('/api/softphone-token', { method: 'POST' })
+    return r.json() // { token, expiresAt, endpoint }
+  },
+})
+```
+
+`createSoftphone` **nunca lança**. Em um navegador sem suporte a áudio, ou numa
+página fora de HTTPS, ele devolve uma instância indisponível com o motivo, e o
+restante da sua página continua funcionando:
+
+```ts
+if (softphone.status === 'unsupported') {
+  console.warn('Softphone indisponível:', softphone.unsupportedReason)
+}
+```
+
+## Comandos
+
+| Método | O que faz |
+| --- | --- |
+| `call(jid, { record })` | Origina a chamada. Pede o microfone **antes** de discar. |
+| `answer({ record })` | Aceita a chamada entrante sinalizada. |
+| `reject()` | Recusa a chamada entrante sinalizada. |
+| `hangup()` | Encerra a conversa, ou cancela uma chamada que ainda toca. |
+| `mute()` / `unmute()` | Silencia e reativa o microfone, sem derrubar a chamada. |
+| `devices.list()` | Lista microfones e saídas de áudio disponíveis. |
+| `devices.select({ inputId, outputId })` | Seleciona, e preserva a escolha entre carregamentos. |
+| `devices.testInput()` | Inicia o teste de captação; devolve `{ stop }`. |
+| `connect()` / `disconnect()` | Abre e fecha a sessão manualmente. |
+| `destroy()` | Libera microfone, sessão e conexão. |
+
+Também há duas leituras diretas: `softphone.line` (a linha está ocupada?) e
+`softphone.muted`.
+
+## Estados e eventos
+
+```ts
+softphone.on('call', (chamada) => {
+  // renderize o estado na sua tela
+})
+```
+
+| Evento | Conteúdo | Quando |
+| --- | --- | --- |
+| `status` | `{ status, reason? }` | A sessão muda de situação |
+| `call` | `{ callId, state, direction, contact, recording?, endedReason? }` | A chamada muda de estado |
+| `incoming` | `{ callId, contact }` | Uma chamada recebida começa a tocar |
+| `incoming:cleared` | `{ callId, reason }` | A chamada recebida para de tocar |
+| `line` | `{ busy, callId?, agent? }` | A linha da instância é ocupada ou liberada |
+| `mic` | `{ muted }` | O microfone é silenciado ou reativado |
+| `devices` | Lista de dispositivos | Um dispositivo é conectado ou desconectado |
+| `level` | `{ level }` | Durante `devices.testInput()`, de 0 a 1 |
+| `error` | `{ code, message }` | Qualquer recusa |
+
+### Estados da chamada (`call.state`)
+
+| Estado | Significado |
+| --- | --- |
+| `IDLE` | Nenhuma chamada em andamento |
+| `DIALING` | O pedido saiu do navegador; a chamada ainda não existe. `callId` **ausente** neste estado |
+| `RINGING` | O aparelho do contato está tocando |
+| `ACTIVE` | Conversa estabelecida nos dois sentidos |
+| `RECONNECTING` | O atendente perdeu a conexão; **a chamada continua** por 15 segundos |
+| `ENDED` | Encerrada — veja `endedReason` |
+
+### Motivos de encerramento (`call.endedReason`)
+
+| Valor | Significado |
+| --- | --- |
+| `BY_AGENT` | O atendente encerrou pelo componente |
+| `BY_CONTACT` | O contato desligou |
+| `REJECTED` | Recusada |
+| `MISSED` | Não atendida |
+| `UNAVAILABLE` | Contato indisponível — em outra ligação |
+| `FAILED` | Falha: microfone revogado, período de graça esgotado, ou queda da instância |
+
+### Motivos de cessação da sinalização (`incoming:cleared.reason`)
+
+| Valor | Significado |
+| --- | --- |
+| `ANSWERED_ELSEWHERE` | **Outro atendente aceitou.** Situação normal, não erro |
+| `REJECTED` | Um atendente recusou |
+| `ABANDONED` | O contato desistiu antes de qualquer aceite |
+
+## Vários atendentes na mesma instância
+
+A instância conduz **uma** chamada por vez, e todos os atendentes conectados
+disputam essa linha.
+
+- Uma chamada recebida **toca em todos**. O primeiro que aceitar conduz; os
+  demais recebem `incoming:cleared` com `ANSWERED_ELSEWHERE`.
+- Quando alguém ocupa a linha, os outros recebem `line` com `busy: true` e o
+  nome de quem está falando.
+- Dois pedidos ao mesmo tempo: exatamente um é aceito. O outro recebe
+  `409 CALL_IN_PROGRESS`.
+
+<Card title="PERDER A CORRIDA NÃO É ERRO">
+`ANSWERED_ELSEWHERE` e `CALL_IN_PROGRESS` são o funcionamento normal de uma
+operação com vários atendentes. Apresente-os como informação — "atendida por
+outro atendente", "linha ocupada" — e não como falha do sistema.
+</Card>
+
+## Oscilação de conexão
+
+Se o atendente perder a conexão, a chamada com o contato **não cai na hora**: ela
+espera 15 segundos por ele.
+
+- Reconectou dentro do prazo: a conversa continua na **mesma** chamada, com o
+  mesmo `callId`, sem nova discagem.
+- Passou do prazo: a chamada é encerrada com `FAILED` e a linha é liberada.
+- O contato desligou durante a espera: o desfecho é `BY_CONTACT`, e não falha.
+
+Fechar a aba do navegador segue a mesma regra.
+
+## Gravação
+
+Passe `record: true` ao originar ou atender. Todas as regras — cota diária,
+limite de duração, entrega por evento, link assinado e retenção — são as mesmas
+da [página de chamadas](/functions/calls).
+
+```ts
+const chamada = await softphone.call('5511999999999', { record: true })
+
+if (chamada.recording?.requested && !chamada.recording.granted) {
+  // a chamada ACONTECE; só não será gravada
+  console.log('Sem gravação:', chamada.recording.reason)
+}
+```
+
+<Warning>
+Cota diária atingida **não impede a chamada**. Ela acontece normalmente, sem
+gravação, e o motivo chega em `recording.reason`. Avise o atendente no momento da
+discagem, em vez de deixá-lo procurar depois um arquivo que nunca existiu.
+
+Informar ao contato que a ligação está sendo gravada é responsabilidade sua,
+conforme a LGPD.
+</Warning>
+
+## Erros e o que fazer
+
+| Código | Quando | Ação recomendada |
+| --- | --- | --- |
+| `MICROPHONE_DENIED` | O atendente negou o microfone | Oriente a liberar pelo cadeado na barra de endereço e tentar de novo. Nenhuma chamada foi criada. |
+| `MICROPHONE_UNAVAILABLE` | Nenhum microfone, ou em uso por outro programa | Peça para conectar o headset ou fechar o outro programa. |
+| `INSECURE_CONTEXT` | Página fora de HTTPS | Sirva a página por HTTPS. `localhost` também conta como seguro. |
+| `UNSUPPORTED_ENVIRONMENT` | Navegador sem captura de áudio ou sem WebRTC | Oriente a usar Chrome, Edge, Firefox ou Safari recentes. |
+| `AGENT_TOKEN_INVALID` | Credencial expirada, adulterada ou desconhecida | Emita uma credencial nova pelo seu backend. |
+| `AGENT_TOKEN_SCOPE` | Credencial usada fora do escopo de chamadas | Defeito de integração: a credencial só serve ao softphone. |
+| `CALL_IN_PROGRESS` | A instância já conduz uma chamada | Mostre a linha como ocupada. O `detail` traz o `callId` em andamento. |
+| `CALL_NOT_AVAILABLE` | A chamada já foi atendida por outro, ou já encerrou | Apresente como informação, não como falha. |
+| `INVALID_CALL_TARGET` | O número não tem conta de WhatsApp | Confirme o número com o atendente. |
+| `INSTANCE_NOT_CONNECTED` | A instância perdeu a sessão do WhatsApp | Reconecte a instância no painel. |
+| `UNSUPPORTED_FOR_INSTANCE_TYPE` | Instância de conexão oficial | O softphone não existe para Cloud API. |
+| `DEVICE_LOST` | O dispositivo selecionado foi desconectado | **A chamada continua** no dispositivo padrão. Atualize a lista de dispositivos na tela. |
+| `MEDIA_NEGOTIATION_FAILED` | O áudio não pôde ser estabelecido | Verifique a conexão do atendente e tente reconectar. |
+| `SESSION_CLOSED` | Comando enviado com a sessão fechada | Chame `connect()` antes, ou aguarde a reconexão automática. |
+
+## Histórico e autoria
+
+As chamadas conduzidas pelo softphone aparecem no
+[histórico de chamadas](/functions/calls) com a autoria do atendente, e podem ser
+filtradas por ele:
+
+```http
+GET /{instanceId}/calls?agentId=op-1183
+```
+
+```json
+{
+  "callId": "...",
+  "conductedVia": "SOFTPHONE",
+  "agent": { "id": "op-1183", "displayName": "Ana" }
+}
+```
+
+Chamadas originadas pela API, sem atendente, aparecem com
+`"conductedVia": "API"` e **sem** o campo `agent` — ausente, e não nulo: não
+houve atendente, e isso é diferente de não sabermos qual foi.
+
+## Compatibilidade
+
+O softphone é uma forma nova de **conduzir** a mesma chamada, e não um recurso
+paralelo. Se você já consome as chamadas por API:
+
+- os eventos continuam saindo em `calls.update`, com o mesmo formato;
+- as operações por API continuam disponíveis e inalteradas;
+- o histórico ganhou campos novos, e nenhum campo existente mudou.
+
+Uma instância sem nenhum atendente conectado se comporta exatamente como antes.
