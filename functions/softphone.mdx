@@ -61,6 +61,39 @@ credencial de curta duração existe.
 
 ## Passo 1 — Emitir a credencial
 
+<Card title="ANTES DE COMEÇAR: A ORIGEM DO SEU SISTEMA PRECISA ESTAR CADASTRADA">
+A credencial do atendente só vale para as páginas servidas em **uma origem
+específica**, cadastrada na instância. É o que impede uma credencial vazada de ser
+usada a partir de outro site.
+
+Sem esse cadastro, a rota abaixo responde:
+
+```json
+{
+  "code": "PROVIDER_UNAVAILABLE",
+  "message": "A origem do CRM não está configurada para esta instância",
+  "statusCode": 503
+}
+```
+
+Hoje o cadastro é feito pela ZapperHub: peça pelo suporte informando a origem
+**exata** das páginas que vão embutir o componente — por exemplo
+`https://crm.suaempresa.com.br`, ou `http://localhost:3000` para desenvolvimento.
+
+O formato importa. Informe apenas esquema, domínio e porta, sem barra final e sem
+caminho: `https://crm.suaempresa.com.br`, nunca
+`https://crm.suaempresa.com.br/` nem `https://crm.suaempresa.com.br/atendimento`.
+A comparação é literal contra o cabeçalho `Origin` que o navegador envia, e uma
+barra a mais faz a credencial ser emitida normalmente e a sessão ser recusada
+depois com `AGENT_TOKEN_INVALID` — que é bem mais difícil de diagnosticar.
+
+Cada instância tem uma origem. Se o mesmo sistema atende vários domínios, fale com
+o suporte antes de integrar.
+</Card>
+
+{/* TODO: quando existir rota pública para o cliente cadastrar a origem, trocar a
+    instrução de "peça pelo suporte" pela chamada correspondente. */}
+
 Chame esta rota **a partir do seu backend**, com o `x-api-key` da instância.
 
 ```http
@@ -275,7 +308,8 @@ conforme a LGPD.
 | `MICROPHONE_UNAVAILABLE` | Nenhum microfone, ou em uso por outro programa | Peça para conectar o headset ou fechar o outro programa. |
 | `INSECURE_CONTEXT` | Página fora de HTTPS | Sirva a página por HTTPS. `localhost` também conta como seguro. |
 | `UNSUPPORTED_ENVIRONMENT` | Navegador sem captura de áudio ou sem WebRTC | Oriente a usar Chrome, Edge, Firefox ou Safari recentes. |
-| `AGENT_TOKEN_INVALID` | Credencial expirada, adulterada ou desconhecida | Emita uma credencial nova pelo seu backend. |
+| `PROVIDER_UNAVAILABLE` | A origem do seu sistema não está cadastrada na instância | Peça o cadastro ao suporte, com a origem exata. Veja o **Passo 1** desta página. |
+| `AGENT_TOKEN_INVALID` | Credencial expirada, adulterada, desconhecida — ou apresentada por uma página cuja origem não é a cadastrada | Emita uma credencial nova pelo seu backend. Se persistir, confira se a origem cadastrada bate exatamente com a da página, sem barra final. |
 | `AGENT_TOKEN_SCOPE` | Credencial usada fora do escopo de chamadas | Defeito de integração: a credencial só serve ao softphone. |
 | `CALL_IN_PROGRESS` | A instância já conduz uma chamada | Mostre a linha como ocupada. O `detail` traz o `callId` em andamento. |
 | `CALL_NOT_AVAILABLE` | A chamada já foi atendida por outro, ou já encerrou | Apresente como informação, não como falha. |

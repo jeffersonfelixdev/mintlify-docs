@@ -28,6 +28,20 @@ Conexão oficial continua **recebendo** os eventos `calls.update` normalmente �
 o que não existe lá é a capacidade de conduzir a chamada.
 </Card>
 
+<Card title="PARA ACOMPANHAR A CHAMADA, ASSINE `calls.update`">
+As respostas das rotas desta página descrevem o instante do comando, não o
+desfecho: originar devolve `RINGING`, e o que vem depois — atendida, recusada,
+não atendida, encerrada — chega pelo evento `calls.update` no seu
+[webhook](/integrations/webhooks).
+
+Sem assinar esse evento, sua aplicação não fica sabendo que a chamada terminou.
+A alternativa é consultar o histórico por `callId`, descrito mais abaixo nesta página,, que
+é o mesmo estado, só que sob demanda.
+
+Isso vale para os dois caminhos: chamadas conduzidas por API e pelo
+[softphone](/functions/softphone).
+</Card>
+
 ## Limites desta versão
 
 | Limite | Valor |
@@ -77,6 +91,21 @@ contato atende** — reproduzir é sempre um comando explícito seu.
 | `422` | `INSTANCE_NOT_CONNECTED` | A instância não tem sessão ativa |
 
 ## Atender uma chamada recebida
+
+<Card title="NÚMERO EM COEXISTÊNCIA NÃO RECEBE CHAMADAS">
+Se o mesmo número também está conectado à Cloud API — o arranjo de
+**coexistência**, com o aplicativo WhatsApp Business e a API oficial no mesmo
+número —, as chamadas recebidas são recusadas antes de tocar.
+
+O dispositivo hospedado da Cloud API responde à oferta com `uncallable`, e o
+WhatsApp encerra a chamada para todos os dispositivos daquele número. Sua
+aplicação vê a chamada aparecer e sumir no mesmo instante, sem que nada possa ser
+atendido.
+
+**Originar continua funcionando normalmente** nesses números; a limitação é só
+para receber. Para atender chamadas, use um número que não esteja em
+coexistência.
+</Card>
 
 Use o `callId` que chegou no evento `calls.update` com `event: "connect"`.
 
