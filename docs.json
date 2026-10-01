@@ -95,6 +95,7 @@
             "icon": "message",
             "pages": [
               "painel/templates",
+              "painel/consumo-e-cobranca",
               "painel/log-de-mensagens",
               "painel/webhooks"
             ]

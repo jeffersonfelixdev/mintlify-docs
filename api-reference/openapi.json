@@ -3928,6 +3928,521 @@
         }
       }
     },
+    "/{instanceId}/billing/usage": {
+      "get": {
+        "summary": "Consumo e cobrança da Meta",
+        "tags": [
+          "Cloud API"
+        ],
+        "description": "Consumo de mensagens da instância Cloud API no mês: franquia de mensagens de serviço gratuitas, volume e custo por categoria (marketing, utility, authentication e serviço) e o status do meio de pagamento, com o link para cadastrá-lo na Meta.\n\n**Os valores são estimativas derivadas de sinais da Meta.** A Meta não expõe um contador da franquia gratuita nem se há cartão cadastrado: a franquia é estimada somando as mensagens de serviço entregues, e o status de pagamento é inferido (erro `131042` e estado de saúde do número). Os dados oficiais da Meta chegam com atraso de algumas horas; `dataFreshness.officialUntil` informa até quando valem. Reações enviadas fora da ZapperAPI podem aparecer na estimativa até a próxima conferência.\n\nO mês é o mês civil no fuso da WABA (`timezone`). Apenas instâncias `cloud_api` têm este recurso.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+            },
+            "in": "query",
+            "name": "month",
+            "required": false,
+            "description": "Mês consultado, no formato `YYYY-MM`, no fuso da WABA. Padrão: o mês corrente. Aceita meses desde o início da coleta da instância, até 12 meses antes do corrente."
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "instanceId",
+            "required": true,
+            "description": "Id da instância"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "instanceId": {
+                      "type": "string"
+                    },
+                    "month": {
+                      "type": "string",
+                      "description": "Mês consultado (`YYYY-MM`), no fuso da WABA."
+                    },
+                    "isCurrentMonth": {
+                      "type": "boolean"
+                    },
+                    "timezone": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "Nome IANA do fuso usado nos cálculos."
+                        },
+                        "fallback": {
+                          "type": "boolean",
+                          "description": "`true` quando o fuso da WABA não pôde ser obtido e se usou `America/Sao_Paulo`."
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "fallback"
+                      ],
+                      "additionalProperties": false,
+                      "description": "Fuso da WABA, que define a virada do mês de faturamento."
+                    },
+                    "currency": {
+                      "nullable": true,
+                      "description": "Moeda da WABA (ISO 4217). Nulo quando ainda desconhecida.",
+                      "type": "string"
+                    },
+                    "freeTier": {
+                      "type": "object",
+                      "properties": {
+                        "used": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Mensagens de serviço entregues no mês (estimativa)."
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Franquia gratuita mensal, por número."
+                        },
+                        "remaining": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "overage": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "Mensagens de serviço entregues além da franquia."
+                        },
+                        "alertLevel": {
+                          "type": "string",
+                          "enum": [
+                            "none",
+                            "warning",
+                            "exceeded"
+                          ],
+                          "description": "`warning` a partir de 80% da franquia, `exceeded` a partir de 100%. Só no mês corrente."
+                        }
+                      },
+                      "required": [
+                        "used",
+                        "limit",
+                        "remaining",
+                        "overage",
+                        "alertLevel"
+                      ],
+                      "additionalProperties": false,
+                      "description": "Franquia de mensagens de serviço gratuitas. É uma **estimativa**: a Meta não expõe um contador."
+                    },
+                    "categories": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "category": {
+                            "type": "string",
+                            "enum": [
+                              "marketing",
+                              "utility",
+                              "authentication",
+                              "service",
+                              "other"
+                            ]
+                          },
+                          "volume": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "cost": {
+                            "nullable": true,
+                            "description": "Custo na moeda da WABA, somado só dos dias já conferidos com a Meta. Nulo quando não há custo confirmado.",
+                            "type": "number"
+                          },
+                          "costPending": {
+                            "type": "boolean",
+                            "description": "`true` quando há volume em dias ainda não conferidos, cujo custo está a confirmar."
+                          }
+                        },
+                        "required": [
+                          "category",
+                          "volume",
+                          "cost",
+                          "costPending"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "Volume e custo por categoria. As quatro categorias principais sempre aparecem, mesmo com volume zero."
+                    },
+                    "totalVolume": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "dataFreshness": {
+                      "type": "object",
+                      "properties": {
+                        "officialUntil": {
+                          "nullable": true,
+                          "description": "Até quando os dados são oficiais da Meta. Depois disso, valem as estimativas em tempo real. Nulo se nunca houve conferência.",
+                          "type": "string"
+                        },
+                        "lastReconcileAttemptAt": {
+                          "nullable": true,
+                          "description": "Última tentativa de conferência.",
+                          "type": "string"
+                        },
+                        "lastReconcileSuccessAt": {
+                          "nullable": true,
+                          "description": "Última conferência bem-sucedida.",
+                          "type": "string"
+                        },
+                        "reconcileFailure": {
+                          "nullable": true,
+                          "description": "Presente quando a última conferência falhou.",
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "enum": [
+                                "requires_reconnect",
+                                "transient",
+                                "unexpected"
+                              ]
+                            },
+                            "since": {
+                              "nullable": true,
+                              "description": "Desde quando a instância está sem conferir.",
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string",
+                              "description": "Explicação em pt-BR para o cliente."
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "since",
+                            "message"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "officialUntil",
+                        "lastReconcileAttemptAt",
+                        "lastReconcileSuccessAt",
+                        "reconcileFailure"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "payment": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "not_verified",
+                            "problem_detected",
+                            "ok"
+                          ],
+                          "description": "Estado **inferido** do meio de pagamento. A Meta não expõe se há cartão cadastrado."
+                        },
+                        "lastCheckedAt": {
+                          "nullable": true,
+                          "description": "Última consulta do estado de saúde do número.",
+                          "type": "string"
+                        },
+                        "problemDetectedAt": {
+                          "nullable": true,
+                          "description": "Quando o problema de pagamento foi detectado.",
+                          "type": "string"
+                        },
+                        "problemSignal": {
+                          "nullable": true,
+                          "description": "Origem da detecção.",
+                          "type": "string",
+                          "enum": [
+                            "error_131042",
+                            "health_status"
+                          ]
+                        },
+                        "billingHubUrl": {
+                          "type": "string",
+                          "description": "Tela da Meta para cadastrar ou gerenciar o meio de pagamento."
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "lastCheckedAt",
+                        "problemDetectedAt",
+                        "problemSignal",
+                        "billingHubUrl"
+                      ],
+                      "additionalProperties": false,
+                      "description": "Status do meio de pagamento e link para cadastro na Meta."
+                    },
+                    "availableMonths": {
+                      "type": "object",
+                      "properties": {
+                        "first": {
+                          "type": "string"
+                        },
+                        "last": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "first",
+                        "last"
+                      ],
+                      "additionalProperties": false,
+                      "description": "Meses consultáveis (`YYYY-MM`)."
+                    }
+                  },
+                  "required": [
+                    "instanceId",
+                    "month",
+                    "isCurrentMonth",
+                    "timezone",
+                    "currency",
+                    "freeTier",
+                    "categories",
+                    "totalVolume",
+                    "dataFreshness",
+                    "payment",
+                    "availableMonths"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Mês fora do intervalo disponível. O `detail` traz o primeiro mês consultável (`YYYY-MM`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Mês fora do intervalo disponível. O `detail` traz o primeiro mês consultável (`YYYY-MM`)."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Header `x-api-key` ausente, inválido ou de outra instância.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Header `x-api-key` ausente, inválido ou de outra instância."
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/{instanceId}/cloud-api/register-phone-number": {
       "post": {
         "operationId": "registerPhoneNumber",

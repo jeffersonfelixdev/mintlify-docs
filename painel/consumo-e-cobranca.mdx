@@ -1,0 +1,208 @@
+---
+title: Consumo e cobrança
+description: "Acompanhar a franquia de mensagens de serviço gratuitas, o volume por categoria e o meio de pagamento da sua conta na Meta — no painel e pela API"
+---
+
+**Onde fica**: Instâncias → (selecione a instância) → Consumo e cobrança
+
+A aba só existe para instâncias da **API oficial** (WhatsApp Cloud API). Nas instâncias da via não
+oficial ela não aparece.
+
+## Por que isso importa
+
+A partir de **1º de outubro de 2026**, a Meta passa a cobrar as **mensagens de serviço** — as
+respostas livres, sem template, enviadas dentro da janela de atendimento de 24 horas. Cada número
+tem **1.000 mensagens de serviço gratuitas por mês**, e a cobrança começa na 1.001ª entregue. A
+franquia não acumula de um mês para o outro, e o mês é o mês civil no fuso da sua conta na Meta.
+
+<Warning>
+Sem um **meio de pagamento** cadastrado na Meta, as mensagens de serviço **deixam de ser
+entregues** quando passam a ser cobradas. Seus clientes continuam escrevendo, mas as respostas não
+chegam. Esta tela existe para você ver isso antes de acontecer.
+</Warning>
+
+<Note>
+**Os números desta tela são estimativas derivadas de sinais da Meta.** A Meta não oferece um
+contador da franquia gratuita e não informa se há um cartão cadastrado. Por isso a franquia é
+estimada somando as mensagens de serviço entregues, e o status de pagamento é inferido. Os dados
+oficiais da Meta chegam com algumas horas de atraso — veja
+[Dados oficiais da Meta](#dados-oficiais-da-meta).
+</Note>
+
+## Meio de pagamento
+
+O primeiro cartão da tela mostra o status do pagamento, sempre com o botão
+**Cadastrar/gerenciar cartão na Meta**, que abre a tela de métodos de pagamento da Meta Business
+Suite em uma nova aba. Quem cadastra o cartão é você, direto na Meta.
+
+| Status | O que significa |
+|---|---|
+| **Não verificado** | Ainda não houve verificação do pagamento desta conta |
+| **Problema de pagamento detectado** | A Meta recusou mensagens por problema de pagamento, ou o número foi marcado como bloqueado por cobrança. O botão ganha destaque, e um banner vermelho aparece no topo das páginas da instância |
+| **Nenhum problema detectado** | Nenhum sinal de problema de pagamento |
+
+O status é **inferido** a partir de dois sinais: o erro **131042** (*Business eligibility payment
+issue*) da Meta em envios e eventos, e o estado de saúde do número. O estado de saúde é consultado a
+cada **6 horas** e, enquanto houver um problema detectado, a cada **15 minutos**.
+
+O status só volta para **Nenhum problema detectado** quando duas coisas acontecem, em qualquer
+ordem: a consulta de saúde do número volta sem erro de cobrança **e** uma mensagem é entregue depois
+do problema. Ou seja, depois de cadastrar o cartão, o alerta some assim que a próxima mensagem for
+entregue.
+
+<Note>
+Um número bloqueado por outro motivo — por exemplo, um template reprovado — **não** altera o status
+de pagamento.
+</Note>
+
+## Mensagens de serviço gratuitas
+
+A barra mostra **N / 1.000** no mês, quantas **restam** e, quando a franquia acaba, quantas
+mensagens foram além dela (**+N cobradas pela Meta**).
+
+Entram na conta as mensagens de **serviço** entregues. Ficam de fora as mensagens que não foram
+entregues e as que estão dentro de uma janela de entrada gratuita de 72 horas (aberta por anúncios
+ou botões de contato). Reações enviadas pela ZapperAPI também não contam; reações enviadas por fora
+podem aparecer na estimativa até a próxima conferência com a Meta.
+
+Dois avisos aparecem no topo das páginas da instância, só para o **mês corrente**:
+
+| Quando | Aviso |
+|---|---|
+| A partir de **80%** da franquia | Banner amarelo: você já usou 80% das mensagens de serviço gratuitas do mês |
+| A partir de **100%** da franquia | Banner vermelho: as próximas mensagens de serviço serão cobradas pela Meta |
+
+## Mensagens por categoria
+
+Quatro cards mostram o volume do mês em cada categoria de preço da Meta — **Marketing**,
+**Utility**, **Authentication** e **Serviço** — e o **total**. Uma categoria extra, **Outras**,
+aparece apenas quando há volume nela (por exemplo, conversões de indicação).
+
+Cada card traz também o **custo**, na moeda da sua conta na Meta:
+
+- O custo só é somado nos dias já **conferidos com a Meta**.
+- Quando há volume em dias ainda não conferidos, aparece **Custo a confirmar**.
+- **Custo indisponível** aparece quando a Meta não informa custo — por exemplo, quando a sua conta
+  usa a linha de crédito de um parceiro da Meta, que é quem recebe a cobrança.
+
+Num mês sem nenhuma entrega, os cards mostram zero e a tela informa **Nenhuma mensagem entregue
+neste mês**.
+
+## Dados oficiais da Meta
+
+A cada **6 horas**, a ZapperAPI confere o consumo de cada instância com os dados oficiais da Meta e
+passa a usar os números dela nos dias já fechados — inclusive quando divergem da contagem em tempo
+real. Um dia só é tratado como oficial algumas horas depois de terminar, porque a Meta demora a
+consolidá-lo.
+
+A tela informa **Dados oficiais da Meta até** uma data e hora; depois disso, os números são a
+estimativa em tempo real. Isso também corrige mensagens enviadas pelo mesmo número por fora da
+ZapperAPI, que só entram na conferência.
+
+Se a conferência falhar, os números **não somem**: a tela continua com a contagem em tempo real e os
+últimos dados oficiais, e mostra **Não foi possível conferir com a Meta desde** uma data, com o
+motivo. A conferência é tentada de novo automaticamente.
+
+<Note>
+A conferência usa o token da instância, que precisa da permissão `whatsapp_business_management`. Em
+instâncias conectadas manualmente o token pode não a ter. Quando o motivo da falha é esse, ou o
+token expirou, a tela mostra o botão **Reconectar instância**, que leva à tela de conexão.
+</Note>
+
+## Meses anteriores
+
+O seletor **Mês**, no topo da tela, lista os meses desde o início da coleta da instância até o mês
+corrente, limitado aos últimos **13 meses**. Ao escolher um mês anterior, a tela mostra a franquia
+usada, o volume e o custo por categoria daquele mês, sem banners de aviso.
+
+O **fuso** usado nos cálculos aparece ao lado do seletor. Se o fuso da sua conta na Meta não puder
+ser obtido, a ZapperAPI usa o horário de Brasília e avisa na tela.
+
+O histórico começa na data em que o recurso entrou no ar: não há dados retroativos.
+
+## Quem vê esta aba
+
+O **dono da instância** e o **parceiro que criou a instância ou o subusuário dono dela**. Qualquer
+outro usuário não vê a aba.
+
+## Pela API
+
+Os mesmos dados estão disponíveis em
+[Consumo e cobrança da Meta](/api-reference/cloud-api/consumo-e-cobranca-da-meta)
+(`GET /{instanceId}/billing/usage`). A chamada usa o `x-api-key` da instância, e só instâncias
+`cloud_api` a aceitam.
+
+```bash
+curl "https://api.zapperhub.com/{instanceId}/billing/usage" \
+  -H "x-api-key: SUA_CHAVE"
+```
+
+O parâmetro opcional `month` (`YYYY-MM`) escolhe um mês anterior. Sem ele, vale o mês corrente no
+fuso da conta.
+
+```json
+{
+  "instanceId": "inst_123",
+  "month": "2026-10",
+  "isCurrentMonth": true,
+  "timezone": { "name": "America/Sao_Paulo", "fallback": false },
+  "currency": "BRL",
+  "freeTier": {
+    "used": 640,
+    "limit": 1000,
+    "remaining": 360,
+    "overage": 0,
+    "alertLevel": "none"
+  },
+  "categories": [
+    { "category": "marketing", "volume": 120, "cost": 7.5, "costPending": false },
+    { "category": "utility", "volume": 300, "cost": 2.1, "costPending": true },
+    { "category": "authentication", "volume": 40, "cost": null, "costPending": false },
+    { "category": "service", "volume": 900, "cost": 0, "costPending": true }
+  ],
+  "totalVolume": 1360,
+  "dataFreshness": {
+    "officialUntil": "2026-10-14T03:00:00.000Z",
+    "lastReconcileAttemptAt": "2026-10-15T12:00:00.000Z",
+    "lastReconcileSuccessAt": "2026-10-15T12:00:00.000Z",
+    "reconcileFailure": null
+  },
+  "payment": {
+    "status": "ok",
+    "lastCheckedAt": "2026-10-15T11:55:00.000Z",
+    "problemDetectedAt": null,
+    "problemSignal": null,
+    "billingHubUrl": "https://business.facebook.com/latest/billing_hub/payment_methods"
+  },
+  "availableMonths": { "first": "2026-10", "last": "2026-10" }
+}
+```
+
+| Campo | O que é |
+|---|---|
+| `freeTier` | Franquia de mensagens de serviço. `alertLevel` é `none`, `warning` (a partir de 80%) ou `exceeded` (a partir de 100%), e só vale no mês corrente |
+| `categories` | Volume e custo por categoria. As quatro principais sempre aparecem, mesmo zeradas. `cost` é `null` quando não há custo confirmado, e `costPending` indica volume em dias ainda não conferidos |
+| `dataFreshness` | Até quando os dados são oficiais da Meta e, se a última conferência falhou, `reconcileFailure` com `kind` (`requires_reconnect`, `transient` ou `unexpected`), `since` e `message` |
+| `payment` | Status inferido do pagamento (`not_verified`, `problem_detected` ou `ok`), a origem da detecção (`problemSignal`) e o link da Meta para cadastrar o cartão |
+| `availableMonths` | O primeiro e o último mês que podem ser consultados |
+
+### Erros
+
+| Situação | Resposta |
+|---|---|
+| `x-api-key` ausente ou de outra instância | `401` |
+| Instância que não é `cloud_api` | `400` |
+| `month` fora do formato `YYYY-MM` | `400` de validação |
+| `month` fora do intervalo consultável | `400` com `code: BILLING_MONTH_UNAVAILABLE` e o primeiro mês disponível em `detail` |
+
+Uma instância ainda sem nenhum dado **não** é erro: a resposta vem com os volumes zerados e o
+pagamento **não verificado**.
+
+## Limitações
+
+- A **franquia** é uma estimativa: a Meta não expõe um contador dela.
+- O **status de pagamento** é inferido: a Meta não informa se há cartão cadastrado.
+- Os **dados oficiais** chegam com algumas horas de atraso, e o **custo** só aparece quando a Meta
+  o informa (não informa, por exemplo, quando a conta usa a linha de crédito de um parceiro).
+- O **histórico** começa na data em que o recurso entrou no ar e guarda, no máximo, 13 meses.
+- Os avisos são **só no painel**: não há e-mail nem webhook para eles.
