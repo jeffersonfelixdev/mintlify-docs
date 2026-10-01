@@ -75,8 +75,12 @@ Dois avisos aparecem no topo das páginas da instância, só para o **mês corre
 ## Mensagens por categoria
 
 Quatro cards mostram o volume do mês em cada categoria de preço da Meta — **Marketing**,
-**Utility**, **Authentication** e **Serviço** — e o **total**. Uma categoria extra, **Outras**,
-aparece apenas quando há volume nela (por exemplo, conversões de indicação).
+**Utility**, **Authentication** e **Serviço** — e o **total**. Dois cards extras aparecem apenas
+quando há volume neles:
+
+- **Conversão de indicação**: mensagens de conversas abertas por anúncios que levam ao WhatsApp.
+  Elas não consomem a franquia de mensagens de serviço.
+- **Outras**: categorias de preço que a ZapperAPI ainda não reconhece.
 
 Cada card traz também o **custo**, na moeda da sua conta na Meta:
 
@@ -181,7 +185,7 @@ fuso da conta.
 | Campo | O que é |
 |---|---|
 | `freeTier` | Franquia de mensagens de serviço. `alertLevel` é `none`, `warning` (a partir de 80%) ou `exceeded` (a partir de 100%), e só vale no mês corrente |
-| `categories` | Volume e custo por categoria. As quatro principais sempre aparecem, mesmo zeradas. `cost` é `null` quando não há custo confirmado, e `costPending` indica volume em dias ainda não conferidos |
+| `categories` | Volume e custo por categoria (`marketing`, `utility`, `authentication`, `service`). As quatro principais sempre aparecem, mesmo zeradas; `referral_conversion` e `other` só aparecem com volume. `cost` é `null` quando não há custo confirmado, e `costPending` indica volume em dias ainda não conferidos |
 | `dataFreshness` | Até quando os dados são oficiais da Meta e, se a última conferência falhou, `reconcileFailure` com `kind` (`requires_reconnect`, `transient` ou `unexpected`), `since` e `message` |
 | `payment` | Status inferido do pagamento (`not_verified`, `problem_detected` ou `ok`), a origem da detecção (`problemSignal`) e o link da Meta para cadastrar o cartão |
 | `availableMonths` | O primeiro e o último mês que podem ser consultados |
