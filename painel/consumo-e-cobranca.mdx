@@ -86,8 +86,9 @@ Cada card traz também o **custo**, na moeda da sua conta na Meta:
 
 - O custo só é somado nos dias já **conferidos com a Meta**.
 - Quando há volume em dias ainda não conferidos, aparece **Custo a confirmar**.
-- **Custo indisponível** aparece quando a Meta não informa custo — por exemplo, quando a sua conta
-  usa a linha de crédito de um parceiro da Meta, que é quem recebe a cobrança.
+- **Custo indisponível** aparece quando a Meta não informa o custo a aplicativos parceiros, que é o
+  caso das contas conectadas pela ZapperAPI. O volume continua oficial; para ver o valor cobrado,
+  consulte **Cobrança e pagamentos** na sua conta da Meta. A tela mostra um aviso com isso.
 
 Num mês sem nenhuma entrega, os cards mostram zero e a tela informa **Nenhuma mensagem entregue
 neste mês**.
@@ -206,7 +207,7 @@ pagamento **não verificado**.
 
 - A **franquia** é uma estimativa: a Meta não expõe um contador dela.
 - O **status de pagamento** é inferido: a Meta não informa se há cartão cadastrado.
-- Os **dados oficiais** chegam com algumas horas de atraso, e o **custo** só aparece quando a Meta
-  o informa (não informa, por exemplo, quando a conta usa a linha de crédito de um parceiro).
+- Os **dados oficiais** chegam com algumas horas de atraso, e o **custo** não é informado pela Meta
+  a aplicativos parceiros: o volume é oficial, mas o valor cobrado fica na sua conta da Meta.
 - O **histórico** começa na data em que o recurso entrou no ar e guarda, no máximo, 13 meses.
 - Os avisos são **só no painel**: não há e-mail nem webhook para eles.
