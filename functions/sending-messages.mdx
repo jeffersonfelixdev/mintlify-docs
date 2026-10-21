@@ -173,11 +173,9 @@ janela continua sendo de 24 horas e o envio fora dela é recusado pela Meta.
 
 ### Citar uma mensagem no Instagram
 
-O `quotedMessageId` aceita o `mid` de uma mensagem do Instagram. A Meta documenta a
-citação só no **recebimento**, e o envio ainda precisa ser confirmado num teste real.
-Por isso a citação no Instagram vem **desligada** (`INSTAGRAM_SEND_REPLY_TO=false`): a
-mensagem sai normalmente, **sem** o balão de citação, e o envio não falha. Quando o
-envio for confirmado em homologação, basta ligar a variável. Diferente do WhatsApp,
+O `quotedMessageId` aceita o `mid` de uma mensagem do Instagram. A mensagem nunca
+deixa de ser enviada por causa da citação: se ela não puder ser aplicada, a
+mensagem sai normalmente, **sem** o balão de citação. Diferente do WhatsApp,
 o envio do Instagram não publica um `messages.upsert` de saída com o campo `quote`:
 o eco da mensagem enviada chega depois, pelo webhook da Meta, e traz a citação em
 `contextInfo.stanzaId` quando ela foi aplicada.
@@ -454,8 +452,7 @@ resposta é `400` e `validation` traz o caminho do cartão (por exemplo,
 | `text` do botão | Até 20 caracteres |
 | `id` do botão `reply` | Até 256 caracteres. É seu, e a API não o altera |
 
-A Meta não documenta o máximo de respostas rápidas por cartão; a API aceita até
-2, e esse limite pode subir quando a Meta o confirmar.
+A API aceita até 2 respostas rápidas por cartão.
 
 A imagem ou o vídeo de cada cartão vai para a Meta como link, sem upload prévio.
 Se a Meta não conseguir baixar uma mídia, o carrossel não é entregue e a mensagem

@@ -589,8 +589,7 @@ mensagem é descartada: um tipo que a ZapperHub ainda não conhece chega como
   resposta.
 - `callPermissionReplyMessage.expiresAt` é a data de validade da permissão em
   formato ISO 8601, e só vem em permissão temporária. `permanent` é `true` quando
-  o contato aceitou de forma permanente. O formato deste evento ainda está sendo
-  validado contra um webhook real da Meta.
+  o contato aceitou de forma permanente.
 - `systemMessage` informa o fato; a ZapperHub também atualiza o vínculo do
   contato quando se trata de troca de número ou de BSUID — veja
   [Identidade do contato](#identidade-do-contato-telefone-bsuid-e-username).
@@ -737,12 +736,11 @@ Na remoção, `update` vem só com o tipo:
 - A mesma edição ou remoção entregue duas vezes pela Meta gera um único evento.
 
 <Card title="ATENÇÃO">
-Hoje a Meta entrega as **edições** como mensagem de tipo não suportado, e não no
-formato próprio de edição. Por isso a **edição ainda não gera** `messages.update`:
-ela chega como `messages.upsert` com [`unsupportedMessage`](#outros-tipos-de-mensagem-recebidos)
-de `type` `edit`, sem o texto novo. A Meta informa que está restaurando o formato
-próprio; assim que ele voltar, a ZapperHub passa a publicar o evento de edição
-sem nenhuma mudança da sua parte. A **remoção** já funciona.
+A Meta entrega as **edições** como mensagem de tipo não suportado, e não no
+formato próprio de edição. Por isso a edição chega como `messages.upsert` com
+[`unsupportedMessage`](#outros-tipos-de-mensagem-recebidos) de `type` `edit`, sem
+o texto novo, e não como `messages.update`. A **remoção** gera `messages.update`
+normalmente.
 </Card>
 
 ### Escolha de opção em mensagem de lista
