@@ -1,0 +1,54 @@
+---
+title: "Novidades"
+description: "O que mudou na API da ZapperHub, com os avisos de mudança de comportamento"
+---
+
+<Update label="Outubro de 2026" description="Entrega e leitura na conexão não oficial" tags={["DEVICE", "Webhooks"]}>
+
+## Entrega e leitura de mensagens na DEVICE
+
+- O webhook **`messages.status`** agora também é disparado em conexão não oficial, com `status` `delivered` (dois checks) ou `read` (checks azuis). Quem já assina `messages.status` em instâncias oficiais passa a receber o evento também das DEVICE, com os mesmos campos `messageId`, `recipientId`, `status` e `timestamp`, mais `chatId`. Veja [Estado de entrega da mensagem](/integrations/webhooks#estado-de-entrega-da-mensagem).
+- Nova rota **`POST /{instanceId}/messages/read`** para avisar o WhatsApp de que mensagens recebidas foram lidas — [Marcar como lida](/functions/sending-messages#marcar-como-lida).
+
+</Update>
+
+<Update label="Outubro de 2026" description="Paridade com a API oficial da Meta" tags={["Cloud API", "Instagram", "Webhooks"]}>
+
+## Atenção: `messages.upsert` traz tipos novos
+
+Quem assina `messages.upsert` passa a receber, além das mensagens de antes:
+
+- **reações**, como `message.reactionMessage` (Cloud API e Instagram);
+- **resposta de Flow** (`flowResponseMessage`), **permissão de ligação** (`callPermissionReplyMessage`), **mensagem de sistema** (`systemMessage`), **pedido** (`orderMessage`) e **mensagem não suportada** (`unsupportedMessage`);
+- qualquer outro tipo que a Meta envie, como `unknownMessage`, com a mensagem original em `raw`.
+
+Nada do que já chegava mudou de formato: a mudança é aditiva. Mas um parser que rejeita campos desconhecidos em `message` pode estranhar, então vale tratar chaves novas com tolerância. Antes, esses eventos eram descartados em silêncio. Veja [Outros tipos de mensagem recebidos](/integrations/webhooks#outros-tipos-de-mensagem-recebidos).
+
+Uma mensagem `unsupported` continua gerando também o `messages.error` com o código 131051, como antes.
+
+## Novos eventos (opt-in)
+
+Estes eventos só chegam a quem os incluir em `subscriptions`; quem não assina continua recebendo exatamente o que recebia:
+
+| Evento | Quando |
+| --- | --- |
+| `messages.update` | O contato editou ou apagou uma mensagem (número em coexistência) |
+| `contacts.identity` | O vínculo entre telefone, BSUID e username de um contato mudou |
+| `contacts.preference` | O contato pediu para parar, ou voltou a aceitar, mensagens de marketing |
+
+## Novos recursos
+
+- **Citar uma mensagem** em qualquer envio, com `quotedMessageId` — [Responder citando uma mensagem](/functions/sending-messages#responder-citando-uma-mensagem).
+- **Reagir** também na Cloud API e no Instagram, e receber as reações dos contatos.
+- **Contatos**: consultar o vínculo de identidade, listar e marcar opt-outs de marketing, bloquear e desbloquear, e excluir os dados de um contato (LGPD) — [Contatos](/functions/contacts). Um template de marketing para quem pediu para não recebê-lo é recusado antes de ir para a fila, com `MARKETING_OPT_OUT`.
+- **Templates**: consultar por id, editar e excluir um único idioma — [Template](/functions/sending-messages#template).
+- **Carrossel** na Cloud API — [Carrossel](/functions/sending-messages#carrossel).
+- **Instagram**: `humanAgent` para responder em até 7 dias — [Responder em até 7 dias no Instagram](/functions/sending-messages#responder-em-ate-7-dias-no-instagram).
+- **Erros da Meta tipados**: recusas por regra conhecida respondem `422` com `code: "PROVIDER_REJECTED"`, o código original em `meta` e a explicação em português em `localizedMessage`.
+
+## Ainda dependem de confirmação da Meta
+
+- A **citação no Instagram** ainda não é enviada: a mensagem sai normalmente, sem o balão de citação, até a Meta confirmar o recurso no envio.
+- O formato de `callPermissionReplyMessage` está sendo validado contra um webhook real.
+
+</Update>

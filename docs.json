@@ -26,7 +26,8 @@
               "introduction",
               "creating-instance",
               "connecting-whatsapp",
-              "quickstart"
+              "quickstart",
+              "changelog"
             ]
           },
           {
@@ -47,6 +48,7 @@
             "pages": [
               "functions/messages",
               "functions/sending-messages",
+              "functions/contacts",
               "functions/chats",
               "functions/groups",
               "functions/calls",

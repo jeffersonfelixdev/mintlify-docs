@@ -18,7 +18,10 @@ uso de webhooks, a comunicação entre sistemas diferentes torna-se muito mais s
 | Evento | Quando dispara |
 | --- | --- |
 | `messages.upsert` | Uma mensagem foi recebida ou enviada pela instância |
-| `messages.status` | O estado de uma mensagem enviada mudou (enviada, entregue, lida, falhou). Apenas em conexão oficial |
+| `contacts.preference` | O contato pediu para parar (ou voltou a aceitar) mensagens de marketing, ou o integrador marcou isso pela API. Apenas em conexão oficial. **Assinatura opt-in** |
+| `contacts.identity` | O vínculo entre telefone, BSUID e username de um contato mudou. Apenas em conexão oficial. **Assinatura opt-in** |
+| `messages.update` | Uma mensagem recebida foi editada ou apagada pelo contato. Apenas em conexão oficial, e só em número em coexistência com o WhatsApp Business. **Assinatura opt-in** |
+| `messages.status` | O estado de uma mensagem enviada mudou. Em conexão oficial: enviada, entregue, lida ou falhou. Em conexão não oficial: entregue (dois checks) ou lida (checks azuis) |
 | `messages.error` | O envio de uma mensagem falhou em definitivo |
 | `connection.update` | A conexão da instância abriu ou fechou |
 | `group-participants.update` | Participantes entraram, saíram, foram promovidos ou rebaixados em um grupo. Apenas em conexão não oficial |
@@ -483,6 +486,265 @@ enviado.
 }
 ```
 
+**Reação** (Cloud API e Instagram)
+
+No Instagram, o evento chega com `trackSource: "instagram"`, o `key.id` é composto
+(`ig-reaction:<mid>:<remetente>:<timestamp>`) e a retirada vem com `removed: true`,
+como abaixo; o resto do formato é o mesmo.
+
+Quando o contato reage a uma mensagem — ou o número reage pelo aparelho, no modo
+de coexistência —, chega um `messages.upsert` com `reactionMessage`. O `key.id`
+do evento é o da **própria reação**; a mensagem reagida está em
+`reactionMessage.key.id`.
+
+```json
+{
+  "type": "messages.upsert",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "wamid.HBgLNTUxMjkxMjM0NTY3OBUCABIYFjNFQjA",
+    "senderPn": "5512912345678@s.whatsapp.net"
+  },
+  "messageTimestamp": 1744398716,
+  "pushName": "John Doe",
+  "broadcast": false,
+  "message": {
+    "reactionMessage": {
+      "key": {
+        "remoteJid": "5512912345678@s.whatsapp.net",
+        "fromMe": true,
+        "id": "3AB16AB78CD9012E89A0"
+      },
+      "text": "👍",
+      "senderTimestampMs": 1744398716000
+    }
+  },
+  "removed": false,
+  "trackSource": "whatsapp"
+}
+```
+
+- `reactionMessage.text` é o emoji. Quando o contato **retira** a reação, `text`
+  vem vazio (`""`) e `removed` vem `true`.
+- `reactionMessage.key.fromMe` indica de quem é a mensagem reagida: `true` quando
+  o contato reagiu a uma mensagem da empresa, `false` quando o número reagiu, pelo
+  aparelho, a uma mensagem do contato.
+- Uma segunda reação à mesma mensagem é um evento novo, com outro `key.id`.
+- Para reagir, use [`POST /{instanceId}/messages/react`](/functions/sending-messages#reagir-a-uma-mensagem).
+
+### Outros tipos de mensagem recebidos
+
+Tipo: `messages.upsert`
+
+Além de texto, mídia, localização, contato e resposta de botão ou lista, a conexão
+oficial (Cloud API) entrega os tipos abaixo. Todos chegam no mesmo envelope das
+demais mensagens recebidas (`chatId`, `key`, `messageTimestamp`, `pushName`) e
+aparecem em `GET /{instanceId}/messages` com o tipo correspondente. Nenhuma
+mensagem é descartada: um tipo que a ZapperHub ainda não conhece chega como
+`unknownMessage`.
+
+| Conteúdo em `message` | Quando chega | Campos |
+| --- | --- | --- |
+| `flowResponseMessage` | O contato responde a um Flow | `name`, `body`, `responseJson` e `contextInfo.stanzaId` (o Flow respondido) |
+| `callPermissionReplyMessage` | O contato responde ao pedido de permissão de ligação | `response` (`accept` ou `reject`), `expiresAt`, `permanent`, `source` e `contextInfo.stanzaId` |
+| `systemMessage` | A Meta avisa de uma mudança na conversa, como a troca de número do contato | `type` (por exemplo `user_changed_number` ou `user_changed_user_id`) e `body` |
+| `orderMessage` | O contato envia um pedido do catálogo | `catalogId`, `text` e `items[]` com `productRetailerId`, `quantity`, `itemPrice` e `currency` |
+| `unsupportedMessage` | A Meta não repassa o tipo (poll, edição fora da coexistência, etc.) | `type` (o tipo informado pela Meta, como `edit`) e `error` (`code`, `title`, `details`) |
+| `unknownMessage` | Qualquer tipo sem tratamento próprio | `type` (o tipo cru da Meta) e `raw` (a mensagem original) |
+
+```json
+{
+  "type": "messages.upsert",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "wamid.HBgNNTUxMjkxMjM0NTY3OBUC",
+    "senderPn": "5512912345678@s.whatsapp.net"
+  },
+  "messageTimestamp": 1785312060,
+  "pushName": "John Doe",
+  "broadcast": false,
+  "message": {
+    "flowResponseMessage": {
+      "name": "flow",
+      "body": "Enviado",
+      "responseJson": { "flow_token": "tk_123", "nome": "Maria" },
+      "contextInfo": {
+        "stanzaId": "wamid.FLOW",
+        "participant": "5511900000000@s.whatsapp.net"
+      }
+    }
+  },
+  "trackSource": "whatsapp"
+}
+```
+
+- `flowResponseMessage.responseJson` é o objeto que o Flow devolveu. Se a Meta
+  entregar um texto que não é JSON válido, ele vai como texto, sem perder a
+  resposta.
+- `callPermissionReplyMessage.expiresAt` é a data de validade da permissão em
+  formato ISO 8601, e só vem em permissão temporária. `permanent` é `true` quando
+  o contato aceitou de forma permanente. O formato deste evento ainda está sendo
+  validado contra um webhook real da Meta.
+- `systemMessage` informa o fato; a ZapperHub também atualiza o vínculo do
+  contato quando se trata de troca de número ou de BSUID — veja
+  [Identidade do contato](#identidade-do-contato-telefone-bsuid-e-username).
+- Uma mensagem `unsupported` continua gerando também o `messages.error` com o
+  código **131051**, como antes. A novidade é a mensagem em si chegar como
+  `messages.upsert`.
+- `unknownMessage.raw` leva a mensagem original da Meta, para que você trate o
+  tipo novo sem esperar uma atualização da ZapperHub.
+
+### Identidade do contato: telefone, BSUID e username
+
+A Meta passou a identificar os contatos por um **BSUID** (`BR.13491208655302741918`)
+e, quando o contato adota um **username**, pode deixar de informar o telefone. A
+ZapperHub guarda o vínculo entre os três, **por empresa (WABA) e por dono**: todas
+as suas instâncias na mesma WABA compartilham o vínculo, e ele nunca é visto por
+outro dono, mesmo que ele use a mesma WABA.
+
+**Como a conversa é identificada.** O `key.remoteJid` (e o `chatId`) de uma mensagem
+segue sempre esta ordem:
+
+1. o **telefone**, quando a Meta o informa no evento;
+2. o telefone **já conhecido** para aquele BSUID;
+3. o próprio **BSUID** (por exemplo, `BR.13491208655302741918`), quando o telefone
+   ainda é desconhecido.
+
+O `key.bsuid` e o `username` acompanham a mensagem sempre que são conhecidos — nas
+mensagens recebidas, nos **ecos** de mensagens enviadas pelo aparelho e nos
+[status de entrega](#estado-de-entrega-da-mensagem).
+
+Tipo: `contacts.identity`
+
+Quando o vínculo muda, a ZapperHub publica este evento em cada instância do mesmo
+dono na WABA. É por ele que você junta duas conversas que eram do mesmo contato.
+
+```json
+{
+  "type": "contacts.identity",
+  "instanceId": "inst_01hxyz1234567890",
+  "reason": "phone_discovered",
+  "previous": { "phone": null, "bsuid": "BR.13491208655302741918", "username": "fulano" },
+  "current": { "phone": "5512912345678", "bsuid": "BR.13491208655302741918", "username": "fulano" },
+  "chatId": {
+    "previous": "BR.13491208655302741918",
+    "current": "5512912345678@s.whatsapp.net"
+  },
+  "timestamp": 1760000000
+}
+```
+
+| `reason` | O que aconteceu |
+| --- | --- |
+| `phone_discovered` | Um contato que só tinha BSUID teve o telefone revelado |
+| `phone_changed` | O contato trocou de número |
+| `bsuid_changed` | O contato mudou de BSUID |
+| `link_removed` | O telefone passou a pertencer a outro BSUID e deixou este vínculo |
+
+- Use `chatId.previous` e `chatId.current` para migrar o histórico da conversa
+  antiga para a nova.
+- Uma entrega repetida da Meta não republica o evento.
+- A primeira vez que a ZapperHub vê um contato **não** gera evento: só mudanças.
+- A assinatura é **opt-in**: só recebe quem incluir `contacts.identity` em
+  `subscriptions`.
+
+### Opt-out de marketing
+
+Tipo: `contacts.preference`
+
+Quando um contato pede para **parar** (ou volta a **aceitar**) mensagens de
+marketing — pela Meta, ou à mão pela
+[API de contatos](/functions/contacts#opt-out-de-marketing) —, a ZapperHub publica
+este evento em **todas as instâncias do mesmo dono na mesma WABA**: a escolha vale
+para a empresa toda.
+
+```json
+{
+  "type": "contacts.preference",
+  "instanceId": "inst_01hxyz1234567890",
+  "contact": { "phone": "5512912345678", "bsuid": "BR.13491208655302741918" },
+  "category": "marketing_messages",
+  "status": "opted_out",
+  "source": "meta",
+  "timestamp": 1731705721
+}
+```
+
+- `status` é `opted_out` (não recebe marketing) ou `opted_in` (voltou a aceitar).
+- `source` é `meta` (o contato pediu) ou `manual` (o integrador marcou pela API).
+- `contact.phone` e `contact.bsuid` trazem o que a ZapperHub conhece do contato;
+  qualquer um pode ser `null`.
+- Entre a escolha da Meta e a manual vale a **mais recente**.
+- A mesma escolha repetida não gera um segundo evento.
+- Com `opted_out`, templates de **marketing** para o contato são recusados com
+  `MARKETING_OPT_OUT`; utilidade e autenticação seguem.
+- A assinatura é **opt-in**: só recebe quem incluir `contacts.preference` em
+  `subscriptions`.
+
+### Mensagem editada ou apagada
+
+Tipo: `messages.update`
+
+Quando o contato **edita** ou **apaga** uma mensagem — ou quando o próprio número
+faz isso pelo aparelho —, a ZapperHub avisa com este evento. Ele aponta para a
+mensagem **original**: `key.id` é o id dela, o mesmo que você recebeu antes em
+`messages.upsert`. O id do evento de edição ou remoção vem em `eventId`.
+
+```json
+{
+  "type": "messages.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "wamid.HBgLNTUxMjkxMjM0NTY3OBUCABIYFjNFQjA"
+  },
+  "update": {
+    "kind": "edited",
+    "message": {
+      "extendedTextMessage": { "text": "Texto corrigido" }
+    }
+  },
+  "eventId": "wamid.HBgLNTUxMjkxMjM0NTY3OBUCABIYFjNGQzE",
+  "timestamp": 1749854575
+}
+```
+
+Na remoção, `update` vem só com o tipo:
+
+```json
+{ "update": { "kind": "deleted" } }
+```
+
+- `update.kind` é `edited` ou `deleted`.
+- Na edição, `update.message` traz o **texto** novo (`extendedTextMessage`) ou a
+  **legenda** nova (`imageMessage`, `videoMessage` ou `documentMessage`, com
+  `caption`). A mídia em si não é reenviada, porque não muda numa edição de
+  legenda. Se a Meta não informar o conteúdo novo, `update.message` é omitido.
+- A assinatura é **opt-in**: só recebe quem incluir `messages.update` em
+  `subscriptions`. Quem assina apenas `messages.upsert` continua recebendo
+  exatamente o que recebia.
+- A Meta só envia estes eventos para números em **coexistência** com o app do
+  WhatsApp Business. A edição vale até **15 minutos** depois do envio, e a remoção
+  até **2 dias**.
+- A mesma edição ou remoção entregue duas vezes pela Meta gera um único evento.
+
+<Card title="ATENÇÃO">
+Hoje a Meta entrega as **edições** como mensagem de tipo não suportado, e não no
+formato próprio de edição. Por isso a **edição ainda não gera** `messages.update`:
+ela chega como `messages.upsert` com [`unsupportedMessage`](#outros-tipos-de-mensagem-recebidos)
+de `type` `edit`, sem o texto novo. A Meta informa que está restaurando o formato
+próprio; assim que ele voltar, a ZapperHub passa a publicar o evento de edição
+sem nenhuma mudança da sua parte. A **remoção** já funciona.
+</Card>
+
 ### Escolha de opção em mensagem de lista
 
 Tipo: `messages.upsert`
@@ -539,9 +801,10 @@ A resposta a uma mensagem com **botões** chega da mesma forma, em
 
 Tipo: `messages.status`
 
-Disparado em instâncias oficiais (Cloud API) a cada mudança de estado de uma
-mensagem enviada. O campo `status` acompanha os valores da Meta — `sent`,
-`delivered`, `read` e `failed` —, e `error` só aparece nas falhas.
+Disparado a cada mudança de estado de uma mensagem enviada, em instâncias
+oficiais (Cloud API) e não oficiais (DEVICE). Na Cloud API, o campo `status`
+acompanha os valores da Meta — `sent`, `delivered`, `read` e `failed` —, e
+`error` só aparece nas falhas.
 
 ```json
 {
@@ -553,6 +816,44 @@ mensagem enviada. O campo `status` acompanha os valores da Meta — `sent`,
   "timestamp": 1785312030
 }
 ```
+
+#### Em conexão não oficial (DEVICE)
+
+O evento chega com `status` `delivered` (dois checks) ou `read` (dois checks
+azuis), uma vez por mensagem — quando o WhatsApp agrupa vários recibos, cada
+mensagem do lote gera o seu evento. O `messageId` é o mesmo `key.id` recebido no
+`messages.upsert` do envio.
+
+```json
+{
+  "type": "messages.status",
+  "instanceId": "inst_01hxyz1234567890",
+  "messageId": "3AB16AB78CD9012E89A0",
+  "recipientId": "5512912345678",
+  "recipientPn": "5512912345678",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "status": "read",
+  "timestamp": 1785312030
+}
+```
+
+- `chatId` é a conversa. Quando ela é identificada por LID, o evento traz
+  `recipientLid` com o LID e, se a ZapperHub já conhece o vínculo,
+  `recipientPn` com o telefone; sem o vínculo, `recipientId` carrega o LID.
+- Não há `sent` nem `failed` em conexão não oficial: a confirmação de envio é a
+  resposta da API, e a falha definitiva chega em `messages.error`.
+- Recibos de **grupo** não são entregues.
+- Se o contato desativou a confirmação de leitura nas configurações de
+  privacidade do WhatsApp, o evento `read` não chega — só o `delivered`.
+- Para avisar o WhatsApp de que **você** leu uma mensagem, use
+  [Marcar como lida](/functions/sending-messages#marcar-como-lida).
+
+#### Em conexão oficial (Cloud API)
+
+Quando a ZapperHub conhece o BSUID ou o username do destinatário — porque a Meta
+os informou no próprio status ou porque o contato já tinha escrito antes —, o
+evento traz também `bsuid` e `username`. Se o destinatário não tem telefone
+visível, `recipientId` carrega o BSUID.
 
 ### Falha no envio de mensagens
 
@@ -600,6 +901,11 @@ Ele vale para **todos os tipos de mensagem** enviados pela API.
   rede.
 - `error.error_data.details` traz o erro real do envio; `error.message` é a
   descrição estável do código.
+- `error.localizedMessage` traz a explicação **em português** para os códigos da
+  Meta que a ZapperHub conhece (por exemplo, `131047`: "Passaram mais de 24 horas
+  desde a última mensagem do contato. Envie um template de mensagem.").
+  O campo só aparece quando há tradução; os demais campos do bloco `error` não
+  mudam.
 - `key.id` é derivado do job (`job_<jobId>`), e não do provedor — o envio nunca
   chegou a produzir um id de mensagem. É também o que distingue uma falha nascida
   na nossa fila de um erro reportado pela Meta.
