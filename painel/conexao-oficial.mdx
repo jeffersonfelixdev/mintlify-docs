@@ -22,8 +22,8 @@ coisas diferentes de você:
 | **Link de conexão com Facebook** | Quem tem o Facebook não é quem administra o painel | Nada — o link basta a quem recebe |
 | **Configuração manual (Meta)** | Você já tem app e tokens próprios na Meta | Token do usuário do sistema e IDs da Meta |
 
-Há ainda a **Configuração manual (Gupshup)**, para quem opera pela Gupshup — descrita mais
-abaixo.
+Nas instâncias **v2** há ainda a **Configuração manual (Gupshup)**, para quem opera pela
+Gupshup — descrita mais abaixo.
 
 ### 1. Conectar com Facebook
 
@@ -101,18 +101,27 @@ Ao final, **Concluir**.
 
 ## Configuração manual (Gupshup)
 
-Para quem já opera o número pela Gupshup. O tipo de conexão passa a ser **Gupshup**.
+Para quem já opera o número pela Gupshup. A opção só aparece em instâncias **v2** — a versão
+indicada na listagem de instâncias. O tipo de conexão passa a ser **Gupshup**.
 
 | Campo | Obrigatório | Validação |
 |---|---|---|
 | **Nome do app** | Sim | o nome do app na Gupshup |
 | **API Key do Gupshup** | Sim | a chave da sua conta Gupshup |
-| **ID do número de telefone** | Sim | identificador do número |
 | **Número do telefone conectado** | Sim | somente números, com o código internacional |
-| **URL do Webhook de encaminhamento** | Não | URL para onde encaminhar os eventos |
+| **URL de encaminhamento do Webhook** | Não | URL para onde encaminhar os eventos |
 
-A seção **Configuração do Webhook do Gupshup** orienta: *Siga as instruções na documentação do
-Gupshup para configurar o webhook.* — a configuração é feita **no painel da Gupshup**, não aqui.
+Ao conectar, a tela mostra a **URL de Callback** — o Gupshup não usa token de verificação. Essa
+URL é configurada **no painel da Gupshup**:
+
+<Steps>
+  <Step title="Acesse o seu app na Gupshup" />
+  <Step title="Vá para a aba Webhooks e clique em Add Webhook" />
+  <Step title="Dê um nome ao webhook (ex: ZapperHub) e cole a URL de Callback no campo callback URL" />
+  <Step title="Em Payload Format, selecione Gupshup format (v2)" />
+  <Step title="Em Message Events, marque Message e Sent" />
+  <Step title="Salve as configurações" />
+</Steps>
 
 ## Modo de coexistência
 
