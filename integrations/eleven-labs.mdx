@@ -1,54 +1,65 @@
 ---
 title: ElevenLabs
-description: "Conecte a ZapperHub nesta poderosa ferramenta de texto para fala e dê um toque diferenciado nos seus atendimentos."
+description: "Conectar a ElevenLabs à instância para enviar mensagens de voz sintetizada"
 ---
-## Introdução
 
-**O que é a ElevenLabs**
+## Descrição
 
-A ElevenLabs é uma empresa de software especializada no desenvolvimento de aplicações
-baseadas em síntese de voz natural, utilizando LLM de aprendizado profundo, com
-possibilidade de escolher tom de voz, velocidade, timbre e até sotaques regionais.
+A ElevenLabs é um serviço de síntese de voz. Ele converte texto em áudio com
+escolha de voz, velocidade, timbre e sotaque.
 
-O cadastro na ElevenLabs é gratuito e pode ser feito <a href="https://elevenlabs.io">aqui</a>.
+Com a integração, a instância envia notas de voz geradas a partir de texto, e o
+agente de IA pode responder em áudio.
 
+## Pré-requisitos
 
-## Como integrar a ElevenLabs à ZapperHub
+- Uma conta na [ElevenLabs](https://elevenlabs.io). O cadastro é gratuito.
+- Uma chave de API da ElevenLabs. Gere a chave em
+  [elevenlabs.io/app/settings/api-keys](https://elevenlabs.io/app/settings/api-keys).
+  A chave precisa de acesso a **Text to Speech** e a **Voices** (ao menos leitura).
+
+## Cadastrar a chave
 
 ### Pela API
 
-Para poder utilizar a integração com a ElevenLabs via API, consulte a 
-<a href="/api-reference/elevenlabs/atualizar-api-key-da-elevenlabs">Seção ElevenLabs</a> na 
-documentação de referência da API para criar ou atualizar a chave de API da ElevenLabs,
-bem como escolher uma voz padrão de uso.
+Use a rota
+[Atualizar API Key da ElevenLabs](/api-reference/elevenlabs/atualizar-api-key-da-elevenlabs)
+para cadastrar a chave e escolher uma voz padrão.
 
-### Pelo Dashboard
+### Pelo painel
 
-Para facilitar, disponibilizamos essa configuração pelo Dashboard:
+<Steps>
+  <Step title="Abra a instância">
+    Acesse [app.zapperhub.com/dash](https://app.zapperhub.com/dash) e clique na instância.
+  </Step>
+  <Step title="Abra a tela de texto para fala">
+    Clique em **Texto para Fala**.
+  </Step>
+  <Step title="Salve a chave">
+    Preencha **Chave da API da ElevenLabs** e clique em **Atualizar**.
+  </Step>
+</Steps>
 
-- Acesse o dashboard em https://app.zapperhub.com/dash;
-- Clique sobre a instância desejada;
-- Selecione a guia **Texto para Fala**;
-- Preencha o campo Chave da API ElevenLabs e clique em **Atualizar**.
+Veja os detalhes da tela em [Texto para fala](/painel/text-to-speech).
 
-Você consegue obter uma chave de API da ElevenLabs a partir <a href="https://elevenlabs.io/app/settings/api-keys" target="_blank">deste link</a>.
+## Responder em áudio com o agente de IA
 
-### Responder mensagens enviadas pelo agente de IA utilizando áudio
+Com esta configuração, o agente de IA responde em áudio quando o contato envia a
+pergunta em áudio.
 
-Você poderá configurar que seu agente de IA responda mensagens de áudio utilizando
-a integração com a ElevenLabs, caso o usuário tenha enviado a pergunta com áudio.
+<Steps>
+  <Step title="Abra as configurações da instância">
+    Na instância, clique em **Configurações**.
+  </Step>
+  <Step title="Escolha a voz padrão">
+    Na aba **Mensagens**, selecione a voz em **Voz padrão ElevenLabs**.
+  </Step>
+  <Step title="Ative a resposta em áudio">
+    Na aba **Integração**, ative **Responder com áudio**. Salve.
+  </Step>
+</Steps>
 
-Para isso, siga os seguintes passos:
-
-- Acesse o dashboard e clique em sua instância;
-- Selecione a guia **Configurações**;
-- Na seção **Mensagens**, selecione a voz que deseja usar como padrão;
-- Na seção **Integração AI**, marque a opção **Responder com áudio**.
-
-Pronto! Sua integração da ElevenLabs agora vai cuidar de todo o processo de 
-converter o texto do agente para áudio e enviar para o usuário!
-
-<Card title="IMPORTANTE">
-O agente só vai responder em áudio quando for interrogado em áudio.
-</Card>
-
+<Note>
+O agente só responde em áudio quando a pergunta chega em áudio. Uma pergunta em
+texto recebe resposta em texto.
+</Note>

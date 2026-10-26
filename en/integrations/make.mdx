@@ -1,0 +1,99 @@
+---
+title: Make
+description: "Use ZapperHub in a Make scenario, through the ZapperHub app or the HTTP module"
+---
+
+## Description
+
+There are two ways to use ZapperHub in Make:
+
+| Way | When to use |
+|---|---|
+| **ZapperHub app** | Recommended. It covers most cases. The fields are guided, with less chance of error. |
+| **HTTP module (native to Make)** | When the ZapperHub app does not have the required module. It requires the manual entry of the URL, the method, and the JSON. |
+
+## Preliminary requirements
+
+- The URL, the id, and the API key of the instance. See [Quickstart](/en/quickstart).
+- To install the app: `Admin`, `Owner`, or `App Developer` permission in the Make
+  organization. Without the permission, send this page to your manager to do
+  steps 1 to 4.
+
+## ZapperHub app
+
+<Steps>
+  <Step title="Open the app invitation">
+    Go to [the app installation link](https://us2.make.com/app/invite/23387626ccaf253247e64f57566ffa15).
+  </Step>
+  <Step title="Install">
+    Click **Install**.
+
+    ![Install button of the ZapperHub app](/integrations/make-step-1.png)
+  </Step>
+  <Step title="Choose the organization">
+    Select the organization where the app will be installed. Click **Install**.
+
+    ![Organization selection](/integrations/make-step-2.png)
+  </Step>
+  <Step title="Finish the installation">
+    Click **Finish Wizard**.
+
+    ![Finish Wizard button](/integrations/make-step-3.png)
+  </Step>
+  <Step title="Add the module to the scenario">
+    In the scenario, add a new module and search for **ZapperHub**.
+
+    ![Search for the ZapperHub module](/integrations/make-step-4.png)
+  </Step>
+  <Step title="Create the connection">
+    Select the module. If there is no connection yet, click **Create a connection**.
+
+    ![Create a connection button](/integrations/make-step-5.png)
+  </Step>
+  <Step title="Enter the instance data">
+    Fill in the **Instance id** and the **API Key**. Both are in the
+    [panel](https://app.zapperhub.com/dash).
+
+    ![Connection form with id and key](/integrations/make-step-6.png)
+  </Step>
+  <Step title="Fill in the module">
+    Fill in the module fields. The example shows the text message module.
+
+    ![Fields of the text send module](/integrations/make-step-7.png)
+  </Step>
+</Steps>
+
+## HTTP module (native to Make)
+
+<Steps>
+  <Step title="Add the HTTP module">
+    In the scenario, add the **HTTP** > **Make an API Key Auth request** module.
+
+    ![HTTP Make an API Key Auth request module](/integrations/make-http-step-1.png)
+  </Step>
+  <Step title="Select or create the credential">
+    In **Credentials**, select the ZapperHub credential. If there is none, click **Create a keychain**.
+
+    ![Credential selection](/integrations/make-http-step-2.png)
+  </Step>
+  <Step title="Fill in the credential">
+    In **Add new keychain**, fill in **Key** with the API key of the instance. Keep the other fields at their defaults.
+
+    ![Add new keychain form](/integrations/make-http-step-3.png)
+  </Step>
+  <Step title="Fill in the request">
+    In **URL**, enter the complete URL of the route. Example, for a text
+    message: `https://api.zapperhub.com/{instanceId}/messages/text`. In
+    **Method**, select the method, such as `POST`. Fill in the data as JSON.
+
+    ![URL, method, and body fields of the request](/integrations/make-http-step-4.png)
+  </Step>
+  <Step title="Save">
+    Click **Save**.
+  </Step>
+</Steps>
+
+<Note>
+Format the phone number with no parentheses, spaces, or dashes. See
+[Number format](/en/definitions/number-format).
+</Note>

@@ -1,76 +1,47 @@
 ---
-title: Conexão com WhatsApp
-description: "Saiba como utilizar as rotas protegidas de sua ZapperHub"
+title: Conexão com o WhatsApp
+description: "O que é uma instância e quais são as formas de conexão"
 ---
 
-## Introdução
+## Instância
 
-Cada número conectado na ZapperHub recebe o nome de *Instância*, que nada mais
-é que um serviço rodando em nossa infraestrutura responsável pela comunicação
-com o WhatsApp.
+Uma instância é um serviço da ZapperHub que faz a comunicação com um número de
+WhatsApp. Cada instância conecta um único número.
 
-Cada instância conecta-se com um só número, e é executada em um ambiente isolado,
-garantindo assim maior segurança e performance. Dessa forma, sua instância não 
-será prejudicada pelo excesso de uso de recursos de outra instância, por exemplo.
+Cada instância roda em um ambiente isolado. O uso de recursos de uma instância
+não afeta outra instância, mesmo na mesma conta. Esse isolamento garante
+ambientes separados para cada cliente seu.
 
-Até mesmo instâncias criadas na mesma conta recebem esse tratamento, garantindo
-assim que seus clientes tenham ambientes separados e com alta disponibilidade.
+## Formas de conexão
 
-## Forma de conexão
+| Forma | Tipo | Descrição |
+|---|---|---|
+| **Conectar com Facebook** | API oficial | Recomendada. A Meta guia a autorização do número no próprio site dela. |
+| **Configuração manual (Meta)** | API oficial | Você cria um app na Meta, gera os tokens e cadastra o webhook. |
+| **Gupshup** | API oficial | Para quem já opera o número pela Gupshup. O webhook é configurado na Gupshup, não na ZapperHub. |
+| **QR Code** | API não oficial | O celular lê um QR Code em **Dispositivos conectados** > **Conectar dispositivo**. |
+| **Código de pareamento** | API não oficial | Você digita no celular um código de 8 letras e números. |
+| **FastLink** | API oficial e não oficial | Um link temporário para outra pessoa conectar o número, sem acesso ao painel. Indicado para agências. |
+| **ZapperHub Connect** | API não oficial | Extensão do Chrome para aparelhos que exigem chave de acesso no WhatsApp Web. Veja [ZapperHub Connect](/definitions/zapperhub-connect). |
+| **Instagram** | Instagram | Conecta uma conta profissional do Instagram à instância, para mensagens diretas e interações. |
 
-Há diversas formas de conexão com a ZapperHub:
+Na conexão por QR Code ou por código de pareamento, a instância funciona como o
+WhatsApp Web. O celular registra a instância como um dispositivo conectado.
 
-- **[API Oficial] Conectar com Facebook (recomendada)**: Você será guiado por um fluxo diretamente
-no site da Meta para se conectar com a API Oficial do WhatsApp;
+<Warning>
+**Risco de bloqueio.** A conexão não oficial está sujeita a restrições e
+bloqueios da Meta. Use a API oficial da Meta sempre que possível. A ZapperHub é
+Meta Business Provider: você não precisa criar apps nem fazer configurações
+manuais, e a ZapperHub cuida do suporte junto à Meta.
+</Warning>
 
-- **[API Oficial] Conexão Manual Meta**: Neste caminho, você precisa criar um app na Meta, gerar tokens e 
-cadastrar webhooks.
+## Onde operar cada forma
 
-- **[API Oficial] Gupshup**: destinada a quem já opera o número por meio da Gupshup. A conexão é
-feita com as credenciais da conta Gupshup, e o webhook é configurado na plataforma da Gupshup, não
-na ZapperHub.
-
-- **[API Não Oficial] QR Code**: um QR Code é exibido para ser lido pelo seu dispositivo móvel 
-(Menu de configurações - Dispositivos conectados - Adicionar dispositibo);
-
-- **[API Não Oficial] Código de pareamento**: um código de 8 letras e números é exibido para ser 
-digitado em seu dispositivo quando solicitado;
-
-- **[API Oficial e Não Oficial] FastLink**: Uma exclusividade da ZapperHub é o FastLink, ideal para agências com muitos clientes.
-Trata-se de um link temporário que é gerado para ser enviado para seu cliente fazer 
-a conexão por QR Code ou por login via Facebook. Com isso, seu cliente não precisa ter acesso ao painel 
-de administração da ZapperHub para conectar o WhatsApp.
-
-- **[API Não Oficial] Extensão do Chrome ZapperHub Connect**: Para alguns dispositivos, o WhatsApp exige uma verificação adicional
-com chave de acesso para se conectar com o WhatsApp Web. Nestes casos, é necessário
-instalar a extensão **ZapperHub Connect** em seu navegador Chrome para se conectar
-na ZapperHub. Para mais informações, consulte a seção <a href="/definitions/zapperhub-connect">ZapperHub Connect</a>
-e veja como utilizar a extensão em seu navegador.
-
-- **[Instagram] Conta profissional do Instagram**: Além do WhatsApp, uma instância pode ser ligada
-a uma conta profissional do Instagram, para tratar mensagens diretas e interações. A autorização é
-feita no próprio Instagram, e a conta precisa ser profissional — comercial ou de criador de
-conteúdo.
-
-Nas conexões com QR Code ou código de pareamento (método não oficial), as instâncias 
-da ZapperHub funcionam exatamente como o WhatsApp Web: necessitam de ser
-adicionadas como dispositivo conectado em seu app no celular. 
-
-<Card title="IMPORTANTE">
-Devido aos riscos de restrições e banimentos, recomendamos fortemente o uso da
-**API Oficial da Meta**. A ZapperHub é Meta Business Provider, e fazendo a conexão
-conosco, você não precisa de se preocupar em criar apps, fazer configurações manuais.
-Nós cuidamos ainda de todo o suporte junto à Meta. Como Meta Business Provider,
-temos suporte prioritário e canal exclusivo para atendimento de nossos clientes.
-</Card>
-
-## Onde cada forma é operada
-
-Esta página explica **o que é** cada forma de conexão. O passo a passo de operação — onde cada
-opção fica e o que preencher — está no tab Painel:
+Esta página descreve o que é cada forma de conexão. O procedimento de cada uma
+está na aba Painel:
 
 | Forma de conexão | Página do Painel |
 |---|---|
-| Conectar com Facebook, Conexão Manual Meta, Gupshup | [Conexão oficial](/painel/conexao-oficial) |
+| Conectar com Facebook, Configuração manual (Meta), Gupshup | [Conexão oficial](/painel/conexao-oficial) |
 | QR Code, Código de pareamento, FastLink, ZapperHub Connect | [Conexão não oficial](/painel/conexao-nao-oficial) |
 | Conta profissional do Instagram | [Instagram](/painel/instagram) |

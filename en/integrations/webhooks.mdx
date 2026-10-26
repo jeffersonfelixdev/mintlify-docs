@@ -1,0 +1,1280 @@
+---
+title: Webhooks
+description: "Receive the instance events in your application, with the structure and examples of each event"
+---
+
+## Description
+
+A webhook is an HTTP request that ZapperHub sends to your application when an
+event happens on the instance. The webhook replaces periodic polling: the
+application receives the data at the moment of the event.
+
+## Available events
+
+| Event | When it is published |
+| --- | --- |
+| `messages.upsert` | The instance received or sent a message |
+| `contacts.preference` | The contact asked to stop, or to resume, marketing messages. Or the integrator set it through the API. Official connection only. Opt-in subscription |
+| `contacts.identity` | The link between phone, BSUID, and username of a contact changed. Official connection only. Opt-in subscription |
+| `messages.update` | The contact edited or deleted a received message. Official connection only, on a number in coexistence with WhatsApp Business. Opt-in subscription |
+| `messages.status` | The state of a sent message changed. Official connection: sent, delivered, read, or failed. Unofficial connection: delivered or read |
+| `messages.error` | The send of a message failed permanently |
+| `connection.update` | The instance connection opened or closed |
+| `group-participants.update` | Participants joined, left, were promoted, or were demoted in a group. Unofficial connection only |
+| `calls.update` | A voice or video call was received, answered, or ended. Official and unofficial connections |
+| `comments.upsert` | The account received a comment on a post. Instagram instances only |
+| `token.expired` | The Instagram token expired or was revoked. It requires a new authorization |
+| `token.refresh.failed` | An attempt to renew the Instagram token failed |
+| `webhook.test` | Test request, sent once at the webhook registration |
+
+Each webhook receives only the events it subscribed to. The subscription is the
+`subscriptions` list given at registration.
+
+## Register a webhook
+
+### In the panel
+
+Open **Instances**, select the instance, open **Webhook**, and click **New
+Webhook**. The procedure, the validations, and the limit of webhooks per instance
+are in [Webhooks in the panel](/en/panel/webhooks).
+
+### Through the API
+
+Send `POST /{instanceId}/webhooks` with a name, the URL, and the events:
+
+```json
+{
+  "name": "Integração CRM",
+  "url": "https://exemplo.com/webhooks/zapperhub",
+  "subscriptions": ["messages.upsert", "messages.error", "connection.update"]
+}
+```
+
+The URL must use HTTPS. Before it creates the registration, ZapperHub sends a
+`POST` test request (`webhook.test`) to the URL. If the URL does not respond with
+success, ZapperHub does not create the webhook.
+
+The routes to list, update, and delete are in the
+[Webhooks](/api-reference/webhook/listar-webhooks) section of the API Reference.
+
+## Request authenticity
+
+Every delivery carries the `x-webhook-signature` header. The value is the
+HMAC-SHA256 of the request body, exactly as received, with the API key of the
+instance as the secret. The requests carry the `User-Agent` `ZapperHub API`.
+
+To validate, recompute the signature over the raw body and compare:
+
+```javascript
+import { createHmac, timingSafeEqual } from 'node:crypto'
+
+function isFromZapperHub(rawBody, signature, apiKey) {
+  const expected = createHmac('sha256', apiKey).update(rawBody, 'utf8').digest('hex')
+  return timingSafeEqual(Buffer.from(expected), Buffer.from(signature))
+}
+```
+
+<Warning>
+**Validate the signature.** The signature is the only way to make sure that the
+request came from ZapperHub. The validation is the responsibility of your
+application. Protect the application also with other rules, such as rate limits
+and TLS. Do not send the API key to third parties.
+</Warning>
+
+<Note>
+The test request at registration (`webhook.test`) is the only one with no
+signature. It happens before the webhook exists.
+</Note>
+
+## Delivery
+
+ZapperHub delivers each event through its own queue, with 5 attempts and an
+increasing interval, from 10 seconds. Each attempt has a 7-second timeout. A URL
+that takes longer counts as a failure.
+
+Respond with a success status as fast as possible. Process the content after the
+response.
+
+ZapperHub records each attempt in a delivery receipt, with the time and the
+error, when there is one. Query the receipts with
+`GET /{instanceId}/webhook-receipts` or in **View delivery receipts**, in the
+[Message log](/en/panel/message-log).
+
+<Note>
+ZapperHub keeps the files received through webhooks for 7 days. See
+[File storage](/en/definitions/storage).
+</Note>
+
+## Events of the own session
+
+The webhook also carries the messages sent by the connected account itself. The
+reason is the queue: at the moment of the send, the API returns only the `jobId`,
+not the message id.
+
+A message with the `jobId` field was sent by ZapperHub. A message sent by another
+device does not have this field.
+
+## Payload structure
+
+The message events share the same structure. The content of the `message` object
+changes with the type.
+
+| Field | Content |
+| --- | --- |
+| `type` | The event, one of the list above |
+| `instanceId` | Id of the instance that generated the event |
+| `chatId` | Id of the chat |
+| `key.remoteJid` | JID of the chat: the contact or the group |
+| `key.fromMe` | `true` when the message came from the connected account |
+| `key.id` | Id of the message in WhatsApp |
+| `key.senderPn` / `key.senderLid` | Number and LID of the sender, in an individual chat |
+| `key.participantPn` / `key.participantLid` | Number and LID of the sender, in a group |
+| `messageTimestamp` | Time of the message, in seconds |
+| `pushName` | Display name of the sender |
+| `message` | The content, in the format of the message type |
+| `mediaUrl` | URL of the processed file, in media messages |
+| `jobId` | Id of the job in the queue. Present in messages sent through the API |
+| `trackId` / `trackSource` | The values given at the send. In received messages, `trackSource` is `whatsapp` |
+
+On the official connection (Cloud API), the events also carry the original body
+from Meta, in the `object` and `entry` fields.
+
+## Payload examples
+
+### Webhook test
+
+Type: `webhook.test`
+
+ZapperHub sends this event once, at registration, to check that the URL accepts
+`POST` requests.
+
+```json
+{
+  "type": "webhook.test",
+  "instanceId": "inst_01hxyz1234567890",
+  "message": "If you see this message, your webhook is working correctly."
+}
+```
+
+### Connection update
+
+Type: `connection.update`
+
+Published when the instance connects (`open`) or disconnects (`close`). The
+`reason` field appears on disconnections with a known cause, such as an account
+removed at Meta or an expired Instagram token.
+
+```json
+{
+  "type": "connection.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "connection": "close",
+  "reason": "token_expired"
+}
+```
+
+### Received messages
+
+Type: `messages.upsert`
+
+**Text message**
+
+```json
+{
+  "type": "messages.upsert",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "3AB16AB78CD9012E89A0",
+    "senderPn": "5512912345678@s.whatsapp.net"
+  },
+  "messageTimestamp": 1744398716,
+  "pushName": "John Doe",
+  "broadcast": false,
+  "message": {
+    "conversation": "Hello world from ZapperHub",
+    "messageContextInfo": {
+      "deviceListMetadata": {
+        "senderKeyHash": "aBCd1234==",
+        "senderTimestamp": "1744145094",
+        "recipientKeyHash": "ZyXpto1234==",
+        "recipientTimestamp": "1744348039"
+      },
+      "deviceListMetadataVersion": 2,
+      "messageSecret": "abcdef123456/9876Xpto="
+    }
+  },
+  "trackSource": "whatsapp"
+}
+```
+
+**Audio message**
+
+```json
+{
+  "type": "messages.upsert",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "78AD14337B2A86AFCC956A4C728481EB"
+  },
+  "messageTimestamp": 1744399258,
+  "pushName": "John Doe",
+  "broadcast": false,
+  "message": {
+    "audioMessage": {
+      "url": "https://mmg.whatsapp.net/v/test_url?mms3=true",
+      "mimetype": "audio/ogg; codecs=opus",
+      "fileSha256": "AbcDefGh12345=",
+      "fileLength": "8500",
+      "seconds": 4,
+      "ptt": true,
+      "mediaKey": "yXpto1234=",
+      "fileEncSha256": "aBC/DeFGh1234/6g788afrgHDs1234=",
+      "directPath": "/v/t62.7117-24/avcd_12r4fs.enc?ccb=12-5oh=f34urjfhei&oe=15f6d&_nc_sid=5a12a0",
+      "mediaKeyTimestamp": "1744399255",
+      "waveform": "AAAAABBBBB12234=="
+    },
+    "messageContextInfo": {
+      "deviceListMetadata": {
+        "senderKeyHash": "iDads+fds3D==",
+        "senderTimestamp": "1744145094",
+        "recipientKeyHash": "Cefgr+df==",
+        "recipientTimestamp": "1744348039"
+      },
+      "deviceListMetadataVersion": 2,
+      "messageSecret": "LRfsdg3rg21fdg3eY="
+    }
+  },
+  "mediaUrl": "https://storage.zapperapi.com/media/551245678900/5512912345678/1744399258603-548723645df463782eacd43.oga"
+}
+```
+
+**Document**
+
+```json
+{
+  "type": "messages.upsert",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "195AE8577DAD7DA921BE6AEA4255E196"
+  },
+  "messageTimestamp": 1744400179,
+  "pushName": "Will Smith",
+  "broadcast": false,
+  "message": {
+    "documentMessage": {
+      "url": "https://mmg.whatsapp.net/v/t62.7119-24/12345694_4321098765412345_8789897654456789907_n.enc?ccb=11-4&oh=01_Q5Aa1QFSK-_SYsySdefsfsfz5w6HceIfsdfhBaT7A2o-oQ&oe=682fsdf84B&_nc_sid=5fsa3e0&mms3=true",
+      "mimetype": "application/pdf",
+      "fileSha256": "MNg59Afdsfsfs9dqyifSwsdgfsDk2s=",
+      "fileLength": "23025",
+      "pageCount": 12,
+      "mediaKey": "OLOuiVpfewdfgsdKBXY38lfsdfswlWPoVuLuooQ=",
+      "fileName": "senhas-pati.pdf",
+      "fileEncSha256": "Ig+efdf32ferfwefsdYjteErfvJfdsfsW+CKCl6dqE=",
+      "directPath": "/v/t62.7119-24/12345694_4321098765412345_8789897654456789907_n.enc?ccb=11-4&oh=01_fv2zV3bq-P1dHWGgdfgdfgYPFgXO0ZvgfdgsdAdN5FHQ-oQ&oe=682550E337&_nc_sid=5103e0",
+      "mediaKeyTimestamp": "1744400177",
+      "thumbnailDirectPath": "/v/t62.36145-24/2345678_1234567890_198765432101234567_n.enc?ccb=11-4&oh=01_fv2zV3bq-P1dHWGgdfgdfgYPFgXO0ZvgfdgsdAdN5FHQ&oe=682550E337&_nc_sid=5103e0",
+      "thumbnailSha256": "qQmdwefkerswgfrwe3=",
+      "thumbnailEncSha256": "qqpl+fdsafasf=",
+      "jpegThumbnail": "/9j/fdsfsdfdsADds+fed3==",
+      "thumbnailHeight": 480,
+      "thumbnailWidth": 370,
+      "caption": "Documentação em anexo"
+    },
+    "messageContextInfo": {
+      "deviceListMetadata": {
+        "senderKeyHash": "fdsi+WderiDJqg==",
+        "senderTimestamp": "1744145094",
+        "recipientKeyHash": "Cifre3f9d==",
+        "recipientTimestamp": "1744348039"
+      },
+      "deviceListMetadataVersion": 2,
+      "messageSecret": "OHJdikejwoxi+ferDsd="
+    }
+  },
+  "mediaUrl": "https://storage.zapperapi.com/media/551245678900/5512912345678/1744400179958-ad37655efdc1489a987d6f698c9e87.pdf"
+}
+```
+
+**Image**
+
+```json
+{
+  "type": "messages.upsert",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "7B3F1FA5E211E42FEDFA1F2143A102D6"
+  },
+  "messageTimestamp": 1744400576,
+  "pushName": "Will Smith",
+  "broadcast": false,
+  "message": {
+    "imageMessage": {
+      "url": "https://mmg.whatsapp.net/v/t62.7118-24/321561_156151_651651_n.enc?ccb=11-4&oh=gfdgdfgd&oe=126456&_nc_sid=5e03e0&mms3=true",
+      "mimetype": "image/jpeg",
+      "fileSha256": "fhjd0jieruygvj0wer9+Fo=",
+      "fileLength": "12525",
+      "height": 640,
+      "width": 480,
+      "mediaKey": "gdfgds+erggdfg+hSKU=",
+      "fileEncSha256": "Hfewghjsodgfhj=",
+      "directPath": "/v/t62.7118-24/123456_123456_15645.enc?ccb=11-4&oh=4g65sd1g6sd5&oe=f1sdf3s&_nc_sid=5e03e0",
+      "mediaKeyTimestamp": "1744363528",
+      "jpegThumbnail": "/9j/FIRWEUGFH93RUGH/sfhjsdf/2c7Z//////////////fdfg3/Zztn////////////////gsdfgs/sfds/dd/AAAA/AAAA+gfg3+",
+      "scansSidecar": "fdf3erfgs+gs==",
+      "scanLengths": [
+        1234,
+        4321
+      ],
+      "midQualityFileSha256": "sdfsdf/fdf/df/sdfsaf="
+    },
+    "messageContextInfo": {
+      "deviceListMetadata": {
+        "senderKeyHash": "d+dfsfs==",
+        "senderTimestamp": "1744145094",
+        "recipientKeyHash": "fr3sdfg==",
+        "recipientTimestamp": "1744348039"
+      },
+      "deviceListMetadataVersion": 2,
+      "messageSecret": "g3gre+gr34gdfgsgs="
+    }
+  },
+  "mediaUrl": "https://storage.zapperapi.com/media/551245678900/5512912345678/1744400577105-12c2b82fdebc64a249a2182e9eb57b170.jpeg"
+}
+```
+
+**Video**
+
+```json
+{
+  "type": "messages.upsert",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "9A9BA7815141EAA71DB9986A32AEFE67"
+  },
+  "messageTimestamp": 1744401275,
+  "pushName": "Will Smith",
+  "broadcast": false,
+  "message": {
+    "videoMessage": {
+      "url": "https://mmg.whatsapp.net/v/t62.1212-24/123456_654321_1234567.enc?ccb=11-4&oh=ferw3fe3&oe=1wf6&_nc_sid=5e03e0&mms3=true",
+      "mimetype": "video/mp4",
+      "fileSha256": "fer3fwfw+9Gu4H+A=",
+      "fileLength": "295632",
+      "seconds": 1,
+      "mediaKey": "e+rewfw+/fewf=",
+      "height": 850,
+      "width": 474,
+      "fileEncSha256": "efwf/mSHj4nfwefkCghDfwefwOVGWWCjc9ok=",
+      "directPath": "/v/t62.7161-24/26006495_651803170909509_8692356198490887094_n.enc?ccb=11-4&oh=01_Q5Aa1QHJBZcffHnD3ISle6otMfGXyqD77WWjDGnFpdrs3TWEtA&oe=6820F12F&_nc_sid=5e03e0",
+      "mediaKeyTimestamp": "1744401273",
+      "jpegThumbnail": "hfirfhue/f98vyei=",
+      "contextInfo": {},
+      "streamingSidecar": "Vfdesfwef="
+    },
+    "messageContextInfo": {
+      "deviceListMetadata": {
+        "senderKeyHash": "fs+fsd==",
+        "senderTimestamp": "1744145094",
+        "recipientKeyHash": "sdf23fc==",
+        "recipientTimestamp": "1744348039"
+      },
+      "deviceListMetadataVersion": 2,
+      "messageSecret": "fwe3rtw+werga="
+    }
+  },
+  "mediaUrl": "https://storage.zapperapi.com/media/551246787585/5512912345678/1744401275832-ad71abe8547533259a3274d4af8711c3.mp4"
+}
+```
+
+**Contact**
+
+```json
+{
+  "type": "messages.upsert",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "E6189A524889DE724D911AAA2F837AB1"
+  },
+  "messageTimestamp": 1744401096,
+  "pushName": "Jane Doe",
+  "broadcast": false,
+  "message": {
+    "contactMessage": {
+      "displayName": "John Doe",
+      "vcard": "BEGIN:VCARD\nVERSION:3.0\nN:;John;;;\nFN:John Doe\nitem1.TEL;waid=555599995555:+55 55 9999-5555\nitem1.X-ABLabel:Celular\nEND:VCARD"
+    },
+    "messageContextInfo": {
+      "deviceListMetadata": {
+        "senderKeyHash": "dsa+das==",
+        "senderTimestamp": "1744145094",
+        "recipientKeyHash": "dasfw==",
+        "recipientTimestamp": "1744348039"
+      },
+      "deviceListMetadataVersion": 2,
+      "messageSecret": "fsdfgwdgsd="
+    }
+  }
+}
+```
+
+**Sent list message**
+
+Published when the list is sent, on official (Cloud API) and unofficial
+instances. The `title` and `footer` fields are omitted when they were not given.
+`sections` repeats what was sent.
+
+```json
+{
+  "type": "messages.upsert",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "jobId": "42",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": true,
+    "id": "3AB16AB78CD9012E89A0",
+    "senderPn": "5512912345678@s.whatsapp.net"
+  },
+  "messageTimestamp": 1785312000,
+  "broadcast": false,
+  "message": {
+    "listMessage": {
+      "buttonText": "Ver opções",
+      "title": "Cardápio",
+      "description": "Escolha uma das opções abaixo",
+      "footer": "Equipe ZapperHub",
+      "sections": [
+        {
+          "title": "Bebidas",
+          "rows": [
+            {
+              "title": "Café",
+              "description": "200ml",
+              "rowId": "cafe-01"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "trackId": "pedido-8823",
+  "trackSource": "crm"
+}
+```
+
+**Reaction** (Cloud API and Instagram)
+
+When the contact reacts to a message, or the number reacts from the device in
+coexistence mode, a `messages.upsert` arrives with `reactionMessage`. The
+`key.id` of the event is the id of the reaction itself. The reacted message is in
+`reactionMessage.key.id`.
+
+On Instagram, the event arrives with `trackSource: "instagram"`. The `key.id` is
+composite (`ig-reaction:<mid>:<sender>:<timestamp>`). The removal comes with
+`removed: true`. The rest of the format is the same.
+
+```json
+{
+  "type": "messages.upsert",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "wamid.HBgLNTUxMjkxMjM0NTY3OBUCABIYFjNFQjA",
+    "senderPn": "5512912345678@s.whatsapp.net"
+  },
+  "messageTimestamp": 1744398716,
+  "pushName": "John Doe",
+  "broadcast": false,
+  "message": {
+    "reactionMessage": {
+      "key": {
+        "remoteJid": "5512912345678@s.whatsapp.net",
+        "fromMe": true,
+        "id": "3AB16AB78CD9012E89A0"
+      },
+      "text": "👍",
+      "senderTimestampMs": 1744398716000
+    }
+  },
+  "removed": false,
+  "trackSource": "whatsapp"
+}
+```
+
+- `reactionMessage.text` is the emoji. When the contact removes the reaction, `text` is empty (`""`), and `removed` is `true`.
+- `reactionMessage.key.fromMe` says whose message was reacted to: `true` when the
+  contact reacted to a message from the business, `false` when the number
+  reacted, from the device, to a message from the contact.
+- A second reaction to the same message is a new event, with another `key.id`.
+- To react, use [`POST /{instanceId}/messages/react`](/en/functions/sending-messages#react-to-a-message).
+
+### Other received message types
+
+Type: `messages.upsert`
+
+In addition to text, media, location, contact, and button or list replies, the
+official connection (Cloud API) delivers the types below. All arrive in the same
+envelope as the other messages (`chatId`, `key`, `messageTimestamp`, `pushName`)
+and appear in `GET /{instanceId}/messages` with the corresponding type. No
+message is discarded. A type that ZapperHub does not know arrives as
+`unknownMessage`.
+
+| Content in `message` | When it arrives | Fields |
+| --- | --- | --- |
+| `flowResponseMessage` | The contact replies to a Flow | `name`, `body`, `responseJson`, and `contextInfo.stanzaId` (the answered Flow) |
+| `callPermissionReplyMessage` | The contact replies to the call permission request | `response` (`accept` or `reject`), `expiresAt`, `permanent`, `source`, and `contextInfo.stanzaId` |
+| `systemMessage` | Meta reports a change in the chat, such as a number change of the contact | `type` (for example `user_changed_number` or `user_changed_user_id`) and `body` |
+| `orderMessage` | The contact sends an order from the catalog | `catalogId`, `text`, and `items[]` with `productRetailerId`, `quantity`, `itemPrice`, and `currency` |
+| `unsupportedMessage` | Meta does not forward the type (poll, edit outside coexistence, etc.) | `type` (the type reported by Meta, such as `edit`) and `error` (`code`, `title`, `details`) |
+| `unknownMessage` | Any type without specific handling | `type` (the raw Meta type) and `raw` (the original message) |
+
+```json
+{
+  "type": "messages.upsert",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "wamid.HBgNNTUxMjkxMjM0NTY3OBUC",
+    "senderPn": "5512912345678@s.whatsapp.net"
+  },
+  "messageTimestamp": 1785312060,
+  "pushName": "John Doe",
+  "broadcast": false,
+  "message": {
+    "flowResponseMessage": {
+      "name": "flow",
+      "body": "Enviado",
+      "responseJson": { "flow_token": "tk_123", "nome": "Maria" },
+      "contextInfo": {
+        "stanzaId": "wamid.FLOW",
+        "participant": "5511900000000@s.whatsapp.net"
+      }
+    }
+  },
+  "trackSource": "whatsapp"
+}
+```
+
+- `flowResponseMessage.responseJson` is the object returned by the Flow. If Meta
+  delivers a text that is not valid JSON, it goes as text.
+- `callPermissionReplyMessage.expiresAt` is the expiration of the permission, in
+  ISO 8601. It comes only on a temporary permission. `permanent` is `true` when
+  the contact accepted permanently.
+- `systemMessage` reports the fact. ZapperHub also updates the contact link on a
+  number or BSUID change. See
+  [Contact identity](#contact-identity-phone-bsuid-and-username).
+- An `unsupported` message continues to generate the `messages.error` event with
+  code 131051.
+- `unknownMessage.raw` carries the original message from Meta. This way, you
+  handle the new type without waiting for a ZapperHub update.
+
+### Contact identity: phone, BSUID, and username
+
+Meta identifies contacts by a BSUID (`BR.13491208655302741918`). When the contact
+adopts a username, Meta can omit the phone. ZapperHub stores the link between the
+three, per business (WABA) and per owner. All your instances on the same WABA
+share the link. Another owner never sees the link, even with the same WABA.
+
+The `key.remoteJid` (and the `chatId`) of a message follows this order:
+
+1. The phone, when Meta reports it in the event.
+2. The phone already known for that BSUID.
+3. The BSUID itself, when the phone is unknown.
+
+`key.bsuid` and `username` accompany the message when they are known: in received
+messages, in echoes of messages sent from the device, and in
+[delivery states](#message-delivery-state).
+
+Type: `contacts.identity`
+
+When the link changes, ZapperHub publishes this event on each instance of the
+same owner on the WABA. Use the event to merge two chats of the same contact.
+
+```json
+{
+  "type": "contacts.identity",
+  "instanceId": "inst_01hxyz1234567890",
+  "reason": "phone_discovered",
+  "previous": { "phone": null, "bsuid": "BR.13491208655302741918", "username": "fulano" },
+  "current": { "phone": "5512912345678", "bsuid": "BR.13491208655302741918", "username": "fulano" },
+  "chatId": {
+    "previous": "BR.13491208655302741918",
+    "current": "5512912345678@s.whatsapp.net"
+  },
+  "timestamp": 1760000000
+}
+```
+
+| `reason` | What happened |
+| --- | --- |
+| `phone_discovered` | A contact that had only a BSUID had the phone revealed |
+| `phone_changed` | The contact changed the number |
+| `bsuid_changed` | The contact changed the BSUID |
+| `link_removed` | The phone now belongs to another BSUID and left this link |
+
+- Use `chatId.previous` and `chatId.current` to migrate the history from the old chat to the new one.
+- A repeated delivery from Meta does not republish the event.
+- The first time ZapperHub sees a contact does not generate an event. Only changes generate an event.
+- The subscription is opt-in. Include `contacts.identity` in `subscriptions`.
+
+### Marketing opt-out
+
+Type: `contacts.preference`
+
+A contact can ask to stop, or to resume, marketing messages. The request comes
+through Meta or through the [contacts API](/en/functions/contacts#marketing-opt-out).
+ZapperHub then publishes this event on all instances of the same owner on the
+same WABA.
+
+```json
+{
+  "type": "contacts.preference",
+  "instanceId": "inst_01hxyz1234567890",
+  "contact": { "phone": "5512912345678", "bsuid": "BR.13491208655302741918" },
+  "category": "marketing_messages",
+  "status": "opted_out",
+  "source": "meta",
+  "timestamp": 1731705721
+}
+```
+
+- `status` is `opted_out` (does not receive marketing) or `opted_in` (accepts again).
+- `source` is `meta` (the contact asked) or `manual` (the integrator set it through the API).
+- `contact.phone` and `contact.bsuid` carry what ZapperHub knows about the contact. Either can be `null`.
+- Between the Meta choice and the manual one, the most recent applies.
+- The same repeated choice does not generate a second event.
+- With `opted_out`, the API rejects marketing templates to the contact with `MARKETING_OPT_OUT`. Utility and authentication continue.
+- The subscription is opt-in. Include `contacts.preference` in `subscriptions`.
+
+### Edited or deleted message
+
+Type: `messages.update`
+
+When the contact edits or deletes a message, or the number itself does it from
+the device, ZapperHub publishes this event. The event points to the original
+message: `key.id` is its id, the same one received before in `messages.upsert`.
+The id of the edit or deletion event comes in `eventId`.
+
+```json
+{
+  "type": "messages.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "wamid.HBgLNTUxMjkxMjM0NTY3OBUCABIYFjNFQjA"
+  },
+  "update": {
+    "kind": "edited",
+    "message": {
+      "extendedTextMessage": { "text": "Texto corrigido" }
+    }
+  },
+  "eventId": "wamid.HBgLNTUxMjkxMjM0NTY3OBUCABIYFjNGQzE",
+  "timestamp": 1749854575
+}
+```
+
+On deletion, `update` carries only the kind:
+
+```json
+{ "update": { "kind": "deleted" } }
+```
+
+- `update.kind` is `edited` or `deleted`.
+- On an edit, `update.message` carries the new text (`extendedTextMessage`) or
+  the new caption (`imageMessage`, `videoMessage`, or `documentMessage`, with
+  `caption`). The media is not resent. If Meta does not report the new content,
+  `update.message` is omitted.
+- The subscription is opt-in. Include `messages.update` in `subscriptions`.
+  Subscribers of only `messages.upsert` continue to receive what they received.
+- Meta sends these events only for numbers in coexistence with the WhatsApp
+  Business app. The edit is valid up to 15 minutes after the send. The deletion
+  is valid up to 2 days.
+- The same edit or deletion delivered twice by Meta generates a single event.
+
+<Note>
+Meta delivers edits as an unsupported message type, not in its own edit format.
+For this reason, the edit arrives as `messages.upsert` with
+[`unsupportedMessage`](#other-received-message-types) of `type` `edit`, without
+the new text, and not as `messages.update`. The deletion generates
+`messages.update`.
+</Note>
+
+### Option chosen in a list message
+
+Type: `messages.upsert`
+
+Published when the contact selects an option from the list. The format is the
+same on official (Cloud API) and unofficial instances:
+
+- `message.listResponseMessage.selectedButtonId`: the exact `rowId` of the chosen option, as defined at the send.
+- `message.listResponseMessage.selectedDisplayText`: the displayed text of the option.
+- `message.listResponseMessage.contextInfo.stanzaId`: the id of the original list message.
+
+```json
+{
+  "type": "messages.upsert",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "4D2AAEC025A74710866EF732A614AABA",
+    "senderPn": "5512912345678@s.whatsapp.net"
+  },
+  "messageTimestamp": 1785312060,
+  "pushName": "John Doe",
+  "broadcast": false,
+  "message": {
+    "listResponseMessage": {
+      "selectedButtonId": "cafe-01",
+      "selectedDisplayText": "Café",
+      "contextInfo": {
+        "stanzaId": "3AB16AB78CD9012E89A0",
+        "participant": "5512912345678@s.whatsapp.net"
+      }
+    }
+  },
+  "trackSource": "whatsapp"
+}
+```
+
+<Note>
+On unofficial instances, the `listResponseMessage` block also carries the native
+provider fields (`title`, `description`, `listType`,
+`singleSelectReply.selectedRowID`). The difference is additive. An integration
+that reads only `selectedButtonId` and `selectedDisplayText` works on both
+channels.
+</Note>
+
+The reply to a message with buttons arrives the same way, in
+`message.buttonsResponseMessage`.
+
+### Message delivery state
+
+Type: `messages.status`
+
+Published at each state change of a sent message, on official (Cloud API) and
+unofficial (`device`) instances. On the Cloud API, `status` follows the Meta
+values: `sent`, `delivered`, `read`, and `failed`. `error` appears only on
+failures.
+
+```json
+{
+  "type": "messages.status",
+  "instanceId": "inst_01hxyz1234567890",
+  "messageId": "wamid.HBgNNTUxMjkxMjM0NTY3OBUCABEYEjc0NjcyOTk2MEE1MEJDNTY2AA==",
+  "recipientId": "5512912345678",
+  "status": "delivered",
+  "timestamp": 1785312030
+}
+```
+
+#### On the unofficial connection (`device`)
+
+The event arrives with `status` `delivered` (two check marks) or `read` (two blue
+check marks), once per message. When WhatsApp groups several receipts, each
+message of the batch generates its own event. The `messageId` is the same
+`key.id` received in the `messages.upsert` of the send.
+
+```json
+{
+  "type": "messages.status",
+  "instanceId": "inst_01hxyz1234567890",
+  "messageId": "3AB16AB78CD9012E89A0",
+  "recipientId": "5512912345678",
+  "recipientPn": "5512912345678",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "status": "read",
+  "timestamp": 1785312030
+}
+```
+
+- `chatId` is the chat. When the chat is identified by LID, the event carries
+  `recipientLid` with the LID and, if ZapperHub knows the link, `recipientPn`
+  with the phone. Without the link, `recipientId` carries the LID.
+- There is no `sent` or `failed` on the unofficial connection. The send
+  confirmation is the API response. The permanent failure arrives in
+  `messages.error`.
+- Group receipts are not delivered.
+- If the contact turned off read receipts, the `read` event does not arrive. Only `delivered` arrives.
+- To tell WhatsApp that you read a message, use
+  [Mark as read](/en/functions/sending-messages#mark-as-read).
+
+#### On the official connection (Cloud API)
+
+When ZapperHub knows the BSUID or the username of the recipient, the event also
+carries `bsuid` and `username`. If the recipient has no visible phone,
+`recipientId` carries the BSUID.
+
+### Message send failure
+
+Type: `messages.error`
+
+The `200` of the API confirms the queueing, not the delivery. When the 5 send
+attempts are exhausted, ZapperHub publishes this event. No message reached the
+recipient. An intermediate failure followed by success does not generate the
+event.
+
+The event applies to all message types sent through the API.
+
+```json
+{
+  "type": "messages.error",
+  "instanceId": "inst_01hxyz1234567890",
+  "jobId": "42",
+  "key": {
+    "id": "job_42",
+    "fromMe": true,
+    "remoteJid": "5512912345678@s.whatsapp.net"
+  },
+  "error": {
+    "code": 131000,
+    "title": "Something went wrong",
+    "message": "Message failed to send because of an unknown error.",
+    "error_data": {
+      "details": "connect ETIMEDOUT 10.0.0.1:443"
+    },
+    "href": "https://developers.facebook.com/docs/whatsapp/cloud-api/support/error-codes/"
+  },
+  "timestamp": 1753758000,
+  "trackId": "pedido-8823",
+  "trackSource": "crm"
+}
+```
+
+- The `error` block follows the Cloud API error format. An integration written
+  for that format reads this event with no new handling.
+- `error.code` forwards the original Meta code when the failure came from the
+  Cloud API (for example, `131047` for an expired 24-hour window, or `131026`
+  for an unreachable recipient). Code `131000` is used when there is no provider
+  code: unofficial instances, timeout, and network failures.
+- `error.error_data.details` carries the real send error. `error.message` is the stable description of the code.
+- `error.localizedMessage` carries the explanation in Portuguese for the Meta
+  codes that ZapperHub knows. Example, `131047`: "Passaram mais de 24 horas
+  desde a última mensagem do contato. Envie um template de mensagem." The field
+  appears only when there is a translation.
+- `key.id` is derived from the job (`job_<jobId>`), not from the provider. The
+  send never produced a message id. This format distinguishes a queue failure
+  from a Meta error.
+- `trackId` and `trackSource` are the same ones given at the send.
+
+### Group participant change
+
+Type: `group-participants.update`
+
+Published on unofficial instances when someone joins, leaves, is promoted to
+admin, or is demoted. The `join`, `leave`, `promote`, and `demote` fields carry
+the affected participants. Only the field that matches what happened is filled.
+The others are omitted.
+
+```json
+{
+  "type": "group-participants.update",
+  "groupId": "120363012345678901@g.us",
+  "join": ["5512912345678@s.whatsapp.net"],
+  "timestamp": "2026-07-29T12:00:00Z"
+}
+```
+
+### Call
+
+Type: `calls.update`
+
+Published when a voice or video call reaches the number of the instance, is
+answered, or is ended, on official and unofficial connections. Each occurrence is
+an independent event. Correlate the occurrences of the same call by `callId`.
+
+The `event` field is the discriminator. `key.id` is always equal to `callId`.
+`timestamp` is in seconds.
+
+#### Example: instance with an official connection (Cloud API)
+
+```json
+{
+  "type": "calls.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5511999999999@s.whatsapp.net",
+  "key": {
+    "remoteJid": "5511999999999@s.whatsapp.net",
+    "fromMe": false,
+    "id": "wacid.HBgNNTUxMTk5OTk5OTk5ORUCACASE",
+    "addressingMode": "pn",
+    "senderPn": "5511999999999@s.whatsapp.net"
+  },
+  "callId": "wacid.HBgNNTUxMTk5OTk5OTk5ORUCACASE",
+  "event": "terminate",
+  "status": "COMPLETED",
+  "direction": "USER_INITIATED",
+  "timestamp": 1787072520,
+  "startTime": 1787072463,
+  "endTime": 1787072520,
+  "duration": 57,
+  "trackSource": "whatsapp",
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "102290129340398",
+      "changes": [
+        {
+          "field": "calls",
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": { "display_phone_number": "5511888888888" },
+            "calls": [
+              {
+                "id": "wacid.HBgNNTUxMTk5OTk5OTk5ORUCACASE",
+                "event": "terminate",
+                "direction": "USER_INITIATED",
+                "status": "COMPLETED",
+                "start_time": 1787072463,
+                "end_time": 1787072520,
+                "duration": 57
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+#### Example: instance with an unofficial connection (`device`)
+
+```json
+{
+  "type": "calls.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5511999999999@s.whatsapp.net",
+  "key": {
+    "remoteJid": "5511999999999@s.whatsapp.net",
+    "fromMe": false,
+    "id": "3EB0C767D26B8F6E2A11",
+    "addressingMode": "pn",
+    "senderPn": "5511999999999@s.whatsapp.net",
+    "senderLid": "221122334455667@lid"
+  },
+  "callId": "3EB0C767D26B8F6E2A11",
+  "event": "terminate",
+  "status": "MISSED",
+  "reason": "timeout",
+  "direction": "USER_INITIATED",
+  "timestamp": 1787072520,
+  "trackSource": "whatsapp",
+  "rawEvent": {
+    "type": "CallTerminate",
+    "event": {
+      "From": "5511999999999@s.whatsapp.net",
+      "Timestamp": "2026-08-26T17:02:00Z",
+      "CallCreator": "5511999999999@s.whatsapp.net",
+      "CallCreatorAlt": "221122334455667@lid",
+      "CallID": "3EB0C767D26B8F6E2A11",
+      "GroupJID": "",
+      "Reason": "timeout",
+      "Data": {
+        "Tag": "terminate",
+        "Attrs": { "call-id": "3EB0C767D26B8F6E2A11", "reason": "timeout" },
+        "Content": null
+      }
+    }
+  }
+}
+```
+
+#### Example: group call (`device`)
+
+In a group call, `chatId` and `key.remoteJid` are the group. `groupId` carries
+the same JID. The participant who started the call goes in `key.participantPn`,
+as in group messages. The `key.senderPn` and `key.senderLid` fields do not
+appear.
+
+```json
+{
+  "type": "calls.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "120363012345678901@g.us",
+  "key": {
+    "remoteJid": "120363012345678901@g.us",
+    "fromMe": false,
+    "id": "5AC1D882E37B0F6E2A22",
+    "addressingMode": "pn",
+    "participantPn": "5511999999999@s.whatsapp.net",
+    "participantLid": "221122334455667@lid"
+  },
+  "callId": "5AC1D882E37B0F6E2A22",
+  "event": "connect",
+  "groupId": "120363012345678901@g.us",
+  "direction": "USER_INITIATED",
+  "timestamp": 1787072463,
+  "trackSource": "whatsapp",
+  "rawEvent": {
+    "type": "CallOfferNotice",
+    "event": {
+      "CallID": "5AC1D882E37B0F6E2A22",
+      "CallCreator": "5511999999999@s.whatsapp.net",
+      "GroupJID": "120363012345678901@g.us",
+      "Type": "group",
+      "Media": "audio",
+      "Timestamp": "2026-08-26T17:01:03Z"
+    }
+  }
+}
+```
+
+#### `event` values by origin
+
+| `event` | Official connection (Cloud API) | Unofficial connection (`device`) |
+| ------- | --------------------------- | ---------------------------- |
+| `connect` | User call reaching the number. No `status` | Call reaching the number. No `status` |
+| `status` | Call progress: `RINGING`, `ACCEPTED`, or `REJECTED` | Call answered: `ACCEPTED` |
+| `terminate` | End: `COMPLETED` or `FAILED` | End: `REJECTED`, `MISSED`, `ACCEPTED`, `COMPLETED`, `FAILED`, or omitted |
+| `error` | Failure reported by Meta | Does not occur |
+
+`MISSED` (a call that rang until it expired) exists only on the unofficial
+connection. The official connection does not publish this outcome.
+
+On the unofficial connection, an absent `status` in a `terminate` means that the
+platform does not anticipate the reason. Use `reason`, which always comes.
+
+#### Differences between the two origins
+
+| | Official connection (Cloud API) | Unofficial connection (`device`) |
+| --- | --- | --- |
+| Exclusive fields | `startTime`, `endTime`, `duration`, `bizOpaqueCallbackData`, `username` | `reason`, `groupId`, `key.senderLid` / `key.participantLid` |
+| `key.addressingMode` | Always `pn` | `pn` or `lid`, according to the contact |
+| Group call | Not applicable | `groupId` and `key.participantPn` |
+| Raw occurrence | In the `object` and `entry` fields | In `rawEvent` |
+
+A field with no value at the origin is omitted. ZapperHub never sends `null` or
+an empty string in this case.
+
+<Note>
+**The `calls.update` subscription is opt-in.** Include the string in
+`subscriptions`. No existing subscription changes automatically. Subscribe
+through the event selector in the panel, or through the API with
+`PUT /{instanceId}/webhooks/{webhookId}`.
+
+A call is not a message. The event is not forwarded to Chatwoot and is not
+recorded in the chat history.
+</Note>
+
+<Warning>
+**Official connection: the subscription enables calls on the number.** Meta emits
+call events, and shows the call button to the user, only on a number with the
+calling feature enabled. A Cloud API number starts with the feature off.
+
+For this reason, when you subscribe to `calls.update`, the platform enables the
+feature on the number before it saves the webhook. You do not need to do anything
+at Meta. If the feature is already enabled, nothing changes: business hours,
+button visibility, and SIP stay as they are.
+
+When the enablement is not possible, the webhook is not saved. The response says
+which case applies:
+
+| Response | `code` | What to do |
+|---|---|---|
+| `422` | `CALLING_API_UNAVAILABLE` | The number does not qualify for the Calling API. Save again without `calls.update`. A repeat of the same request fails again |
+| `503` | `PROVIDER_UNAVAILABLE` | Meta did not respond. Repeat the same request shortly |
+
+The rejection applies to the whole request. Name, URL, and the other
+subscriptions are also not saved.
+
+The Calling API requirements belong to Meta. The number must be a native Cloud
+API number (coexistence does not qualify). The daily limit must be at least 2,000
+unique recipients. The `calls` field must be subscribed in the app configuration.
+
+On the unofficial connection, none of this applies. Calls arrive with no
+configuration, and the subscription does not go through this check.
+</Warning>
+
+<Warning>
+On the unofficial connection, calls received while the instance was disconnected
+are not recovered. WhatsApp does not redeliver them when the session returns. The
+event does not exist for the instance.
+</Warning>
+
+### Recording available
+
+Type: `calls.update`, with `event: "recording"`
+
+Published when the recording of a call is ready, on the unofficial connection,
+only for calls with a requested recording. It is an event separate from the end.
+The end leaves as soon as the call ends, without waiting for the recording
+processing. Correlate the two by `callId`.
+
+```json
+{
+  "type": "calls.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5511999999999@s.whatsapp.net",
+  "key": {
+    "remoteJid": "5511999999999@s.whatsapp.net",
+    "fromMe": false,
+    "id": "3EB0C767D26B8CE6A1B4",
+    "addressingMode": "pn",
+    "senderPn": "5511999999999@s.whatsapp.net"
+  },
+  "callId": "3EB0C767D26B8CE6A1B4",
+  "event": "recording",
+  "direction": "USER_INITIATED",
+  "timestamp": 1787072580,
+  "trackSource": "whatsapp",
+  "recording": {
+    "status": "AVAILABLE",
+    "url": "https://storage.zapperhub.com/...&X-Amz-Expires=3600",
+    "expiresAt": "2026-09-04T19:23:47.000Z",
+    "durationSeconds": 216,
+    "truncated": false
+  }
+}
+```
+
+The file contains both sides of the conversation. The address comes signed. The
+download requires no authentication and no destination of your own.
+
+| Field | Description |
+| --- | --- |
+| `recording.status` | `AVAILABLE` or `UNAVAILABLE` |
+| `recording.url` | Download address, valid for 1 hour |
+| `recording.expiresAt` | When this address expires |
+| `recording.durationSeconds` | Duration of the recorded audio |
+| `recording.truncated` | `true` when the recording was cut at the 1-hour limit |
+
+An expired address is not a problem. Query `GET /{instanceId}/calls/{callId}` to
+get a new one, while the recording exists.
+
+When the recording becomes permanently unavailable, the same event carries the
+reason. The end event, already delivered, is not resent:
+
+```json
+{
+  "event": "recording",
+  "callId": "3EB0C767D26B8CE6A1B4",
+  "recording": { "status": "UNAVAILABLE", "reason": "STORAGE_FAILED" }
+}
+```
+
+<Warning>
+**The recording expires in 7 days.** 7 days after the end of the call, the
+platform discards the file permanently. The call record stays available for 90
+days and says that the recording no longer exists. Download and store the file on
+your side if you need it for longer.
+</Warning>
+
+See [Calls](/en/functions/calls) to originate, answer, record, and end calls
+through the API.
+
+### Comment received on Instagram
+
+Type: `comments.upsert`
+
+Published on Instagram instances when the account receives a comment on a post.
+The structure is the same as `messages.upsert`, plus the `comment` block.
+
+```json
+{
+  "type": "comments.upsert",
+  "key": {
+    "id": "17984523698451234",
+    "fromMe": false,
+    "remoteJid": "17841400000000000",
+    "senderId": "17841400000000000",
+    "recipientId": "17841411111111111"
+  },
+  "messageTimestamp": 1785312000,
+  "pushName": "john.doe",
+  "broadcast": false,
+  "message": {
+    "extendedTextMessage": {
+      "text": "Vocês entregam em São Paulo?"
+    }
+  },
+  "comment": {
+    "id": "17984523698451234",
+    "text": "Vocês entregam em São Paulo?",
+    "postId": "17895695668004550",
+    "parentCommentId": null,
+    "from": {
+      "id": "17841400000000000",
+      "username": "john.doe"
+    },
+    "timestamp": 1785312000
+  },
+  "trackSource": "instagram"
+}
+```
+
+<Warning>
+The comment is public. Any visitor of the profile sees it. The comment is not
+forwarded to Chatwoot and is not deduplicated. Meta can redeliver the same
+notification. Use `comment.id` as the idempotency key and ignore repeated
+deliveries of the same id.
+</Warning>
+
+To reply privately to the author of the comment, use `commentId` in
+`POST /{instanceId}/messages/text`.
+
+### Instagram token expired
+
+Type: `token.expired`
+
+Published when the Instagram access token expired or was revoked. It is a
+terminal event. The instance is disconnected and requires a new authorization. A
+`connection.update` with `connection: "close"` accompanies the event.
+
+```json
+{
+  "type": "token.expired",
+  "instanceId": "inst_01hxyz1234567890",
+  "reason": "token_expired",
+  "expiredAt": "2026-07-29T03:00:00.000Z",
+  "requiresReauth": true
+}
+```
+
+The `reason` field is `token_expired` or `token_revoked`.
+
+### Instagram token renewal failure
+
+Type: `token.refresh.failed`
+
+Published at each renewal attempt that fails for a temporary cause, such as a
+Meta instability. The renewal continues to be attempted. `failureCount`
+accumulates the failures. Use the value to escalate the internal alert before the
+failure becomes terminal.
+
+```json
+{
+  "type": "token.refresh.failed",
+  "instanceId": "inst_01hxyz1234567890",
+  "origin": "automatic",
+  "failureCount": 3,
+  "reason": "temporary",
+  "errorCode": 190,
+  "expiresAt": "2026-08-15T03:00:00.000Z"
+}
+```
+
+`origin` says whether the attempt came from the automatic routine (`automatic`)
+or from the manual renewal route (`manual`).
+
+<Note>
+Without the `token.refresh.failed` and `token.expired` subscriptions, you notice
+the problem only when it is terminal, through `connection.update`. You receive no
+notice during the retry window.
+</Note>

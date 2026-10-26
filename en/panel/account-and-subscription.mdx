@@ -1,0 +1,158 @@
+---
+title: Account and subscription
+description: "Create the account, confirm the email, sign in, recover the password, update the data, and manage the subscription"
+---
+
+import PanelNote from '/snippets/en-panel-note.mdx';
+
+**Location**: public screens (outside the panel) and **Settings** (*Configurações*), in the side menu.
+
+<PanelNote />
+
+## Create the account
+
+Screen **Create your account** (*Crie sua conta*), at the `sign-up` route.
+
+| Field | Required | Validation |
+|---|---|---|
+| Full name (*Nome completo*) | Yes | At least 2 characters |
+| Email | Yes | Valid email |
+| WhatsApp number (*Número do WhatsApp*) | Yes | Valid phone number |
+| Password (*Senha*) | Yes | At least 8 characters, with one uppercase letter, one lowercase letter, one digit, and one special character |
+| Confirm password (*Confirmar senha*) | Yes | Equal to the password |
+| Discount coupon (*Cupom de desconto*) | No | Appears when you check **I have a discount coupon** (*Tenho um cupom de desconto*) |
+| Terms acceptance | Yes | Check **I have read and accept the terms of use and the privacy policies** (*Li e aceito os termos de uso e as políticas de privacidade*) |
+
+The screen requires the reCAPTCHA verification before the submit.
+
+| Error | Cause |
+|---|---|
+| *As senhas não coincidem* (passwords do not match) | The confirmation differs from the password |
+| *Você precisa aceitar os termos de uso e a política de privacidade* (you must accept the terms) | The acceptance was not checked |
+
+On completion, the screen shows *Conta criada com sucesso* (account created) and
+opens the email verification, with the address already filled in.
+
+## Confirm the email
+
+There are two ways. Use the one you receive.
+
+**6-digit code**, at the `verify-email` route. Type the code received by email in
+the six fields. A wrong code responds *Código inválido* (invalid code). On
+success, the screen shows *Cadastro finalizado com sucesso!* (registration
+completed) and the **Login** button.
+
+**Confirmation link**, at the `confirm-email` route. Open the link from the
+email. On success, the screen shows *Email confirmado com sucesso* (email
+confirmed) and redirects to the sign-in screen. If the link was already used or
+expired, the screen shows *Erro ao confirmar email* (error on email
+confirmation). In that case, restart the registration or ask support for a new
+link.
+
+## Sign in
+
+Screen **Sign in** (*Faça seu login*), at the `sign-in` route.
+
+| Field | Required | Validation |
+|---|---|---|
+| Email (*E-mail*) | Yes | Valid email. Error: *Email inválido* |
+| Password (*Senha*) | Yes | — |
+
+The screen has two shortcuts: **Forgot your password? Click here** (*Esqueceu a
+senha? Clique aqui*) starts the recovery, and **No account? Sign up for free**
+(*Não tem uma conta? Cadastre-se grátis*) opens the registration.
+
+After you sign in, you go to the instance list. See
+[Panel overview](/en/panel/overview).
+
+## Recover the password
+
+Route `reset-password`, opened through the link sent by email.
+
+| Field | Required | Validation |
+|---|---|---|
+| New password (*Nova senha*) | Yes | At least 8 characters, with uppercase, lowercase, digit, and special character |
+| Confirmation (*Confirmação*) | Yes | Equal to the new password. Error: *As senhas devem ser iguais* |
+
+On completion, the screen shows *Senha redefinida com sucesso* (password reset).
+
+<Warning>
+The previous password stops working immediately. Every session that depends on it
+must sign in again.
+</Warning>
+
+## Complete a registration started by a third party
+
+Route `complete-registration`. Use this screen when a partner or integrator
+created your account and only the password is missing.
+
+| Field | Required | Validation |
+|---|---|---|
+| New password (*Nova senha*) | Yes | At least 8 characters, with uppercase, lowercase, digit, and special character |
+| Confirmation (*Confirmação*) | Yes | Equal to the new password. Error: *As senhas devem ser iguais* |
+
+On completion, the screen shows *Cadastro finalizado com sucesso* (registration
+completed) and redirects to the main page.
+
+## Registration data
+
+Screen **Account settings** (*Configurações da conta*), at side menu >
+**Settings** (*Configurações*), route `dash/settings`.
+
+| Field | Required | Validation |
+|---|---|---|
+| Name (*Nome*) | Yes | Error if empty: *Informe o nome* |
+| Phone (*Telefone*) | Yes | Error if empty: *Informe o telefone* |
+| Document type (*Tipo de documento*) | Yes | **CPF** or **CNPJ** (Brazilian tax ids). Error if empty: *Selecione o tipo de documento* |
+| Document number (*Número do documento*) | Yes | Error if empty: *Informe o número do documento* |
+| Password, optional (*Senha*) | No | If filled, at least 6 characters |
+
+Click **Save changes** (*Salvar alterações*). The result is *Dados atualizados com
+sucesso!* (data updated) or *Erro ao atualizar dados* (update error).
+
+<Note>
+The password field of this screen is optional and accepts 6 characters. The rule
+differs from the registration password. Leave the field empty to keep the current
+password.
+</Note>
+
+## Subscription and customer portal
+
+The **My subscription** (*Minha assinatura*) item, in the side menu, opens the
+customer portal in a new tab. The portal has the invoices, the payment method,
+and the cancellation.
+
+The `complete-payment-details/[customerId]` route is used in links sent by
+email. It opens the portal of that customer. If the identifier is not valid, the
+screen shows *Link inválido* (invalid link).
+
+### Overdue subscription
+
+With an overdue subscription, the panel blocks the creation of instances. The new
+instance button is disabled, with the message *É preciso regularizar a assinatura
+para criar uma instância* (regularize the subscription to create an instance).
+
+Existing instances stay listed. The panel does not delete them. To create
+instances again, regularize the payment in the customer portal, in **My
+subscription**.
+
+## Registration through a payment link (legacy)
+
+<Warning>
+**Legacy.** The `old-sign-up` route exists only for compatibility. Do not use it
+for new registrations. Use `sign-up`.
+</Warning>
+
+At the `old-sign-up` route, the account is created only after a completed
+payment. The screen requires the checkout session identifier in the URL. Without
+it, the screen responds *Pagamento não confirmado ou link inválido* (payment not
+confirmed or invalid link).
+
+With a valid identifier, the **Create your account** screen asks only for the
+password, with the same rule as the current registration.
+
+## See also
+
+- [Panel overview](/en/panel/overview): the organization of the panel.
+- [Global API key](/en/panel/global-api-key): the key of the account.
+- [Authentication](/en/definitions/authentication): the concept of the keys.

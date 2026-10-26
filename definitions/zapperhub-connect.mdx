@@ -1,66 +1,80 @@
 ---
 title: ZapperHub Connect
-description: Conecte-se facilmente na ZapperHub direto pelo WhatsApp Web
+description: "Extensão do Chrome para conectar a instância a partir do WhatsApp Web"
 ---
 
-## O que é a ZapperHub Connect 
+## Descrição
 
-A ZapperHub agora oferece uma nova forma de se conectar na instância: A extensão
-ZapperHub Connect.
+A ZapperHub Connect é uma extensão do Google Chrome. Ela exporta uma sessão do
+WhatsApp Web para uma instância da ZapperHub.
 
-Esta opção é a recomendada para dispositivos que exigem verificação de segurança
-adicional (chave de acesso) ao tentar se conectar no WhatsApp Web, 
-conforme imagem abaixo:
+Use a extensão quando o aparelho exige uma chave de acesso (passkey) para
+conectar no WhatsApp Web. Nesse caso, a conexão por QR Code ou por código de
+pareamento não funciona. O WhatsApp mostra este aviso:
 
-<img noZoom src="./passkey-alert.png" />
+![Aviso do WhatsApp que pede a chave de acesso](/definitions/passkey-alert.png)
 
-Neste caso, se notar que o fluxo de conexão por QR Code ou código de pareamento
-não está funcionando, é provável que o dispositivo está exigindo a chave de acesso,
-de modo que terá que utilizar esta extensão para se conectar na ZapperHub.
+<Note>
+Nem todos os aparelhos exigem a chave de acesso. A conexão pela extensão funciona
+em qualquer aparelho.
+</Note>
 
-<Card title="IMPORTANTE">
-Nem todos os dispositivos exigem essa verificação com chave de acesso, mas a 
-conexão via ZapperHub Connect funciona para qualquer dispositivo.
-</Card>
+## Pré-requisitos
 
-## Como utilizar
+- Google Chrome.
+- O id e a chave X-Api-Key da instância. Veja [Início rápido](/quickstart).
+- A instância com o status **Desconectado** ou **Não conectado**.
 
-### Instalando no Google Chrome
+## Instalar a extensão
 
-1. Acesse a extensão ZapperHub Connect na <a href="https://chromewebstore.google.com/detail/zapperhub-connect/ofpcjjnbbbgpaoaplobmkkflgakggdoe">Chrome Web Store</a>
+<Steps>
+  <Step title="Abra a extensão na Chrome Web Store">
+    Acesse [ZapperHub Connect](https://chromewebstore.google.com/detail/zapperhub-connect/ofpcjjnbbbgpaoaplobmkkflgakggdoe).
+  </Step>
+  <Step title="Instale">
+    Clique em **Usar no Chrome** e confirme.
+  </Step>
+  <Step title="Fixe a extensão na barra">
+    Clique em **Extensões**, à direita da barra de endereço. Clique no pino ao lado de ZapperHub Connect.
 
-2. Clique em **Usar no Chrome** e confirme a instalação da extensão.
+    ![Menu de extensões com o pino da ZapperHub Connect](/definitions/pin-ext.png)
 
-3. Agora, clique no botão "Extensões" localizado logo após a barra de endereço, e clique
-no pin ao lado da extensão ZapperHub Connect para fixar a extensão na barra superior.
+    O ícone da extensão aparece na barra superior.
 
-<img noZoom src="./pin-ext.png" />
+    ![Ícone da ZapperHub Connect na barra do Chrome](/definitions/pin-ext-2.png)
+  </Step>
+</Steps>
 
-Pronto, a extensão da ZapperHub Connect está instalada e pronta para uso!
+## Conectar a instância
 
-<img noZoom src="./pin-ext-2.png" />
+<Steps>
+  <Step title="Abra o WhatsApp Web">
+    Acesse [web.whatsapp.com](https://web.whatsapp.com).
+  </Step>
+  <Step title="Conecte o celular ao WhatsApp Web">
+    Leia o QR Code e siga as instruções do WhatsApp. Se o WhatsApp pedir a chave
+    de acesso, use um gerenciador de chaves compatível, como Google Authenticator,
+    1Password, Face ID ou Touch ID.
+  </Step>
+  <Step title="Abra a extensão">
+    Com o WhatsApp Web conectado, clique no ícone da ZapperHub Connect.
+  </Step>
+  <Step title="Informe a instância">
+    Digite o id da instância e a X-Api-Key. Clique em **Conectar sessão**.
 
-## Conectando com o WhatsApp
+    ![Janela da extensão com os campos de id e chave](/definitions/connect.png)
+  </Step>
+  <Step title="Aguarde a exportação">
+    A extensão exporta a sessão para a ZapperHub em alguns segundos. Depois, a
+    extensão desconecta o WhatsApp Web para evitar conflito de dispositivos.
+  </Step>
+</Steps>
 
-1. Abra o WhatsApp web em <a href="https://web.whatsapp.com">https://web.whatsapp.com</a>
+## Resultado
 
-2. Leia o QR Code e siga as instruções para se conectar normalmente. Caso seja orientado
-a utilizar chave de acesso, será necessário utilizar um aplicativo compatível para 
-gerenciamento de chaves de acesso, como o Google Authenticator, 1Password, ou dispositivo
-físico como Face ID ou Touch ID
+A instância fica com o status **Conectado**.
 
-3. Após conectado, clique no botão da extensão ZapperHub Connect para abrir o popup de conexão
-
-4. Digite o id da instância e a X-Api-Key, e após, clique em **Conectar sessão**
-
-<img noZoom src="./connect.png" />
-
-5. Aguarde alguns segundos para finalizar o processo de exportação da sessão para
-a ZapperHub. Após a exportação, e para evitar conflitos de dispositivos, a sessão
-do WhatsApp Web será automaticamente desconectada.
-
-<Card title="IMPORTANTE">
-Caso a exportação falhe, recarregue a página do WhatsApp Web e repita os procedimentos.
-Certifique-se que a instância que deseja se conectar esteja desconectada para evitar
-falhas no processo.
-</Card>
+<Note>
+Se a exportação falhar, recarregue a página do WhatsApp Web e repita o
+procedimento. Antes de repetir, confirme que a instância está desconectada.
+</Note>

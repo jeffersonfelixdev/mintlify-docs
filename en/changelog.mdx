@@ -1,0 +1,72 @@
+---
+title: Changelog
+description: "Changes to the ZapperHub API and notices of behavior changes"
+---
+
+<Update label="October 2026" description="Delivery and read receipts on the unofficial connection" tags={["DEVICE", "Webhooks"]}>
+
+## Delivery and read receipts on the unofficial connection
+
+- The `messages.status` webhook is now also published on the unofficial
+  connection. The `status` field is `delivered` (two check marks) or `read`
+  (blue check marks). The fields are the same as on the official connection:
+  `messageId`, `recipientId`, `status`, and `timestamp`, plus `chatId`. See
+  [Message delivery state](/en/integrations/webhooks#message-delivery-state).
+- New route `POST /{instanceId}/messages/read`. It tells WhatsApp that received
+  messages were read. See [Mark as read](/en/functions/sending-messages#mark-as-read).
+
+</Update>
+
+<Update label="October 2026" description="Parity with the official Meta API" tags={["Cloud API", "Instagram", "Webhooks"]}>
+
+## Caution: `messages.upsert` carries new types
+
+Subscribers of `messages.upsert` now receive, in addition to the previous types:
+
+- Reactions, in `message.reactionMessage` (Cloud API and Instagram).
+- Flow response (`flowResponseMessage`), call permission
+  (`callPermissionReplyMessage`), system message (`systemMessage`), order
+  (`orderMessage`), and unsupported message (`unsupportedMessage`).
+- Any other type from Meta, as `unknownMessage`, with the original message in `raw`.
+
+The change is additive. No previous format changed. Before, ZapperHub discarded
+these events.
+
+<Warning>
+A parser that rejects unknown fields in `message` can fail. Accept new keys.
+</Warning>
+
+An `unsupported` message continues to generate the `messages.error` event with
+code 131051. See
+[Other received message types](/en/integrations/webhooks#other-received-message-types).
+
+## New events (opt-in)
+
+These events reach only the webhooks that include them in `subscriptions`.
+Current subscriptions do not change.
+
+| Event | When |
+| --- | --- |
+| `messages.update` | The contact edited or deleted a message (number in coexistence) |
+| `contacts.identity` | The link between phone, BSUID, and username of a contact changed |
+| `contacts.preference` | The contact asked to stop, or to resume, marketing messages |
+
+## New features
+
+- Quote a message in any send, with `quotedMessageId`. See
+  [Reply with a quote](/en/functions/sending-messages#reply-with-a-quote).
+- React on the Cloud API and on Instagram, and receive the reactions of contacts.
+- Contacts: query the identity link, list and set marketing opt-outs, block and
+  unblock, and delete the data of a contact (LGPD). See
+  [Contacts](/en/functions/contacts). A marketing template to an opted-out
+  contact is rejected before the queue, with `MARKETING_OPT_OUT`.
+- Templates: query by id, edit, and delete a single language. See
+  [Template](/en/functions/sending-messages#template).
+- Carousel on the Cloud API. See [Carousel](/en/functions/sending-messages#carousel).
+- Instagram: `humanAgent` to reply within 7 days. See
+  [Reply within 7 days on Instagram](/en/functions/sending-messages#reply-within-7-days-on-instagram).
+- Typed Meta errors: rejections by a known rule respond `422` with
+  `code: "PROVIDER_REJECTED"`, the original code in `meta`, and the explanation
+  in Portuguese in `localizedMessage`.
+
+</Update>

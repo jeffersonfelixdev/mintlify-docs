@@ -1,0 +1,118 @@
+---
+title: Webhooks
+description: "Register, edit, and delete the webhooks of the instance in the panel"
+---
+
+import PanelNote from '/snippets/en-panel-note.mdx';
+
+**Location**: **Instances** (*Instâncias*) > select the instance > **Webhook**.
+
+<PanelNote />
+
+## Description
+
+A webhook makes the instance notify your system when something happens. This page
+describes the registration in the panel. The content of each event is in
+[Webhooks](/en/integrations/webhooks).
+
+The screen is named **Webhooks** (`dash/instances/[id]/webhook`). With no
+registration, it shows *Nenhum webhook cadastrado* (no webhook registered).
+
+The list has the columns **Name** (*Nome*), **URL**, **Events** (*Eventos*), and
+**Actions** (*Ações*).
+
+## Preliminary requirements
+
+- An HTTPS endpoint in your system that accepts `POST` requests and responds with
+  a success status. An address that responds only to `GET` does not work.
+
+## Register
+
+Click **New Webhook** (*Novo Webhook*).
+
+| Field | Required | Validation |
+|---|---|---|
+| **Name** (*Nome*) | Yes | Text. Error if empty: *Nome é obrigatório* |
+| **Webhook URL** (*URL do Webhook*) | Yes | Valid URL. Errors: *URL é obrigatória*, *URL inválida* |
+| **Events** (*Eventos*) | Yes | At least one event. Error: *Selecione pelo menos um evento* |
+
+Click **Create** (*Criar*). Success: *Webhook criado com sucesso.*
+
+<Note>
+Each instance accepts at most 5 webhooks. With 5 webhooks, the **New Webhook**
+button is disabled. Delete or reuse one of the existing ones.
+</Note>
+
+### Available events
+
+| Event | When it is published |
+|---|---|
+| `messages.upsert` | A message was created or received |
+| `messages.status` | The state of a message changed |
+| `messages.error` | A message failed |
+| `connection.update` | The connection state of the instance changed |
+| `group-participants.update` | Participants joined, left, were promoted, or were demoted in a group. Unofficial connection only |
+| `calls.update` | A call was received, answered, or ended. Official and unofficial connections |
+| `comments.upsert` | The account received a comment on a post. Instagram instances only |
+| `token.expired` | The Instagram token expired or was revoked |
+| `token.refresh.failed` | An attempt to renew the Instagram token failed |
+
+`webhook.test` does not appear in the list. ZapperHub sends that event once at
+registration, to validate the URL. It cannot be subscribed to.
+
+<Warning>
+**Official connection and `calls.update`.** On an instance with an official
+connection, checking `calls.update` makes the platform enable the calling feature
+on the number at Meta before it saves. Without the feature, Meta does not emit
+call events and does not show the call button to the user.
+
+If the number does not qualify for the Calling API, the webhook is not saved, and
+the screen warns. Save again without the call event. If the warning is a
+communication failure with Meta, try again shortly.
+
+On the unofficial connection, the check is immediate, with no verification.
+Details in [Webhooks](/en/integrations/webhooks#call).
+</Warning>
+
+The body of each event is in [Webhooks](/en/integrations/webhooks).
+
+## Edit
+
+Click **Edit Webhook** (*Editar Webhook*). The form is the same as the
+registration, with the same validations. Click **Update** (*Atualizar*).
+Success: *Webhook atualizado com sucesso.*
+
+A new URL applies to the next events. Events already delivered, or in a delivery
+attempt, are not resent to the new address.
+
+## Delete
+
+<Warning>
+**The deletion cannot be undone.** The registration leaves the list, and the
+instance immediately stops sending events to that address. Events that happen
+after that are not stored for later delivery.
+
+To change only the address, edit the webhook instead of deleting it.
+</Warning>
+
+Click **Delete** (*Excluir*). The dialog *Confirmar exclusão* asks for
+confirmation. Click **Yes, delete** (*Sim, excluir*). Success: *Webhook excluído
+com sucesso.* Failure: *Ocorreu um erro ao excluir o webhook. Tente novamente
+mais tarde.*
+
+## Several webhooks on the same instance
+
+An instance can have up to 5 webhooks. They work independently:
+
+- Each webhook receives its own copy of the event. Three webhooks with `messages.upsert` generate three deliveries per message.
+- Each webhook receives only the events it subscribed to.
+- The failure of one does not affect the others. The delivery is evaluated per destination.
+
+To confirm that an event reached your system, use **View delivery receipts** in
+the [Message log](/en/panel/message-log).
+
+## See also
+
+- [Webhooks](/en/integrations/webhooks): the content of each event.
+- [Message log](/en/panel/message-log): delivery receipts in webhooks.
+- [Instance settings](/en/panel/instance-settings): instance behavior.

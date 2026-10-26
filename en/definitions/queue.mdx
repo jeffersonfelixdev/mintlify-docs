@@ -1,0 +1,40 @@
+---
+title: Message queue
+description: "How the send queue of each instance works"
+---
+
+## Description
+
+Each instance has a single send queue. Every message goes through the queue:
+text, image, video, document, and audio, to people or to groups.
+
+The queue protects the number against bans. It applies an interval between
+messages, at four levels:
+
+| Level | Interval |
+|---|---|
+| `shortest` | 1 to 3 seconds |
+| `short` | 5 to 10 seconds |
+| `medium` | 15 to 45 seconds |
+| `long` | 60 to 90 seconds |
+
+You can also add a delay before each send, with the status *Typing* or *Recording
+audio*. This feature gives a more human rhythm to the chatbot. To change these
+options, see [Update settings](/api-reference/configurações/atualizar-configurações).
+
+## API response
+
+Because the send goes through the queue, the API response confirms the queueing,
+not the delivery. ZapperHub tries each message up to 5 times. When the attempts
+are exhausted, ZapperHub publishes the
+[`messages.error`](/en/integrations/webhooks#message-send-failure) webhook.
+
+<Warning>
+**The queue cannot be turned off.** It is not possible to send simultaneous
+messages to different people or groups, or to send broadcasts. Misuse is
+penalized according to the [Terms of Use](https://zapperhub.com/terms-of-use).
+</Warning>
+
+<Note>
+The *Typing* and *Recording audio* status is not available in groups.
+</Note>

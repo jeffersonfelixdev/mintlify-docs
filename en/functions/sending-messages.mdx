@@ -1,0 +1,705 @@
+---
+title: Sending messages
+description: "Each message type, with the route, the fields, the limits, and the differences between channels"
+---
+
+## Description
+
+This page describes each message type that ZapperHub sends: the route, the
+fields, the limits, and the differences between an official instance (Cloud
+API), an unofficial instance (`device`), and Instagram. The complete reference
+of each field is in the [API Reference](/api-reference).
+
+## How sending works
+
+Every send goes through the [instance queue](/en/definitions/queue). For this
+reason, the API responds `200` with the scheduling, not with the delivery:
+
+```json
+{ "status": "scheduled", "jobId": "42" }
+```
+
+The result arrives through webhooks:
+
+- `messages.upsert` when the message was sent.
+- `messages.error` when the attempts were exhausted.
+
+See the [payload examples](/en/integrations/webhooks).
+
+When the failure comes from Meta (Cloud API), `messages.error` keeps the original
+code and text. For known codes, it adds `error.localizedMessage` with the
+explanation in Portuguese. Example: "A janela de 24h com este cliente está
+fechada" (the 24-hour window with this customer is closed).
+
+<Note>
+**Exception.** React, mark as read, and delete do not go through the queue. The
+API applies the operation immediately and responds `204`, with no body and no
+`jobId`.
+</Note>
+
+## The recipient
+
+Unless noted, the recipient goes in the `jid` field:
+
+| Format | Example |
+| --- | --- |
+| Phone number | `5512912345678` or `5512912345678@s.whatsapp.net` |
+| Unique user identifier (LID) | `123456789012345@lid` |
+| Group | `120363012345678901@g.us` |
+| Channel | `120363012345678901@newsletter` |
+
+Enter the complete number, with the country code. The `+` prefix is optional. See
+[Number format](/en/definitions/number-format).
+
+On the Cloud API, the recipient can also be:
+
+| Format | Example |
+| --- | --- |
+| BSUID of the contact | `BR.13491208655302741918` |
+| WhatsApp username | `fulano` or `@fulano` |
+
+The API resolves the username through the link stored when the contact wrote to
+the business: the phone, if known, or the BSUID. Without a link, the response is
+`404` with `code: "CONTACT_NOT_FOUND"`. See
+[Contact identity](/en/integrations/webhooks#contact-identity-phone-bsuid-and-username).
+
+## Common fields
+
+| Field | Available in | Function |
+| --- | --- | --- |
+| `trackId` | All queued sends | Your identifier, returned in the send webhook. It does not need to be unique. |
+| `trackSource` | All queued sends | Origin of the message (`crm`, `n8n`, …). Default: `api`. |
+| `delay` | Text, audio, media | Delay before the send, from 0 to 20 seconds. |
+| `expiration` | Text | Disappearing message: `none` (default), `24h`, `7d`, or `90d`. |
+| `quotedMessageId` | All queued sends, including template | Id of the message to quote. See [Reply with a quote](#reply-with-a-quote). |
+
+## Reply with a quote
+
+To send a message as a reply to another message, enter the id of the quoted
+message in `quotedMessageId`. It is the same `key.id` that arrives in the
+`messages.upsert` webhook. The field is optional and applies to all queued sends.
+
+```json
+{
+  "jid": "5512912345678",
+  "message": "Sim, sai hoje às 14h.",
+  "quotedMessageId": "wamid.HBgLNTUxMjkxMjM0NTY3OBUCABIYFjNFQjA"
+}
+```
+
+The API responds `200` with the scheduling. The result of the quote comes in the
+outgoing `messages.upsert`, in `quote`:
+
+```json
+{
+  "type": "messages.upsert",
+  "key": { "fromMe": true, "id": "wamid.HBgL..." },
+  "quote": { "id": "wamid.HBgLNTUxMjkxMjM0NTY3OBUCABIYFjNFQjA", "applied": true }
+}
+```
+
+When the quote is applied, the message content carries `contextInfo` with
+`stanzaId` and `participant`, in the same format as the quotes you receive.
+
+The quote never blocks the send. If the quote cannot be applied, the message
+leaves without the quote, and the event gives the reason:
+
+```json
+{ "quote": { "id": "wamid.INEXISTENTE", "applied": false, "reason": "not_found" } }
+```
+
+| `reason` | When |
+| --- | --- |
+| `not_found` | The message is not in the instance history (wrong id, from another instance, or from another chat), or its author is unknown |
+| `unsupported_type` | The message type does not accept a quote on this channel. On the unofficial channel, buttons and list do not quote |
+
+<Note>
+The search for the quoted message happens only in the history of the instance
+itself. The id of a message from another instance behaves as a nonexistent id.
+
+With `splitMessage` or `processImageLink`, the message becomes several messages.
+Only the first one quotes.
+</Note>
+
+On the Cloud API, Meta accepts the quote on a template, but the device of the
+contact does not show the quote bubble.
+
+## Text
+
+`POST /{instanceId}/messages/text`
+
+Only `message` is required. The recipient goes in `jid` or in `commentId` (a
+private reply to an Instagram comment). Enter exactly one of the two.
+
+```json
+{
+  "jid": "5512912345678",
+  "message": "Olá! Sua entrega sai hoje às 14h."
+}
+```
+
+| Field | Function |
+| --- | --- |
+| `mentions` | Numbers to mention. It has effect only in groups. |
+| `mentionsEveryone` | Mentions all participants of the group. It ignores `mentions`. |
+| `splitMessage` | Splits the message into several messages, at the line breaks. |
+| `processImageLink` | Sends the image links in the text as images, right after the message. |
+| `autoCaption` | With `processImageLink` active, uses the message text as the image caption. |
+| `showLinkPreview` | Shows or hides the link preview. |
+| `humanAgent` | Instagram only. See [Reply within 7 days on Instagram](#reply-within-7-days-on-instagram). |
+
+### Reply within 7 days on Instagram
+
+By default, Instagram allows a reply only up to 24 hours after the last message
+of the contact. With `humanAgent: true`, the API sends the message as a reply
+from a human agent, and the window becomes 7 days. The field applies to
+`messages/text`, `messages/media`, and `messages/audio`. Other connection types
+ignore the field.
+
+```json
+{
+  "jid": "17841499999999999",
+  "message": "Oi! Voltando ao seu pedido de ontem.",
+  "humanAgent": true
+}
+```
+
+<Warning>
+**Meta rule.** Do not use `humanAgent` in automatic messages, such as bot replies
+or scheduled sends. Use it only when a person is replying. The Meta app must have
+the human agent permission approved. Without it, the window stays at 24 hours,
+and Meta rejects the send outside it.
+</Warning>
+
+### Quote a message on Instagram
+
+`quotedMessageId` accepts the `mid` of an Instagram message. The quote never
+blocks the send. If the quote cannot be applied, the message leaves without the
+quote bubble.
+
+Unlike WhatsApp, the Instagram send does not publish an outgoing
+`messages.upsert` with the `quote` field. The echo of the message arrives later,
+through the Meta webhook, with the quote in `contextInfo.stanzaId` when it was
+applied.
+
+## Media
+
+`POST /{instanceId}/messages/media`
+
+Image, video, audio, and document go through this route. Choose the type in
+`mediaType`. The content goes in `media`, which accepts a URL (`http`/`https`),
+base64, or a data URL.
+
+```json
+{
+  "jid": "5512912345678",
+  "mediaType": "image",
+  "media": "https://exemplo.com/nota-fiscal.png",
+  "caption": "Sua nota fiscal"
+}
+```
+
+| Field | Note |
+| --- | --- |
+| `mediaType` | `image`, `video`, `audio`, or `document` |
+| `caption` | Caption. It does not apply to `audio`. |
+| `filename` | File name. Only for `document`. |
+| `mimetype` | MIME type of the file, such as `application/pdf`. Only for `document`. |
+
+## Audio (voice note)
+
+`POST /{instanceId}/messages/audio`
+
+This route sends the audio as a voice note. The media route with
+`mediaType: "audio"` sends the audio as an attached file.
+
+```json
+{
+  "jid": "5512912345678",
+  "audio": "https://exemplo.com/recado.mp3"
+}
+```
+
+The route accepts `mp3`, `mp4`, `wav`, and `ogg`, as a URL, base64, or a data URL.
+
+## Audio from text
+
+`POST /{instanceId}/messages/text-to-speech`
+
+The API converts the text to audio through ElevenLabs and sends the audio as a
+voice note. The route requires the ElevenLabs key registered with
+`POST /{instanceId}/text-to-speech/key`.
+
+```json
+{
+  "jid": "5512912345678",
+  "text": "Seu pedido foi confirmado.",
+  "voiceId": "21m00Tcm4TlvDq8ikWAM"
+}
+```
+
+Without `voiceId`, the API uses the default voice of the instance. See
+[Text to speech](/en/panel/text-to-speech).
+
+## Sticker
+
+`POST /{instanceId}/messages/sticker`
+
+```json
+{
+  "jid": "5512912345678",
+  "sticker": "https://exemplo.com/figurinha.webp"
+}
+```
+
+The file must be `image/webp` or `video/mp4`. The API rejects other formats.
+
+## Location
+
+`POST /{instanceId}/messages/location`
+
+```json
+{
+  "jid": "5512912345678",
+  "location": {
+    "name": "Loja Centro",
+    "lat": -23.1791,
+    "lon": -45.8872
+  }
+}
+```
+
+`lat` and `lon` are required. `name` is optional.
+
+## Contact
+
+`POST /{instanceId}/messages/contact`
+
+The contact goes in structured fields in the `vcard` object. The API converts the
+object to vCard 3.0 before the send. Only `fn` (full name) is required.
+
+```json
+{
+  "jid": "5512912345678",
+  "name": "John Doe",
+  "vcard": {
+    "fn": "John Doe",
+    "n": { "firstName": "John", "lastName": "Doe" },
+    "tel": [{ "value": "+5512912345678", "type": ["cell"] }]
+  }
+}
+```
+
+## Buttons
+
+`POST /{instanceId}/messages/buttons`
+
+The message carries 1 to 5 buttons, of four types. Each type requires one extra
+field:
+
+| `type` | Required field | Effect on tap |
+| --- | --- | --- |
+| `url` | `url` | Opens the address |
+| `copy` | `copyCode` | Copies the value |
+| `call` | `phoneNumber` | Calls the number |
+| `reply` | `id` | Returns the `id` as a quick reply |
+
+```json
+{
+  "jid": "5512912345678",
+  "title": "Pedido #8823",
+  "body": "Seu pedido saiu para entrega.",
+  "footer": "Equipe ZapperHub",
+  "buttons": [
+    { "type": "reply", "id": "recebi", "displayText": "Recebi" },
+    { "type": "url", "url": "https://exemplo.com/pedido/8823", "displayText": "Acompanhar" }
+  ]
+}
+```
+
+Every button has `type`, `displayText`, and `id`. To send the message with an
+image or a video, use `media` and `mediaType`.
+
+<Warning>
+Quick-reply buttons (`reply`) are not accepted in groups. The API rejects the
+whole message with `400`.
+</Warning>
+
+The reply of the contact arrives in the `messages.upsert` webhook, in
+`message.buttonsResponseMessage`.
+
+## Option list
+
+`POST /{instanceId}/messages/list`
+
+The list message shows a button. When the contact taps the button, a menu with up
+to 10 options opens, grouped in sections. Use the list to offer a menu of
+choices, such as a food menu, a triage, or a schedule of time slots.
+
+The route is the same for official and unofficial instances, and the body is
+identical. The API always applies the Cloud API limits, so the same payload works
+on any instance.
+
+```json
+{
+  "jid": "5512912345678",
+  "buttonText": "Ver opções",
+  "title": "Cardápio",
+  "description": "Escolha uma das opções abaixo",
+  "footer": "Equipe ZapperHub",
+  "sections": [
+    {
+      "title": "Bebidas",
+      "rows": [
+        { "title": "Café", "description": "200ml", "rowId": "cafe-01" },
+        { "title": "Suco", "description": "300ml", "rowId": "suco-01" }
+      ]
+    },
+    {
+      "title": "Comidas",
+      "rows": [
+        { "title": "Pão de queijo", "rowId": "pdq-01" }
+      ]
+    }
+  ]
+}
+```
+
+### Limits
+
+| Field | Required | Limit |
+| --- | --- | --- |
+| `buttonText` | Yes | 1 to 20 characters |
+| `title` | No | Up to 60 characters |
+| `description` | Yes | 1 to 1024 characters |
+| `footer` | No | Up to 60 characters |
+| `sections` | Yes | 1 to 10 sections |
+| `sections[].title` | Conditional | Up to 24 characters. Required from 2 sections |
+| `sections[].rows` | Yes | At least 1 row, and at most 10 rows across all sections |
+| `sections[].rows[].title` | Yes | 1 to 24 characters |
+| `sections[].rows[].description` | No | Up to 72 characters |
+| `sections[].rows[].rowId` | Yes | 1 to 200 characters. Unique in the whole message |
+
+The API does not truncate anything. A value above the limit is rejected with
+`400`, and no message enters the queue.
+
+<Warning>
+Groups receive lists only on unofficial instances. The Cloud API does not send
+list messages to groups, and the API rejects the request with `400`.
+</Warning>
+
+Without `title`, the unofficial instance shows the default header `Menu`. On the
+Cloud API, the message goes without a header. Enter the `title` whenever the
+header matters.
+
+### How to receive the chosen option
+
+The `rowId` of the chosen option comes back in the `messages.upsert` webhook, in
+`message.listResponseMessage.selectedButtonId`. The field name is the same on
+both channels. See
+[Option chosen in a list message](/en/integrations/webhooks#option-chosen-in-a-list-message).
+For this reason, the `rowId` must be unique in the whole message.
+
+## Carousel
+
+`POST /{instanceId}/messages/carousel`
+
+Available only on official instances (Cloud API). Other connection types respond
+`422` with `code: "UNSUPPORTED_FOR_INSTANCE_TYPE"`. The message carries 2 to 10
+swipeable cards. Each card has an image or a video, an optional text, and
+buttons.
+
+```json
+{
+  "jid": "5512912345678",
+  "body": "Confira as ofertas da semana",
+  "cards": [
+    {
+      "header": { "type": "image", "url": "https://exemplo.com/tenis.jpg" },
+      "body": "Tênis de corrida",
+      "buttons": [
+        { "type": "reply", "id": "tenis-quero", "text": "Quero" },
+        { "type": "reply", "id": "tenis-depois", "text": "Depois" }
+      ]
+    },
+    {
+      "header": { "type": "image", "url": "https://exemplo.com/bota.jpg" },
+      "body": "Bota de trilha",
+      "buttons": [
+        { "type": "reply", "id": "bota-quero", "text": "Quero" },
+        { "type": "reply", "id": "bota-depois", "text": "Depois" }
+      ]
+    }
+  ]
+}
+```
+
+The API responds `{ "status": "scheduled", "jobId": "..." }`, as in the other
+sends. `quotedMessageId`, `trackId`, and `trackSource` apply as in the other
+types.
+
+### Validation rules
+
+The API checks the Meta rules before queueing. When a rule is violated, the
+response is `400`, and `validation` carries the card path (for example,
+`/cards/1/buttons`) with the explanation in Portuguese.
+
+| Field | Rule |
+| --- | --- |
+| `body` | Required, up to 1024 characters |
+| `cards` | 2 to 10 cards |
+| `cards[].header` | `type` `image` or `video`, with a public `url`. The API rejects other formats |
+| `cards[].body` | Optional, up to 160 characters and 2 line breaks |
+| `cards[].buttons` | Either 1 `url` button, or 1 to 2 `reply` buttons. Do not mix the two in the same card |
+| Buttons across cards | All cards must have the same button type and the same button count |
+| Button `text` | Up to 20 characters |
+| `reply` button `id` | Up to 256 characters. The API does not change the value |
+
+The image or the video of each card goes to Meta as a link, with no prior upload.
+If Meta cannot download a media file, the carousel is not delivered. The message
+gets the status `failed` (webhook `messages.error`), with the reason from Meta.
+Meta does not report which card had the problem.
+
+### How to receive the tapped button
+
+When the contact taps a `reply` button, a `messages.upsert` arrives with
+`message.buttonsResponseMessage`, in the same format as [buttons](#buttons).
+`contextInfo.stanzaId` carries the carousel id. `selectedButtonId` carries the
+button `id` as you defined it. Use unique ids per card, such as `tenis-quero`, to
+know which card the tap came from. URL buttons open the link and do not generate
+an event.
+
+## Template
+
+`POST /{instanceId}/messages/template`
+
+Available only on official instances (Cloud API). The template is the only type
+that reaches a contact outside the 24-hour window. It requires a template
+approved by Meta. Create the template in the [panel](/en/panel/templates) or with
+`POST /{instanceId}/message-templates`.
+
+```json
+{
+  "jid": "5512912345678",
+  "templateName": "confirmacao_pedido",
+  "language": "pt_BR",
+  "components": [
+    {
+      "type": "body",
+      "parameters": [{ "type": "text", "text": "8823" }]
+    }
+  ]
+}
+```
+
+Enter in `components` only what has variables. A template without variables does
+not need the field. To know whether the window with the contact is open, use
+`GET /{instanceId}/check-message-window`.
+
+### Query a template
+
+`GET /{instanceId}/message-templates/{templateId}`
+
+The route queries the template at Meta by `id` and updates the copy kept by the
+API. Use the route to follow the review without waiting for the webhook.
+
+```json
+{
+  "id": "1234567890",
+  "name": "boas_vindas",
+  "language": "pt_BR",
+  "category": "MARKETING",
+  "status": "REJECTED",
+  "rejectedReason": "INVALID_FORMAT",
+  "parameterFormat": "POSITIONAL",
+  "components": [{ "type": "BODY", "text": "Olá {{1}}" }]
+}
+```
+
+`rejectedReason` carries the reason from Meta when the template was rejected. In
+the other cases, it is `null`. The same reason arrives in the template status
+webhook.
+
+An `id` that does not exist, or that belongs to another WhatsApp Business
+account, responds `404` with `code: "TEMPLATE_NOT_FOUND"`.
+
+### Edit a template
+
+`PATCH /{instanceId}/message-templates/{templateId}`
+
+The body uses the same format as the
+[creation](/api-reference/cloud-api/criar-template-de-mensagem): `header`,
+`body`, `footer`, and `buttons`. `category` is optional.
+
+<Warning>
+Meta replaces all components. Send the complete content of the template, not
+only the changed part.
+</Warning>
+
+```json
+{
+  "body": { "text": "Olá {{1}}, seu pedido saiu para entrega.", "examples": ["Maria"] },
+  "footer": { "text": "Responda SAIR para não receber mais" }
+}
+```
+
+Only `APPROVED`, `REJECTED`, or `PAUSED` templates accept an edit. In the other
+statuses (`PENDING`, `IN_APPEAL`, `DISABLED`, `PENDING_DELETION`, `LOCKED`), the
+API responds `422` with `code: "TEMPLATE_NOT_EDITABLE"` and the status in
+`data.status`, without a call to Meta. If the local copy is older than 5
+minutes, the API rereads the status at Meta before it decides.
+
+After the edit, the template goes back to review. The response is
+`{ "id": "...", "status": "PENDING" }`. The template can be sent only when Meta
+approves it again. An image or video header given as a URL is sent to Meta and
+replaced by the `header_handle`, as in the creation.
+
+Meta limits how many times a template can be edited in a period and rejects a
+category change on an approved template. In these cases, the response is `422`
+with `code: "PROVIDER_REJECTED"`, the original code in `meta`, and, for known
+codes, the text in Portuguese in `localizedMessage`.
+
+### Delete a template
+
+`DELETE /{instanceId}/message-templates/{name}`
+
+The route deletes the template at Meta and responds `{ "success": true }`.
+
+<Warning>
+**Irreversible deletion.** Without the `language` parameter, the route deletes the
+template by name and removes all language versions at once. The API does not
+check or cancel pending sends that use the template.
+</Warning>
+
+The `name` follows the Meta rule: lowercase letters, digits, and underscore, up
+to 512 characters.
+
+To delete only one language, enter `language`:
+
+`DELETE /{instanceId}/message-templates/{name}?language=pt_BR`
+
+The other languages stay at Meta and in the local copy. A language that the
+template does not have responds `404` with `code: "TEMPLATE_NOT_FOUND"`.
+
+Three limitations come from Meta:
+
+- A message already sent and not yet delivered puts the template in
+  `PENDING_DELETION`. Meta tries the delivery for up to 30 days.
+- After the deletion of an `APPROVED` template, the same name is blocked for
+  re-creation for 30 days.
+- `DISABLED` templates cannot be deleted.
+
+A repeated deletion of an already removed template responds `404`. The operation
+is not idempotent. The deletion is also in the [panel](/en/panel/templates).
+
+## React to a message
+
+`POST /{instanceId}/messages/react`
+
+```json
+{
+  "remoteJid": "5512912345678@s.whatsapp.net",
+  "id": "3AB16AB78CD9012E89A0",
+  "text": "❤️"
+}
+```
+
+The API responds `204`, with no body. An empty string in `text` removes the
+reaction. Only emojis are accepted.
+
+The reaction applies to unofficial instances, to the Cloud API, and to Instagram.
+On the Cloud API, `remoteJid` also accepts the BSUID of the contact. On
+Instagram, `remoteJid` is the contact id, and `id` is the `mid` of the message.
+
+On Instagram, the reaction of the contact arrives in the `messages.upsert`
+webhook as `reactionMessage`. The removal comes with `removed: true`. The
+`key.id` of this event is composite (`ig-reaction:<mid>:<sender>:<timestamp>`),
+because Instagram does not give the reaction its own id. The reacted message is
+in `reactionMessage.key.id`.
+
+<Note>
+On the Cloud API, Meta delivers the reaction only to messages up to 30 days old,
+not deleted, and that are not reactions. Otherwise, Meta accepts the request, and
+the reaction fails later: `messages.status` arrives with `failed` and code
+`131009`.
+</Note>
+
+When Meta rejects the request immediately, the response carries the typed error:
+
+| Status | `code` | When |
+| --- | --- | --- |
+| `422` | `PROVIDER_REJECTED` | Meta rejected by a known rule. `meta` carries the code and the subcode. `localizedMessage` carries the explanation |
+| `429` | `RATE_LIMITED` | Meta rate limit |
+| `502` | `PROVIDER_ERROR` | Meta error outside the catalog. The original code is in `meta` |
+| `503` | `PROVIDER_UNAVAILABLE` | Meta did not respond |
+| `422` | `UNSUPPORTED_FOR_INSTANCE_TYPE` | Connection type without reaction support |
+
+Received reactions arrive in the `messages.upsert` webhook, as
+`reactionMessage`. See the
+[payload examples](/en/integrations/webhooks#received-messages).
+
+## Mark as read
+
+`POST /{instanceId}/messages/read`
+
+```json
+{
+  "remoteJid": "5512912345678@s.whatsapp.net",
+  "ids": ["3AB16AB78CD9012E89A0", "3AB16AB78CD9012E89A1"]
+}
+```
+
+The route tells WhatsApp that received messages were read. The sender sees the
+two blue check marks. The API responds `204`, with no body.
+
+- `remoteJid` is the chat. `ids` are the `key.id` of the messages, as they arrive in the `messages.upsert` webhook.
+- In a group, also enter `senderJid` with the author of the messages.
+- The route applies only to unofficial instances.
+- The effect depends on the privacy settings of the account. With read receipts
+  off, WhatsApp does not show the blue check marks to the sender.
+
+To follow the delivery and the reading of the messages that you sent, subscribe
+to the [`messages.status`](/en/integrations/webhooks#message-delivery-state)
+webhook.
+
+## Delete a message
+
+`POST /{instanceId}/messages/delete`
+
+```json
+{
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": true,
+    "id": "3AB16AB78CD9012E89A0"
+  }
+}
+```
+
+Enter the `key` exactly as received in the webhook. `remoteJid` and `id`
+identify the message. The API responds `204`, with no body.
+
+The account can delete only messages that it sent. In groups, an admin can delete
+messages from other participants.
+
+## Compatibility by connection type
+
+| Type | Unofficial | Official (Cloud API) | Instagram |
+| --- | :---: | :---: | :---: |
+| Text | ✅ | ✅ | ✅ |
+| Media: image, video, document | ✅ | ✅ | ✅ |
+| Media: audio | ✅ | ✅ | ✅ |
+| Audio (voice note) | ✅ | ✅ | ✅ |
+| Audio from text | ✅ | ✅ | — |
+| Sticker (only `image/webp` on the Cloud API) | ✅ | ✅ | — |
+| Location | ✅ | ✅ | — |
+| Contact | ✅ | ✅ | — |
+| Buttons | ✅ | ✅ | — |
+| Option list | ✅ | ✅ | — |
+| Carousel | — | ✅ | — |
+| Template | — | ✅ | — |
+| React | ✅ | ✅ | ✅ |
+| Delete | ✅ | — | — |
+| Mark as read | ✅ | — | — |
+| Quote (`quotedMessageId`), except buttons and list on unofficial | ✅ | ✅ | ⚠️ |
+| Human agent (`humanAgent`) | — | — | ✅ |

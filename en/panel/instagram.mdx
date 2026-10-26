@@ -1,0 +1,73 @@
+---
+title: Instagram
+description: "Connect a professional Instagram account to the instance"
+---
+
+import PanelNote from '/snippets/en-panel-note.mdx';
+
+**Location**: **Instances** (*Instâncias*) > select the instance > **Connection** (*Conexão*).
+
+<PanelNote />
+
+## Description
+
+The Instagram connection links a professional account to the instance, to handle
+direct messages and interactions.
+
+## Preliminary requirements
+
+- A professional Instagram account (business or creator). Personal accounts
+  cannot be connected. Convert the account in Instagram before you start.
+- Sign-in access to that account.
+
+## Procedure
+
+<Steps>
+  <Step title="Open the connection page">
+    Click **Connect with Instagram** (*Conectar com Instagram*). The panel opens the connection page in a new tab.
+  </Step>
+  <Step title="Sign in and authorize">
+    Sign in to the professional account and authorize the access. This step happens in Instagram.
+  </Step>
+  <Step title="Return to the panel">
+    Return to the connection page to see the status.
+  </Step>
+</Steps>
+
+The flow goes through three screens:
+
+1. **Instagram connection** (*Conexão Instagram*), at the
+   `instagram-connection/[token]` route. The screen shows *Carregando dados de
+   conexão...* (loading) and then *Redirecionando para o Instagram...*
+   (redirecting). If the link is no longer valid, it responds *Link de conexão
+   inválido* or *Erro ao carregar link de conexão*. Generate a new link in the
+   panel.
+2. **Authorization in Instagram.** You sign in to the account and authorize the access.
+3. **Instagram authorization** (*Autorização Instagram*), at the
+   `instagram/authorize` route. The screen shows *Autorizando conexão...*
+   (authorizing) and, on completion, *Conexão realizada com sucesso!*
+   (connected). You can close the window.
+
+## Result
+
+In the panel, the connection page shows *Instância conectada com sucesso!* The
+connection type of the instance appears as **Instagram**.
+
+## Errors
+
+| Message | Cause | Action |
+|---|---|---|
+| *Código de autorização não encontrado.* (authorization code not found) | The Instagram return came without the code | Redo the authorization |
+| *Sessão de conexão não encontrada.* (connection session not found) | The session expired | Restart from the connection link |
+| *Não foi possível determinar a URL de retorno da autorização.* (return URL could not be resolved) | The return address could not be resolved | Generate a new link |
+| *Erro ao autorizar conexão com o Instagram.* (authorization error) | The authorization failed in Instagram | Try again |
+| *Erro ao verificar status da conexão.* (status check error) | The panel could not query the state | Try again |
+
+All error screens have the **Try again** (*Tentar novamente*) button. If the
+error persists, generate a new connection link in the panel.
+
+## See also
+
+- [Official connection](/en/panel/official-connection): WhatsApp through the official Meta API.
+- [Unofficial connection](/en/panel/unofficial-connection): QR code, pairing, and FastLink.
+- [Instances](/en/panel/instances): status and type of each instance.

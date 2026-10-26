@@ -1,27 +1,47 @@
 ---
-title: Conectando o WhatsApp
-description: "Veja como é fácil conectar seu WhatsApp na ZapperHub"
+title: Conectar o WhatsApp
+description: "Como conectar um número de WhatsApp a uma instância"
 ---
 
-Uma vez criada sua instância, o próximo passo é **Conectar seu WhatsApp** na 
-instância.
+## Descrição
 
-<p style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-  <span>Para isso, clique no botão <strong>Conectar</strong></span>
-  <div style={{ backgroundColor: "#080808", display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid', borderRadius: '4px', height: '24px', width: '24px', borderColor: '#363636' }}>
-    <Icon icon="play" size={14} color="#ffffff" />
-  </div>
-  <span>que fica localizado junto à sua instância.</span>
-</p>
+Depois de criar a instância, conecte um número de WhatsApp a ela. A conexão por
+QR Code adiciona a instância como um dispositivo conectado do celular, como o
+WhatsApp Web.
 
-A seguinte caixa de diálogo de conexão se abrirá:
+A ZapperHub recomenda a conexão pela API oficial da Meta. Veja as formas de
+conexão em [Conexão com o WhatsApp](/definitions/connection).
 
-<img noZoom src="./connect.png" />
+## Pré-requisitos
 
-Você pode se conectar diretamente na tela exibida, ou se preferir, compartilhar
-o link de conexão para outra pessoa utilizar.
+- Uma instância criada. Veja [Criar uma instância](/creating-instance).
+- O celular com o número a conectar, com o WhatsApp instalado e com acesso à internet.
 
-<Card title="DICA">
-Caso a conexão falhe após a leitura do QR Code, recomendamos tentar novamente
-após o QR Code atualizar na tela, o que demora cerca de 60 segundos.
-</Card>
+## Procedimento
+
+<Steps>
+  <Step title="Abra o diálogo de conexão">
+    No painel, na linha da instância, clique em **Conectar**.
+    O painel mostra o diálogo de conexão com o QR Code.
+
+    ![Diálogo de conexão com o QR Code](/connect.png)
+  </Step>
+  <Step title="Abra a leitura de QR Code no celular">
+    No WhatsApp, toque em **Configurações**, depois em **Dispositivos conectados** e em **Conectar dispositivo**.
+  </Step>
+  <Step title="Leia o QR Code">
+    Aponte a câmera do celular para o QR Code. Aguarde a confirmação na tela.
+  </Step>
+</Steps>
+
+Se outra pessoa está com o celular, envie a ela o link de conexão que o diálogo
+mostra. Veja [FastLink](/painel/conexao-nao-oficial#fastlink-conectar-sem-acesso-ao-painel).
+
+## Resultado
+
+O status da instância muda para **Conectado**.
+
+<Note>
+Se a conexão falhar depois da leitura, aguarde o QR Code atualizar. O QR Code
+muda a cada 60 segundos. Leia o novo QR Code.
+</Note>

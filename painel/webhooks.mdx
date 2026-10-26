@@ -1,121 +1,111 @@
 ---
 title: Webhooks
-description: "Cadastrar, editar e excluir webhooks da instância pelo painel"
+description: "Cadastrar, editar e excluir os webhooks da instância pelo painel"
 ---
 
-**Onde fica**: Instâncias → (selecione a instância) → Webhook
+**Onde fica**: **Instâncias** > selecione a instância > **Webhook**.
 
-Um webhook faz a instância avisar o **seu** sistema quando algo acontece. Esta página descreve
-como cadastrá-los pelo painel. O conteúdo de cada evento — o formato do corpo que você recebe —
-está em [Webhooks](/integrations/webhooks).
+## Descrição
 
-A tela se chama **Webhooks** (`dash/instances/[id]/webhook`). Sem nenhum cadastrado, ela mostra **Nenhum webhook cadastrado.
-Clique em "Novo Webhook" para criar um.**
+Um webhook faz a instância avisar o seu sistema quando algo acontece. Esta página
+descreve o cadastro pelo painel. O conteúdo de cada evento está em
+[Webhooks](/integrations/webhooks).
+
+A tela se chama **Webhooks** (`dash/instances/[id]/webhook`). Sem nenhum
+cadastro, ela mostra **Nenhum webhook cadastrado.**
 
 A lista tem as colunas **Nome**, **URL**, **Eventos** e **Ações**.
 
+## Pré-requisitos
+
+- Um endpoint HTTPS no seu sistema que aceita requisições `POST` e responde com
+  status de sucesso. Um endereço que responde só a `GET` não serve.
+
 ## Cadastrar
 
-O botão **Novo Webhook** abre o formulário, descrito como *Configure um novo webhook para receber
-eventos da API*.
+Clique em **Novo Webhook**.
 
 | Campo | Obrigatório | Validação |
 |---|---|---|
-| **Nome** | Sim | **Nome é obrigatório**; texto — *Um nome descritivo para identificar este webhook* |
-| **URL do Webhook** | Sim | **URL é obrigatória** e precisa ser válida (**URL inválida** quando não é) |
-| **Eventos** | Sim | **Selecione pelo menos um evento** — um webhook sem evento não é aceito |
+| **Nome** | Sim | Texto. Erro se vazio: **Nome é obrigatório** |
+| **URL do Webhook** | Sim | URL válida. Erros: **URL é obrigatória**, **URL inválida** |
+| **Eventos** | Sim | Ao menos um evento. Erro: **Selecione pelo menos um evento** |
 
-A descrição da URL é explícita quanto ao que o seu servidor precisa fazer: *URL que receberá os
-eventos da API. Precisa ser válida e aceitar requisições POST.* Um endereço que só responda a
-`GET` não serve.
-
-Conclua em **Criar**. Sucesso: **Webhook criado com sucesso.**
+Clique em **Criar**. Sucesso: **Webhook criado com sucesso.**
 
 <Note>
-Cada instância aceita **no máximo 5 webhooks**. Ao chegar a esse número, o botão **Novo Webhook**
-fica desabilitado — exclua ou reaproveite um dos existentes para cadastrar outro.
+Cada instância aceita no máximo 5 webhooks. Com 5 webhooks, o botão **Novo
+Webhook** fica desabilitado. Exclua ou reaproveite um dos existentes.
 </Note>
 
 ### Eventos disponíveis
 
-| Evento | Quando dispara |
+| Evento | Quando é publicado |
 |---|---|
 | `messages.upsert` | Uma mensagem foi criada ou recebida |
-| `messages.status` | O estado de uma mensagem mudou. Apenas em conexão oficial |
+| `messages.status` | O estado de uma mensagem mudou |
 | `messages.error` | Uma mensagem falhou |
 | `connection.update` | O estado da conexão da instância mudou |
-| `group-participants.update` | Participantes entraram, saíram, foram promovidos ou rebaixados em um grupo. Apenas em conexão não oficial |
+| `group-participants.update` | Participantes entraram, saíram, foram promovidos ou rebaixados em um grupo. Só em conexão não oficial |
 | `calls.update` | Uma chamada foi recebida, atendida ou encerrada. Em conexão oficial e não oficial |
-| `comments.upsert` | Um comentário foi recebido em um post da conta. Apenas em instância do Instagram |
+| `comments.upsert` | A conta recebeu um comentário em um post. Só em instância do Instagram |
 | `token.expired` | O token do Instagram expirou ou foi revogado |
 | `token.refresh.failed` | Uma tentativa de renovar o token do Instagram falhou |
 
-<Card title="ATENÇÃO">
-Em instância de **conexão oficial**, marcar `calls.update` faz a plataforma
-habilitar o recurso de chamadas no seu número junto à Meta antes de salvar —
-sem ele, a Meta não emite evento de chamada nem mostra o botão de ligação ao
-usuário.
+`webhook.test` não aparece na lista. A ZapperHub envia esse evento uma única vez
+no cadastro, para validar a URL. Ele não é assinável.
 
-Se o número não se qualificar para a Calling API, **o webhook não é salvo** e a
-tela avisa: salve novamente sem o evento de chamadas. Se o aviso for de falha de
-comunicação com a Meta, basta tentar de novo em instantes.
+<Warning>
+**Conexão oficial e `calls.update`.** Em instância de conexão oficial, marcar
+`calls.update` faz a plataforma habilitar o recurso de chamadas no número junto
+à Meta antes de salvar. Sem o recurso, a Meta não emite evento de chamada nem
+mostra o botão de ligação ao usuário.
 
-Em **conexão não oficial** a marcação é imediata, sem nenhuma verificação.
-Detalhes em [Webhooks](/integrations/webhooks).
-</Card>
+Se o número não se qualifica para a Calling API, o webhook não é salvo, e a tela
+avisa. Salve de novo sem o evento de chamadas. Se o aviso é de falha de
+comunicação com a Meta, tente de novo em instantes.
 
-A tela mostra a lista completa, com uma descrição curta de cada evento ao lado do
-nome. `webhook.test` não aparece: ele é enviado uma única vez no cadastro, para
-validar a URL, e não é assinável.
+Em conexão não oficial, a marcação é imediata, sem verificação. Detalhes em
+[Webhooks](/integrations/webhooks#chamada).
+</Warning>
 
-Marque os que interessam — a instrução da tela é *Selecione os eventos que este webhook deve
-receber*. O corpo de cada um está descrito em [Webhooks](/integrations/webhooks); não o
-reproduzimos aqui para que exista uma única fonte.
+O corpo de cada evento está em [Webhooks](/integrations/webhooks).
 
 ## Editar
 
-A ação **Editar Webhook** abre o mesmo formulário, com o texto *Atualize as informações do
-webhook*, e as mesmas regras de validação. Confirme em **Atualizar**; o resultado é **Webhook
-atualizado com sucesso.**
+Clique em **Editar Webhook**. O formulário é o mesmo do cadastro, com as mesmas
+validações. Clique em **Atualizar**. Sucesso: **Webhook atualizado com sucesso.**
 
-Editar a URL passa a valer para os **próximos** eventos. Eventos já entregues, ou já em tentativa
+Uma URL nova vale para os próximos eventos. Eventos já entregues, ou em tentativa
 de entrega, não são reenviados para o endereço novo.
 
 ## Excluir
 
-O diálogo é **Confirmar exclusão** e declara:
-
-> Tem certeza que deseja excluir o webhook *(nome)*? **Esta ação é irreversível.**
-
-Confirme em **Sim, excluir**. Sucesso: **Webhook excluído com sucesso.** Falha: **Ocorreu um erro
-ao excluir o webhook. Tente novamente mais tarde.**
-
 <Warning>
-**A exclusão não pode ser desfeita.** O cadastro some da lista e a instância **para imediatamente
-de enviar eventos** para aquele endereço. Os eventos que ocorrerem depois disso **não ficam
-guardados** para entrega posterior — eles simplesmente não são enviados àquele destino.
+**A exclusão não pode ser desfeita.** O cadastro sai da lista, e a instância para
+imediatamente de enviar eventos para aquele endereço. Os eventos que ocorrem
+depois não ficam guardados para entrega posterior.
 
-Se a intenção é só trocar o endereço, **edite** o webhook em vez de excluí-lo.
+Para trocar só o endereço, edite o webhook em vez de excluir.
 </Warning>
+
+Clique em **Excluir**. O diálogo **Confirmar exclusão** pede a confirmação.
+Clique em **Sim, excluir**. Sucesso: **Webhook excluído com sucesso.** Falha:
+**Ocorreu um erro ao excluir o webhook. Tente novamente mais tarde.**
 
 ## Vários webhooks na mesma instância
 
-Uma instância pode ter mais de um webhook, até o limite de 5, e eles funcionam de forma
-independente:
+Uma instância pode ter até 5 webhooks. Eles funcionam de forma independente:
 
-- **Cada webhook recebe sua própria cópia do evento.** Se três webhooks assinam
-  `messages.upsert`, uma mensagem recebida gera três entregas, uma para cada URL.
-- **Cada um recebe apenas os eventos que assinou.** Assinaturas diferentes no mesmo evento não
-  interferem umas nas outras.
-- **A falha de um não afeta os outros.** Se uma URL está fora do ar, os demais webhooks seguem
-  recebendo normalmente — a entrega é avaliada destino a destino.
+- Cada webhook recebe a própria cópia do evento. Três webhooks com `messages.upsert` geram três entregas por mensagem.
+- Cada webhook recebe só os eventos que assinou.
+- A falha de um não afeta os outros. A entrega é avaliada destino a destino.
 
-Para saber se um evento chegou de fato ao seu sistema, use **Ver recibos de entrega** no
-[Log de mensagens](/painel/log-de-mensagens): é lá que ficam o horário da entrega, o da tentativa
-e o erro, quando houver.
+Para confirmar que um evento chegou ao seu sistema, use **Ver recibos de
+entrega** no [Log de mensagens](/painel/log-de-mensagens).
 
 ## Veja também
 
-- [Webhooks](/integrations/webhooks) — o conteúdo de cada evento
-- [Log de mensagens](/painel/log-de-mensagens) — recibos de entrega nos webhooks
-- [Configurações da instância](/painel/configuracoes-da-instancia) — comportamento da instância
+- [Webhooks](/integrations/webhooks): o conteúdo de cada evento.
+- [Log de mensagens](/painel/log-de-mensagens): recibos de entrega nos webhooks.
+- [Configurações da instância](/painel/configuracoes-da-instancia): comportamento da instância.

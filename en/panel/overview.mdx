@@ -1,0 +1,105 @@
+---
+title: Panel overview
+description: "How the panel is organized and where each area is"
+---
+
+import PanelNote from '/snippets/en-panel-note.mdx';
+
+**Location**: the first screen after you sign in.
+
+<PanelNote />
+
+## Description
+
+The panel is where you create instances, connect numbers, follow messages, and
+adjust the behavior of each instance. This page describes the organization of the
+panel and points to the page of each area.
+
+## Entry to the panel
+
+When you open the panel address, the panel redirects you. There is no home screen.
+
+- Without an active session: you go to the sign-in screen. See [Account and subscription](/en/panel/account-and-subscription).
+- With an active session: you go to the instance list.
+
+The `dash` address also redirects to the instance list. The instance list is the
+entry point of the panel.
+
+## Side menu
+
+The side menu is fixed on all screens. It has two groups.
+
+### Navigation
+
+| Area | Function | Page |
+|---|---|---|
+| **Instances** (*Instâncias*) | Lists the instances of the account and gives access to each one | [Instances](/en/panel/instances) |
+| **Settings** (*Configurações*) | Account and registration data | [Account and subscription](/en/panel/account-and-subscription) |
+| **Global API Key** | Key of the Instance API, to create and manage instances | [Global API key](/en/panel/global-api-key) |
+| **My subscription** (*Minha assinatura*) | Opens the customer portal in a new tab | [Account and subscription](/en/panel/account-and-subscription) |
+
+**My subscription** is not a panel screen. The item opens the customer portal in
+a new tab. In the portal, you see invoices, change the payment method, and cancel
+the subscription.
+
+### Support
+
+Three shortcuts open in a new tab: **Documentation** (*Documentação*, this site),
+**Talk to Zack** (*Fale com o Zack*, support through WhatsApp), and **Community**
+(*Comunidade*). Below them, **Sign out** (*Sair*) ends the session.
+
+## Screens of an instance
+
+When you open an instance in the list, you reach its panel. Each instance has its
+own screens:
+
+<CardGroup cols={2}>
+  <Card title="Connection" href="/en/panel/unofficial-connection">
+    Connect a number through QR code, pairing code, or FastLink
+  </Card>
+  <Card title="Official connection" href="/en/panel/official-connection">
+    Connect a number through the official Meta API
+  </Card>
+  <Card title="Templates" href="/en/panel/templates">
+    Create and send template messages approved by Meta
+  </Card>
+  <Card title="Messages" href="/en/panel/message-log">
+    Query what was sent and received, and investigate failures
+  </Card>
+  <Card title="Webhook" href="/en/panel/webhooks">
+    Receive the instance events in your system
+  </Card>
+  <Card title="Settings" href="/en/panel/instance-settings">
+    Delay, presence, debounce, and other behaviors
+  </Card>
+  <Card title="Text to speech" href="/en/panel/text-to-speech">
+    Send synthesized voice messages
+  </Card>
+  <Card title="Integrations" href="/en/panel/integrations">
+    AI agents and Chatwoot
+  </Card>
+</CardGroup>
+
+The [Instagram](/en/panel/instagram) connection is available for accounts with
+enabled access.
+
+## Two different keys
+
+The panel exposes two keys. They are not interchangeable:
+
+| Key | Location | Function |
+|---|---|---|
+| **Global API Key** | Side menu > Global API Key | Create and manage instances through the Instance API |
+| **Instance API key** | In the instance row, in the list | Send messages and operate the instance through the API |
+
+The difference between the two, with the HTTP header of each one, is in
+[Global API key](/en/panel/global-api-key).
+
+## Concept pages
+
+This section describes where to click. To understand what each thing is, see:
+
+- [Authentication](/en/definitions/authentication)
+- [WhatsApp connection](/en/definitions/connection)
+- [ZapperHub Connect](/en/definitions/zapperhub-connect)
+- [Message queue](/en/definitions/queue)

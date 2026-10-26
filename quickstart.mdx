@@ -1,41 +1,59 @@
 ---
-title: 'Início Rápido'
-description: 'Veja como utilizar a API e envie uma mensagem em menos de 3 minutos'
+title: Início rápido
+description: "Envie a primeira mensagem de texto pela API"
 ---
 
-## Obtendo os dados de conexão
+## Pré-requisitos
 
-Na tela do <a href="https://app.zapperhub.com/dash">dashboard</a>, você encontrará
-em cada instância os dados necessários para realizar uma conexão à API:
-- **URL**: é o endereço de sua instância na ZapperHub, onde você fará as solicitações
-de envio de mensagens, mídias, gerenciamento de grupos, configurações. Cada
-instância possui uma URL própria;
-- **X-Api-Key**: é a chave de acesso privada para realizar as ações na sua
-instância, tornando segura a conexão entre sua aplicação e a ZapperHub.
+- Uma instância com o status **Conectado**. Veja [Conectar o WhatsApp](/connecting-whatsapp).
+- A URL e a chave de API da instância.
 
-Para copiar a URL e a X-Api-Key, basta clicar sobre os respectivos valores, que
-os dados serão copiados para a área de transferência.
+## Obter os dados da instância
 
-<Card title="INFORMAÇÃO DE SEGURANÇA">
-A chave de acesso à sua API é privada e não deve ser fornecida para terceiros.
-Use somente em sua aplicação, e armazene em local seguro e de forma criptografada.
-Com a chave de acesso privada é possível ter acesso direto ao WhatsApp, portanto,
-proteja essa informação.
+Na lista de instâncias do [painel](https://app.zapperhub.com/dash), cada
+instância mostra dois dados:
 
-A chave de acesso da instância não pode ser alterada. Em caso de vazamento e uso
-indevido de sua chave de acesso, apague a instância e crie uma nova.
-</Card>
+| Dado | Descrição |
+|---|---|
+| **URL** | O endereço da instância na ZapperHub. Cada instância tem uma URL própria. |
+| **X-Api-Key** | A chave de acesso privada da instância. |
 
-## Enviando uma mensagem
+Clique sobre um valor para copiá-lo.
 
-- Acesse a documentação para <a href="/api-reference/mensagens/enviar-mensagem-de-texto" target="_blank">enviar uma mensagem de texto</a>;
-- Clique em **Try it**;
-- Preencha no campo `instanceId` o id da sua instância, 
-que é o **valor que se encontra logo após https://api.zapperhub.com/ em sua 
-URL** (ex: inst_abcde12345);
-- Preencha o campo `X-Api-Key` com sua chave de acesso privada;
-- No campo `jid`, preencha o número do telefone para qual deseja mandar uma
-mensagem, com o código do país (ex: 5512912345678);
-- Em `message`, digite a mensagem de texto que deseja enviar.
+O **id da instância** é a parte da URL depois de `https://api.zapperhub.com/`.
+Exemplo: `inst_abcde12345`.
 
-Sua mensagem será encaminhada para uma fila de disparo, que irá respeitar um intervalo de envios de acordo com as <a href="/api-reference/configurações/obter-configurações">configurações de sua API</a>.
+<Warning>
+**Proteja a chave de API.** A chave dá acesso direto ao WhatsApp conectado.
+Guarde a chave em um local seguro e criptografado. Não envie a chave a terceiros.
+A chave não pode ser alterada. Em caso de vazamento, exclua a instância e crie
+uma nova.
+</Warning>
+
+## Procedimento
+
+<Steps>
+  <Step title="Abra a referência da rota">
+    Abra [Enviar mensagem de texto](/api-reference/mensagens/enviar-mensagem-de-texto) na API Reference.
+  </Step>
+  <Step title="Abra o formulário de teste">
+    Clique em **Try it**.
+  </Step>
+  <Step title="Preencha a autenticação">
+    Em `instanceId`, informe o id da instância. Em `X-Api-Key`, informe a chave de API.
+  </Step>
+  <Step title="Preencha a mensagem">
+    Em `jid`, informe o número de destino com o código do país. Exemplo: `5512912345678`.
+    Em `message`, digite o texto.
+  </Step>
+  <Step title="Envie">
+    Clique em **Send**.
+  </Step>
+</Steps>
+
+## Resultado
+
+A API responde `200` com `status: "scheduled"` e um `jobId`. A mensagem entra na
+fila da instância e sai no intervalo definido nas
+[configurações da instância](/api-reference/configurações/obter-configurações).
+Veja [Fila de mensagens](/definitions/queue).

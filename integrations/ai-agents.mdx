@@ -1,106 +1,105 @@
 ---
 title: Agentes de IA
-description: "Integre diretamente com a Chatvolt e tenha um agente de IA especializado em seu negócio"
+description: "Como um agente de IA da Chatvolt responde as conversas de uma instância e como controlá-lo"
 ---
 
 <Warning>
-  **Mudança no campo `type` a partir de 10/09/2026**
+**Mudança no campo `type` a partir de 10/09/2026.** A rota
+`POST /{instanceId}/integrations` aceita só `CHATVOLT` em `type`. Requisições com
+`GPTMAKER` ou `ZAIA` respondem `400`. Antes, respondiam `204`.
 
-  A rota `POST /{instanceId}/integrations` passa a aceitar **apenas** `CHATVOLT` no campo
-  `type`. Requisições com `GPTMAKER` ou `ZAIA` passam a responder **`400`** onde antes
-  respondiam `204`.
+- Se a sua integração já usa `CHATVOLT`, nada muda.
+- Se você envia `GPTMAKER` ou `ZAIA`, a chamada falha.
 
-  **O que muda para você**
+Integrações desses dois provedores já cadastradas continuam a funcionar enquanto
+a API legada estiver no ar. Elas não podem mais ser criadas nem atualizadas por
+esta rota. Para seguir com um agente de IA, migre para a Chatvolt. Veja
+[Chatvolt AI](/integrations/chatvolt).
 
-  - Se a sua integração já usa `CHATVOLT`, **nada muda** — nenhuma ação necessária.
-  - Se você envia `GPTMAKER` ou `ZAIA` na criação da integração, essa chamada passa a falhar.
-
-  **O que fazer**
-
-  Integrações desses dois provedores que já estão cadastradas continuam funcionando enquanto a
-  API legada estiver no ar, mas não podem mais ser criadas ou atualizadas por esta rota. Para
-  seguir com um agente de IA na ZapperHub, migre para a Chatvolt — veja
-  [Chatvolt AI](/integrations/chatvolt).
-
-  O motivo da recusa é evitar uma falha silenciosa: aceitar um provedor que a API não processa
-  gravaria uma integração que nunca responde, e o problema só apareceria quando o cliente
-  percebesse que a IA não atende.
+A API recusa esses provedores para evitar uma falha silenciosa: uma integração
+com um provedor não processado nunca responderia.
 </Warning>
 
-## Introdução
+## Descrição
 
-Um agente de IA responde automaticamente as conversas de uma instância. Em vez de a ZapperHub
-gerar as respostas, ela encaminha as mensagens recebidas para a **Chatvolt** e devolve ao
-WhatsApp o que o agente respondeu.
+Um agente de IA responde automaticamente as conversas de uma instância. A
+ZapperHub encaminha as mensagens recebidas à **Chatvolt** e devolve ao WhatsApp a
+resposta do agente.
 
 <Note>
-  GPT Maker e Zaia seguem atendidos enquanto a API legada estiver no ar, mas **não aceitam mais
-  novos cadastros**. Integrações criadas hoje precisam usar a Chatvolt.
+GPT Maker e Zaia seguem atendidos enquanto a API legada estiver no ar, mas não
+aceitam novos cadastros. Integrações criadas hoje usam a Chatvolt.
 </Note>
 
-A integração é feita **por instância**: cada número conectado pode ter o seu próprio agente, ou
-nenhum. O agente atende todas as conversas daquela instância, e você pode desligá-lo em uma
-conversa específica sem afetar as demais — é para isso que servem os comandos `#on` e `#off`,
-descritos adiante.
+A integração é por instância. Cada número conectado pode ter o seu próprio
+agente, ou nenhum. O agente atende todas as conversas da instância. Você pode
+desligar o agente em uma conversa sem afetar as outras, com os comandos `#on` e
+`#off`.
 
-O que você precisa ter em mãos, do lado da plataforma de agente:
+## Pré-requisitos
 
-- o **ID do Agente**, que identifica qual agente deve responder;
-- a **Chave de API** daquela plataforma, que autoriza a ZapperHub a conversar com ela.
+Na plataforma do agente, tenha em mãos:
 
-Esta página explica **o que a integração faz e como controlá-la**. O passo a passo de onde clicar
-no painel está em [Integrações](/painel/integracoes).
+- O **ID do Agente**, que identifica qual agente responde.
+- A **Chave de API** da plataforma, que autoriza a ZapperHub a usá-la.
 
-## Como integrar um agente de IA à ZapperHub
+Esta página explica o que a integração faz e como controlá-la. O procedimento no
+painel está em [Integrações](/painel/integracoes).
+
+## Integrar um agente
 
 ### Pela API
 
-Para realizar a integração de um agente da Chatvolt na ZapperHub, consulte a
-[Seção Integrações](/api-reference/integrações/criaratualizar-integração) na documentação de
-referência da API para criar ou atualizar os dados de uma integração.
+Use a rota
+[Criar/atualizar integração](/api-reference/integrações/criaratualizar-integração).
+Informe no corpo:
 
-Você deverá passar no corpo da requisição o tipo da integração (`type`, sempre `CHATVOLT`), o id
-do Agente (`agentId`) e o token de API (`apiKey`) da sua conta na Chatvolt.
+- `type`: sempre `CHATVOLT`.
+- `agentId`: o id do agente.
+- `apiKey`: o token de API da sua conta na Chatvolt.
 
-### Pelo Dashboard
+### Pelo painel
 
-A ZapperHub conta com uma interface amigável para configuração de seu agente de IA:
+<Steps>
+  <Step title="Abra a instância">
+    Acesse [app.zapperhub.com/dash](https://app.zapperhub.com/dash) e clique na instância.
+  </Step>
+  <Step title="Abra a aba de agentes">
+    Clique em **Integrações** e depois em **Agentes de IA**.
+  </Step>
+  <Step title="Preencha e salve">
+    Preencha **Tipo de Integração**, **ID do Agente** e **Chave de API**. Clique em **Atualizar**.
+  </Step>
+</Steps>
 
-- Acesse o dashboard em https://app.zapperhub.com/dash;
-- Clique sobre a instância desejada;
-- Selecione a guia **Integrações** e, dentro dela, a aba **Agentes de IA**;
-- Preencha o **Tipo de Integração**, o **ID do Agente** e a **Chave de API** de seu agente
-  Chatvolt e clique em **Atualizar**.
-
-Cada campo, com sua obrigatoriedade e validação, está detalhado em
+Cada campo, com a obrigatoriedade e a validação, está em
 [Integrações](/painel/integracoes).
 
-## Como controlar o agente pelo WhatsApp
+## Controlar o agente pelo WhatsApp
 
-Com a integração no agente de IA, é possível disparar comandos, tanto pela API
-quanto pelo próprio dispositivo ou WhatsApp Web, para ativar ou desativar o agente.
+Os comandos valem por conversa. Desligar a IA para um contato não afeta os outros.
 
-- Para **desativar** o agente de IA **via API**, basta mandar uma mensagem de texto
-para o contato com o texto `#off`;
-- Para **desativar** o agente de IA **via dispositivo, WhatsApp Web ou Desktop**,
-é possível configurar para desativar mandando **qualquer mensagem de texto**, ou
-se preferir, enviando o texto `#off` (como na API);
-- Para **reativar** o agente de IA, **tanto pela API quanto pelo dispositivo ou WhatsApp Web/Desktop**,
-é só mandar mensagem com texto `#on`.
+| Objetivo | Origem | Comando |
+|---|---|---|
+| Desativar o agente | API | Envie ao contato uma mensagem de texto `#off` |
+| Desativar o agente | Celular, WhatsApp Web ou Desktop | Envie `#off`. Ou configure a instância para desativar com qualquer mensagem de texto |
+| Reativar o agente | API, celular, WhatsApp Web ou Desktop | Envie `#on` |
 
-Os comandos valem **por conversa**: desligar a IA para um contato não afeta o atendimento dos
-demais.
+### Desativar a IA com qualquer mensagem do dispositivo
 
-### Configurando o modo de desativação da IA pelo dispositivo ou web/desktop
+<Steps>
+  <Step title="Abra as configurações da instância">
+    Na instância, clique em **Configurações**.
+  </Step>
+  <Step title="Ative a opção">
+    Na aba **Integração**, ative **Desativar IA em mensagens a partir do dispositivo**.
+  </Step>
+</Steps>
 
-Para configurar a forma como a IA é desativada através do dispositivo móvel, WhatsApp
-Web ou Desktop:
+Com a opção ativa, o agente para de responder naquela conversa quando o dono da
+linha responde pelo celular, pelo WhatsApp Web ou pelo Desktop. Mensagens
+enviadas pelas rotas da API não acionam essa pausa. Para elas, use `#off`.
 
-- Acesse a instância desejada e abra **Configurações**;
-- Na aba **Integração**, ative a opção **Desativar IA em mensagens a partir do dispositivo**.
-
-Com ela ligada, o agente para de responder naquela conversa assim que o dono da linha responde
-pelo celular, pelo WhatsApp Web ou pelo Desktop. Mensagens enviadas pelas **rotas de envio da
-API** não acionam essa pausa — para elas, use `#off`. As demais opções de comportamento —
-inclusive o **Debounce**, que agrupa as mensagens antes de enviá-las ao agente — estão descritas
-em [Configurações da instância](/painel/configuracoes-da-instancia).
+As outras opções de comportamento, inclusive o **Debounce**, que agrupa as
+mensagens antes de enviá-las ao agente, estão em
+[Configurações da instância](/painel/configuracoes-da-instancia).

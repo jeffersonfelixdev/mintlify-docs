@@ -1,0 +1,204 @@
+---
+title: Templates
+description: "Create message templates, follow the approval, send them with variables and media, and delete them at Meta"
+---
+
+import PanelNote from '/snippets/en-panel-note.mdx';
+
+**Location**: **Instances** (*Instâncias*) > select the instance > **Templates**.
+
+<PanelNote />
+
+## Description
+
+Templates are template messages approved by Meta. They start conversations on the
+official API. The screen is named **Message templates** (*Templates de mensagem*,
+`dash/instances/[id]/templates`). The creation happens on its own screen
+(`dash/instances/[id]/new-template`).
+
+With no template, the screen shows *Nenhum template encontrado para esta
+instância* (no template found) and the **Sync templates** (*Sincronizar
+templates*) button.
+
+## Preliminary requirements
+
+- An instance with an official connection (Cloud API). See [Official connection](/en/panel/official-connection).
+
+## Sync templates
+
+ZapperHub keeps the templates in a local database. The database can differ from
+Meta, for example after a template changes status. The **Sync templates**
+(*Sincronizar templates*) button fetches the current templates of the account
+from Meta and updates the local database.
+
+During the sync, the button is unavailable. At the end, the panel shows
+*Templates sincronizados.* and reloads the list. If Meta does not respond: *Erro
+ao sincronizar templates.*
+
+<Note>
+The same operation exists in the API:
+[Sync message templates](/api-reference/cloud-api/sincronizar-templates-de-mensagens)
+(`POST /{instanceId}/message-templates/sync`).
+</Note>
+
+## List
+
+| Attribute | Content |
+|---|---|
+| **Name** (*Nome*) | The identifier of the template |
+| **Language** (*Idioma*) | Portuguese (Brazil), English (US), Spanish, German, Italian, Turkish, French, Indonesian, Russian, among others |
+| **Status** | **Approved** (*Aprovado*), **Pending** (*Pendente*), **Rejected** (*Rejeitado*), **Limit reached** (*Limite atingido*), **Disabled** (*Desativado*), or **Paused** (*Pausado*) |
+| **Category** (*Categoria*) | **Utility** (*Utilitário*), **Authentication** (*Autenticação*), or **Marketing** |
+| **Preview** | The start of the message body |
+
+The list has the **List** (*Lista*) and **Cards** views. It loads in blocks.
+Click **Load more** (*Carregar mais*) for the next block.
+
+Each template has three actions: **View details** (*Ver detalhes*), **Send
+message** (*Enviar mensagem*), and **Delete** (*Excluir*). **View details** shows
+the **Parameter format** (*Formato dos parâmetros*: **Positional** or **Named**)
+and the **Components** (*Componentes*).
+
+## Create a template
+
+Click **New template** (*Novo template*). The panel opens *Criar template de
+mensagem*.
+
+| Field | Required | Validation |
+|---|---|---|
+| **Name** (*Nome*) | Yes | Identifier in the format `boas_vindas` |
+| **Category** (*Categoria*) | Yes | **Utility**, **Authentication**, or **Marketing** |
+| **Language** (*Idioma*) | Yes | One of the languages in the list |
+| **Body** (*Corpo*) | Yes | The message text. It accepts variables |
+| **Header** (*Cabeçalho*) | No | Text or media, according to the **Header format** (*Formato do cabeçalho*) |
+| **Footer** (*Rodapé*) | No | Short text |
+| **Buttons** (*Botões*) | No | Up to the Meta limit, with **Add button** (*Adicionar botão*) |
+
+The **Header format** is **Text**, **Image**, **Video**, **Document**, or
+**Location**. In the media formats, the example field asks for the **URL or
+base64 of the media**.
+
+Each button has **Button text** (*Texto do botão*) and **Type** (*Tipo*): **URL**,
+**Phone** (*Telefone*), **Quick reply** (*Resposta rápida*), or **OTP**. In the
+OTP type, there is also the **OTP type** (**Copy code** or **One tap**) and the
+**Autofill text**.
+
+On save: *Template criado. Ele ficará pendente de aprovação.* (template created,
+pending approval). On failure: *Erro ao criar template.*
+
+## Variables: positional and named
+
+A template can have parts that change at each send. The **Parameter format**
+defines how you declare them. The two formats do not mix in the same template.
+
+### Positional
+
+The variables are numbers between double braces and work by order.
+
+```text Template body
+Olá {{1}}, seu pedido {{2}} foi enviado.
+```
+
+At the send, the panel shows **Positional variables (template order)** and asks
+for the values in sequence. The first field fills `{{1}}`, the second fills
+`{{2}}`.
+
+### Named
+
+The variables have a name instead of a number. Each value is filled by name.
+
+```text Template body
+Olá {{nome}}, seu pedido {{pedido}} foi enviado.
+```
+
+At the send, the panel shows **Named variables (fill in each value)**, with one
+field per name. The fill order does not matter.
+
+In both cases, the creation asks for a **Variable example** (*Exemplo para
+variável*). Meta uses the example to evaluate the template.
+
+## Send a template
+
+Click **Send message** (*Enviar mensagem*). The panel opens *Enviar mensagem de
+template*, with a **Preview** (*Pré-visualização*).
+
+| Field | Required | Validation |
+|---|---|---|
+| **Phone number** (*Número do telefone*) | Yes | Number with the country code, such as `5511999999999` |
+| **Header media link** (*Link da mídia do cabeçalho*) | Yes, if the header is media | Valid URL |
+| **Variables** (*Variáveis*) | Yes, if the template has variables | One value per variable |
+
+During the send, the screen shows *Enviando...*. At the end: *Mensagem enviada.*
+or *Erro ao enviar mensagem.*
+
+### Media in the header
+
+The field does not receive a file. It receives a public address:
+
+- **Image**: public URL of the image. Example ending in `.png`.
+- **Video**: public URL of the video. Example ending in `.mp4`.
+
+Meta fetches the file by itself at delivery. The address must be publicly
+accessible. See [File storage](/en/definitions/storage).
+
+### Unapproved template
+
+The **Send message** button is unavailable while the template is not
+**Approved**. The panel shows *Template precisa estar aprovado para enviar
+mensagem* (template must be approved).
+
+The rule belongs to Meta: every template goes through review before it starts a
+conversation. A new template starts as **Pending**. Only after **Approved** can it
+be sent.
+
+The other statuses also block the send: **Rejected** (Meta refused the content),
+**Limit reached**, **Disabled**, and **Paused** (Meta suspended the template,
+usually for quality). The correction happens on the Meta side. Usually, the path
+is to create a new, adjusted template.
+
+## Delete a template
+
+The **Delete** (*Excluir*) button appears on each template. In the **List** view,
+with the label. In the **Cards** view, only with the trash icon.
+
+<Warning>
+**The deletion is irreversible and by name.** It happens at Meta and removes all
+language versions of the template. A template in `pt_BR` and `en_US` disappears
+entirely. Scheduled sends that use the template are not checked or canceled.
+</Warning>
+
+<Steps>
+  <Step title="Start">
+    Click **Delete** (*Excluir*). The panel opens *Excluir template*.
+  </Step>
+  <Step title="Confirm">
+    Click **Yes, delete** (*Sim, excluir*). **Cancel** (*Cancelar*) closes without deletion.
+  </Step>
+</Steps>
+
+While Meta responds, the button shows *Excluindo...*. At the end: *Template
+excluído.* and the list reloads. Failure: *Erro ao excluir template.*
+
+### Meta rules after the deletion
+
+| Situation | Effect |
+|---|---|
+| There is a sent message not yet delivered | The template goes to `PENDING_DELETION`. Meta tries the delivery for up to 30 days |
+| The deleted template was **Approved** | Meta blocks the re-creation of the same name for 30 days |
+| The template is **Disabled** | It cannot be deleted |
+
+Because of the last rule, the **Delete** button is unavailable on **Disabled**
+templates. The panel shows *A Meta não permite excluir templates desativados*
+(Meta does not allow deletion of disabled templates).
+
+<Note>
+The same operation exists in the API:
+[Delete message template](/api-reference/cloud-api/excluir-template-de-mensagem)
+(`DELETE /{instanceId}/message-templates/{name}`).
+</Note>
+
+## See also
+
+- [Message log](/en/panel/message-log): check what happened to the send.
+- [Official connection](/en/panel/official-connection): templates require the official API.
+- [Sending messages](/en/functions/sending-messages#template): the template send through the API.

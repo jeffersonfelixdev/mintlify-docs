@@ -1,0 +1,44 @@
+---
+title: Messages
+description: "The message types that ZapperHub sends and the accepted destinations"
+---
+
+## Description
+
+ZapperHub sends messages to contacts, groups, communities, and channels.
+
+## Message types
+
+- Text
+- Image, with or without caption
+- Audio
+- Voice note (as recorded on the device)
+- Voice note generated from text
+- Video
+- Document
+- Contact (vCard)
+- Sticker
+- Location
+- Action or quick-reply buttons
+- Option list (interactive menu)
+- Carousel (official connection only)
+- Template approved by Meta (official connection only)
+
+## Destinations
+
+| Destination | Suffix |
+|---|---|
+| Phone number | `@s.whatsapp.net` |
+| Unique user identifier | `@lid` |
+| Group | `@g.us` |
+| Status | `status@broadcast` |
+| Channel | `@newsletter` |
+
+## Other operations
+
+In addition to sending, the API lets you react to a message, mark messages as
+read, and delete a sent message.
+
+The route, the fields, the limits, and the differences between official and
+unofficial connections for each type are in
+[Sending messages](/en/functions/sending-messages).

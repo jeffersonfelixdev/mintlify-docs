@@ -1,75 +1,99 @@
 ---
 title: Make
-description: "Saiba como integrar a ZapperHub ao Make"
+description: "Usar a ZapperHub em um cenário do Make, pelo app da ZapperHub ou pelo módulo HTTP"
 ---
 
-Há duas maneiras de se connectar com a ZapperHub na plataforma Make:
+## Descrição
 
-<div style={{display: 'flex', alignItems: 'center' }}>
-  <img 
-    style={{padding: '8px', backgroundColor: '#2563eb', borderRadius: '8px'}} 
-    noZoom 
-    src="./make-zapperapi-app.png" 
-  />
-  <span style={{padding: '8px'}}><strong>App da ZapperHub</strong>: É a forma recomendada, e atenderá a maioria dos casos de uso. A integração é mais simplificada e menos propensa a erros.</span>
-</div>
+Há duas formas de usar a ZapperHub no Make:
 
-<div style={{display: 'flex', alignItems: 'center' }}>
-  <img 
-    style={{padding: '8px', backgroundColor: '#007ee5', borderRadius: '8px'}} 
-    noZoom 
-    src="./make-http-builtin.png" 
-  />
-  <span style={{padding: '8px'}}><strong>Requisição HTTP (nativo do Make)</strong>: É a forma alternativa quando o App da ZapperHub não contemplar a solução. Deve ser usado com mais cuidado pois é mais sucetível a erros no preenchimento dos campos.</span>
-</div>
+| Forma | Quando usar |
+|---|---|
+| **App da ZapperHub** | Recomendada. Atende a maioria dos casos. Os campos são guiados, com menos chance de erro. |
+| **Módulo HTTP (nativo do Make)** | Quando o app da ZapperHub não tem o módulo necessário. Exige o preenchimento manual da URL, do método e do JSON. |
+
+## Pré-requisitos
+
+- A URL, o id e a chave de API da instância. Veja [Início rápido](/quickstart).
+- Para instalar o app: permissão de `Admin`, `Owner` ou `App Developer` na
+  organização do Make. Sem a permissão, envie esta página ao gestor para
+  executar os passos 1 a 4.
 
 ## App da ZapperHub
 
-1. Acesse este link para instalar o App da ZapperHub: https://us2.make.com/app/invite/23387626ccaf253247e64f57566ffa15
+<Steps>
+  <Step title="Abra o convite do app">
+    Acesse [o link de instalação do app](https://us2.make.com/app/invite/23387626ccaf253247e64f57566ffa15).
+  </Step>
+  <Step title="Instale">
+    Clique em **Install**.
 
-2. Clique no botão Install: 
-<img noZoom src="./make-step-1.png" />
+    ![Botão Install do app da ZapperHub](/integrations/make-step-1.png)
+  </Step>
+  <Step title="Escolha a organização">
+    Selecione a organização onde o app será instalado. Clique em **Install**.
 
-3. Na tela seguinte, <strong>selecione a Organização</strong> onde deseja instalar o App da ZapperHub e em seguida clique em <strong>Install</strong>:
-<img noZoom src="./make-step-2.png" />
-<strong>Importante:</strong>
-É necessário ter permissão de `Admin`, `Owner` ou `App Developer` da organização
-para instalar novos apps. Caso não a tenha, envie <a href="#app-da-zapperhub">esta página</a> ao seu gestor para executar os passos de 1 a 4.
+    ![Seleção da organização](/integrations/make-step-2.png)
+  </Step>
+  <Step title="Conclua a instalação">
+    Clique em **Finish Wizard**.
 
-4. Em seguida, clique em <strong>Finish Wizard</strong> para concluir a instalação:
-<img noZoom src="./make-step-3.png" />
+    ![Botão Finish Wizard](/integrations/make-step-3.png)
+  </Step>
+  <Step title="Adicione o módulo ao cenário">
+    No cenário, adicione um novo módulo e pesquise por **ZapperHub**.
 
-5. Em seu cenário, <strong>adicione um novo módulo</strong>, e pesquise por <strong>ZapperHub</strong>:
-<img noZoom src="./make-step-4.png" />
+    ![Busca pelo módulo ZapperHub](/integrations/make-step-4.png)
+  </Step>
+  <Step title="Crie a conexão">
+    Selecione o módulo. Se ainda não há conexão, clique em **Create a connection**.
 
-6. Selecione o módulo que deseja utilizar, e na tela seguinte, caso ainda não tenha
-feito, crie uma nova conexão clicando em <strong>Create a connection</strong>:
-<img noZoom src="./make-step-5.png" />
+    ![Botão Create a connection](/integrations/make-step-5.png)
+  </Step>
+  <Step title="Informe os dados da instância">
+    Preencha o **Id da instância** e a **API Key**. Os dois estão no
+    [painel](https://app.zapperhub.com/dash).
 
-7. Preencha os dados de sua conexão com a ZapperHub (o `Id da instância` e a `API Key` encontram-se no <a href="https://app.zapperhub.com/dash" target="_blank">dashboard</a>):
-<img noZoom src="./make-step-6.png" />
+    ![Formulário de conexão com id e chave](/integrations/make-step-6.png)
+  </Step>
+  <Step title="Preencha o módulo">
+    Preencha os campos do módulo. O exemplo mostra o módulo de envio de mensagem de texto.
 
-8. Agora basta preencher os campos para executar o módulo, como no exemplo abaixo
-(módulo de enviar mensagem de texto):
-<img noZoom src="./make-step-7.png" />
+    ![Campos do módulo de envio de texto](/integrations/make-step-7.png)
+  </Step>
+</Steps>
 
-Pronto! Você configurou com sucesso sua integração da ZapperHub em suas automações no Make.
+## Módulo HTTP (nativo do Make)
 
-## HTTP (nativo do Make)
+<Steps>
+  <Step title="Adicione o módulo HTTP">
+    No cenário, adicione o módulo **HTTP** > **Make an API Key Auth request**.
 
-1. Em seu cenário, adicione o módulo <strong>HTTP -> Make an API Key Auth request</strong>:
-<img noZoom src="./make-http-step-1.png" />
+    ![Módulo HTTP Make an API Key Auth request](/integrations/make-http-step-1.png)
+  </Step>
+  <Step title="Selecione ou crie a credencial">
+    Em **Credentials**, selecione a credencial da ZapperHub. Se não há uma, clique em **Create a keychain**.
 
-2. Em Credentials, selecione as credenciais da ZapperHub, ou se não tiver uma, clique em <strong>Create a keychain</strong>:
-<img noZoom src="./make-http-step-2.png" />
+    ![Seleção de credenciais](/integrations/make-http-step-2.png)
+  </Step>
+  <Step title="Preencha a credencial">
+    Em **Add new keychain**, preencha **Key** com a chave de API da instância. Mantenha os outros campos no padrão.
 
-3. Em <strong>Add new keychain</strong>, preencha o campo <strong>Key</strong> com a chave (API Key) de sua instância, mantendo
-os demais campos no padrão:
-<img noZoom src="./make-http-step-3.png" />
+    ![Formulário Add new keychain](/integrations/make-http-step-3.png)
+  </Step>
+  <Step title="Preencha a requisição">
+    Em **URL**, informe a URL completa da rota. Exemplo, para uma mensagem de
+    texto: `https://api.zapperhub.com/{instanceId}/messages/text`. Em
+    **Method**, selecione o método, como `POST`. Preencha os dados em JSON.
 
-4. De volta a tela de preenchimento do módulo HTTP, complete o campo URL com a URL completa da requisição que for fazer
-(ex: para envio de mensagens de texto a URL é `https://api.zapperhub.com/{instanceId}/messages/text), o método (ex: POST),
-e os dados da requisição no formato JSON, conforme figura abaixo:
-<img noZoom src="./make-http-step-4.png" />
+    ![Campos URL, método e corpo da requisição](/integrations/make-http-step-4.png)
+  </Step>
+  <Step title="Salve">
+    Clique em **Save**.
+  </Step>
+</Steps>
 
-Agora só clicar em <strong>Save</strong> e sua integração ao ZapperHub está pronta!
+<Note>
+Formate o número de telefone sem parênteses, espaços ou traços. Veja
+[Formato do número](/definitions/number-format).
+</Note>

@@ -1,35 +1,43 @@
 ---
 title: Contatos
-description: "Consulte o vínculo de um contato, gerencie o opt-out de marketing e atenda pedidos de exclusão de dados"
+description: "Consultar o vínculo de identidade, bloquear, gerenciar o opt-out de marketing e excluir os dados de um contato"
 ---
 
-Na **Cloud API**, a ZapperHub guarda, para cada contato que escreve para a sua
-empresa, o vínculo entre **telefone**, **BSUID** e **username**, e a sua escolha
-sobre receber **mensagens de marketing**. Estas rotas permitem consultar e
-corrigir esses dados.
+## Descrição
 
-<Card title="IMPORTANTE">
-Os dados são da **empresa (WABA)**, e não de um único número: todas as suas
-instâncias na mesma WABA compartilham o vínculo e o opt-out. Eles **nunca** são
-vistos por outro dono, mesmo que ele conecte a mesma WABA. O dono e a WABA vêm da
-instância da `x-api-key` — não existe campo para informá-los.
+Na Cloud API, a ZapperHub guarda, para cada contato que escreve para a empresa:
 
-As rotas de **consulta, opt-out e exclusão** valem só para instâncias **Cloud API**;
-as de **bloqueio** valem também para o aparelho (`device`). Em um tipo de instância
-sem suporte, a resposta é `422` com `code: "UNSUPPORTED_FOR_INSTANCE_TYPE"`.
-</Card>
+- O vínculo entre **telefone**, **BSUID** e **username**.
+- A escolha do contato sobre receber **mensagens de marketing**.
+
+As rotas desta página consultam e alteram esses dados.
+
+<Note>
+**Escopo dos dados.** Os dados pertencem à empresa (WABA), não a um número. Todas
+as suas instâncias na mesma WABA compartilham o vínculo e o opt-out. Outro dono
+nunca vê esses dados, mesmo com a mesma WABA. O dono e a WABA vêm da instância da
+`x-api-key`.
+</Note>
+
+| Rotas | Tipos de instância |
+|---|---|
+| Consulta, opt-out e exclusão | Só Cloud API |
+| Bloqueio e desbloqueio | Cloud API e aparelho (`device`) |
+
+Em um tipo de instância sem suporte, a resposta é `422` com
+`code: "UNSUPPORTED_FOR_INSTANCE_TYPE"`.
 
 ## Identificar o contato
 
-Em todas as rotas, `:contact` aceita:
+Em todas as rotas, o parâmetro `:contact` aceita:
 
 | Formato | Exemplo |
 | --- | --- |
-| Telefone | `5512912345678` (com ou sem `+` e com ou sem `@s.whatsapp.net`) |
+| Telefone | `5512912345678`, com ou sem `+` e com ou sem `@s.whatsapp.net` |
 | BSUID | `BR.13491208655302741918` |
 | Username | `fulano` ou `@fulano` |
 
-Um username só é reconhecido se o contato já escreveu para a empresa.
+A API só reconhece um username se o contato já escreveu para a empresa.
 
 ## Consultar um contato
 
@@ -52,47 +60,51 @@ Um username só é reconhecido se o contato já escreveu para a empresa.
 ```
 
 - `marketing` é `null` quando não há escolha registrada.
-- Contato desconhecido responde `404` com `code: "CONTACT_NOT_FOUND"`.
+- Um contato desconhecido responde `404` com `code: "CONTACT_NOT_FOUND"`.
 - Depois de uma [exclusão de dados](#excluir-os-dados-de-um-contato-lgpd) com
-  opt-out ativo, só `marketing` vem preenchido; os campos de identidade vêm `null`.
+  opt-out ativo, só `marketing` vem preenchido. Os campos de identidade vêm `null`.
 
 ## Bloquear e desbloquear
 
-Bloqueie um contato para que ele não consiga mais falar com o número da instância,
-e libere-o depois. Vale para a **Cloud API** e para o **aparelho** (`device`), com
-o mesmo contrato.
+Um contato bloqueado não consegue falar com o número da instância. As rotas
+valem para a Cloud API e para o aparelho (`device`), com o mesmo contrato.
 
-`POST /{instanceId}/contacts/block` e `POST /{instanceId}/contacts/unblock`
+`POST /{instanceId}/contacts/block`
+`POST /{instanceId}/contacts/unblock`
+
+Requisição:
 
 ```json
 { "contact": "5512912345678" }
 ```
 
+Resposta:
+
 ```json
 { "contact": "5512912345678", "blocked": true }
 ```
 
-`blocked` é o **estado final**: `true` depois de bloquear, `false` depois de
-desbloquear. Repetir a operação — bloquear quem já está bloqueado, ou liberar quem
-não está — responde `200`.
+`blocked` é o estado final: `true` depois de bloquear, `false` depois de
+desbloquear. Repetir a operação responde `200`.
 
 | | Cloud API | Aparelho (`device`) |
 | --- | --- | --- |
-| Quem pode ser bloqueado | Quem enviou mensagem nas **últimas 24 horas** | Qualquer contato |
+| Quem pode ser bloqueado | Quem enviou mensagem nas últimas 24 horas | Qualquer contato |
 | Como informar o contato | Telefone, BSUID ou username | Só o telefone |
 | Contato inválido | `404` se o username não tem vínculo | `400` para BSUID e username |
 
-<Card title="REGRA DA META">
-Na Cloud API só é possível bloquear quem **enviou mensagem para a empresa nas
-últimas 24 horas**. Fora disso, a resposta é `422` com `code: "PROVIDER_REJECTED"`
-e `localizedMessage` explicando a regra. Desbloquear não tem essa restrição.
-</Card>
+<Note>
+**Regra da Meta.** Na Cloud API, só é possível bloquear quem enviou mensagem para
+a empresa nas últimas 24 horas. Fora disso, a resposta é `422` com
+`code: "PROVIDER_REJECTED"` e `localizedMessage` com a regra. Desbloquear não tem
+essa restrição.
+</Note>
 
-Os erros da Meta chegam com o código e o subcódigo originais em `meta`, e uma
-explicação em português em `localizedMessage` quando o código é conhecido — por
-exemplo, a lista cheia (limite de 64 mil bloqueados) ou o bloqueio do próprio
-número. Limite de taxa responde `429`; falha da Meta fora desse catálogo, `502`; e
-Meta fora do ar, `503`.
+Os erros da Meta chegam com o código e o subcódigo originais em `meta`. Para os
+códigos conhecidos, `localizedMessage` traz a explicação em português. Exemplos:
+lista cheia (64 mil bloqueados) e bloqueio do próprio número. Limite de taxa
+responde `429`. Falha da Meta fora do catálogo responde `502`. Meta fora do ar
+responde `503`.
 
 ### Listar os bloqueados
 
@@ -107,26 +119,26 @@ Meta fora do ar, `503`.
 }
 ```
 
-A lista é consultada **no provedor** — a Meta na Cloud API, o aparelho no
-`device` —; a ZapperHub não guarda uma cópia. `limit` vai de 1 a 100. Para a
-próxima página, envie o `next` recebido em `cursor`; `next: null` indica a última.
+A API consulta a lista no provedor: a Meta na Cloud API, o aparelho no `device`.
+A ZapperHub não guarda uma cópia.
 
+- `limit` vai de 1 a 100.
+- Para a próxima página, envie o `next` recebido em `cursor`. `next: null` indica a última página.
 - `waId` só aparece na Cloud API.
-- No aparelho, `contact` é o telefone; um identificador que não é telefone (por
-  exemplo, um LID) aparece como veio.
-- Se a lista de bloqueados mudar **durante** a paginação na Cloud API, a resposta é
-  `409` com `code: "BLOCKLIST_CHANGED"`: recomece a listagem do início.
+- No aparelho, `contact` é o telefone. Um identificador que não é telefone, como um LID, aparece como veio.
+- Se a lista mudar durante a paginação na Cloud API, a resposta é `409` com
+  `code: "BLOCKLIST_CHANGED"`. Recomece a listagem.
 - Um `cursor` inválido responde `400` com `code: "INVALID_CURSOR"`.
 
 ## Opt-out de marketing
 
-Quando o contato pede para **parar de receber marketing** (ou volta a aceitar), a
-Meta avisa a ZapperHub, que guarda a escolha e publica o evento
+Quando o contato pede para parar de receber marketing, ou volta a aceitar, a
+Meta avisa a ZapperHub. A ZapperHub guarda a escolha e publica o evento
 [`contacts.preference`](/integrations/webhooks#opt-out-de-marketing) em todas as
 suas instâncias na WABA.
 
-Enquanto o contato estiver em opt-out, o envio de um **template de marketing** é
-recusado **antes de chegar à Meta**:
+Enquanto o contato está em opt-out, a API recusa o envio de um **template de
+marketing** antes de chegar à Meta:
 
 ```json
 {
@@ -138,11 +150,11 @@ recusado **antes de chegar à Meta**:
 }
 ```
 
-- Templates de **utilidade** e de **autenticação** continuam sendo enviados.
-- Quando o contato volta a aceitar marketing, o envio volta a ser aceito.
-- O opt-out vale pelo telefone **e** pelo BSUID do mesmo contato.
-- Se não for possível saber a categoria do template, o envio segue e a decisão
-  fica com a Meta, que recusa com o código `131050`.
+- Templates de utilidade e de autenticação continuam a ser enviados.
+- Quando o contato volta a aceitar marketing, a API volta a aceitar o envio.
+- O opt-out vale pelo telefone e pelo BSUID do mesmo contato.
+- Se a API não conhece a categoria do template, o envio segue. A Meta decide e
+  recusa com o código `131050`.
 
 ### Listar os contatos em opt-out
 
@@ -157,11 +169,11 @@ recusado **antes de chegar à Meta**:
 }
 ```
 
-Do mais recente para o mais antigo, com `limit` de 1 a 100. Para a próxima página,
-envie o `next` recebido em `cursor`; `next: null` indica a última página. Um
-`cursor` inválido responde `400` com `code: "INVALID_CURSOR"`.
+A lista vem do mais recente para o mais antigo. `limit` vai de 1 a 100. Para a
+próxima página, envie o `next` recebido em `cursor`. `next: null` indica a última
+página. Um `cursor` inválido responde `400` com `code: "INVALID_CURSOR"`.
 
-### Marcar ou desmarcar à mão
+### Marcar ou desmarcar manualmente
 
 `PUT /{instanceId}/contacts/{contact}/marketing-preference`
 
@@ -169,15 +181,14 @@ envie o `next` recebido em `cursor`; `next: null` indica a última página. Um
 { "status": "opted_out" }
 ```
 
-Use quando o contato pediu por **outro canal** — telefone, e-mail — para não
-receber marketing. `status` é `opted_out` (bloqueia marketing) ou `opted_in`
-(libera). A resposta traz `source: "manual"` e a hora da mudança.
+Use esta rota quando o contato pede por outro canal, como telefone ou e-mail,
+para não receber marketing. `status` é `opted_out` (bloqueia marketing) ou
+`opted_in` (libera). A resposta traz `source: "manual"` e a hora da mudança.
 
-- Vale para todas as instâncias do mesmo dono na mesma WABA, que recebem o evento
-  `contacts.preference`.
-- Entre a escolha manual e um evento da Meta, **vale a mais recente**.
-- Um contato que a ZapperHub nunca viu é aceito, desde que informado por telefone
-  ou BSUID: assim dá para marcar o opt-out antes de ele escrever. Um username
+- Vale para todas as instâncias do mesmo dono na mesma WABA. Elas recebem o evento `contacts.preference`.
+- Entre a escolha manual e um evento da Meta, vale a mais recente.
+- A API aceita um contato que a ZapperHub nunca viu, se informado por telefone ou
+  BSUID. Assim, você marca o opt-out antes de o contato escrever. Um username
   desconhecido responde `404`.
 - Repetir a mesma escolha responde `200` e não publica o evento de novo.
 
@@ -185,17 +196,15 @@ receber marketing. `status` é `opted_out` (bloqueia marketing) ou `opted_in`
 
 `DELETE /{instanceId}/contacts/{contact}`
 
-Responde `204`, sem corpo. A exclusão apaga o vínculo (telefone, BSUID e username)
-e a escolha de marketing do contato.
+A rota apaga o vínculo (telefone, BSUID e username) e a escolha de marketing do
+contato. Responde `204`, sem corpo.
 
-<Card title="ATENÇÃO">
-Um **opt-out ativo é mantido**, reduzido ao identificador mínimo. Apagá-lo
-reabriria o envio de marketing a quem pediu para sair, o que contraria o próprio
-pedido do contato. Se ele voltar a escrever, o vínculo é recriado normalmente, e o
-opt-out continua valendo até ele pedir para retomar.
-</Card>
+<Warning>
+**O opt-out ativo é mantido**, reduzido ao identificador mínimo. Apagar o
+opt-out reabriria o envio de marketing a quem pediu para sair. Se o contato
+voltar a escrever, a ZapperHub recria o vínculo, e o opt-out continua a valer.
+</Warning>
 
-- Contato desconhecido também responde `204`, para não revelar se ele existia.
-- Não publica evento.
-- Quando uma WABA fica sem nenhuma instância Cloud API, os dados do dono nessa
-  WABA são apagados por uma rotina diária.
+- Um contato desconhecido também responde `204`. A API não revela se o contato existia.
+- A rota não publica evento.
+- Quando uma WABA fica sem instância Cloud API, uma rotina diária apaga os dados do dono nessa WABA.

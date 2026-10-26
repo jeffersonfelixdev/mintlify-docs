@@ -1,0 +1,59 @@
+---
+title: Quickstart
+description: "Send the first text message through the API"
+---
+
+## Preliminary requirements
+
+- An instance with the status **Connected**. See [Connect WhatsApp](/en/connecting-whatsapp).
+- The URL and the API key of the instance.
+
+## Get the instance data
+
+In the instance list of the [panel](https://app.zapperhub.com/dash), each
+instance shows two values:
+
+| Value | Description |
+|---|---|
+| **URL** | The address of the instance in ZapperHub. Each instance has its own URL. |
+| **X-Api-Key** | The private access key of the instance. |
+
+Click a value to copy it.
+
+The **instance id** is the part of the URL after `https://api.zapperhub.com/`.
+Example: `inst_abcde12345`.
+
+<Warning>
+**Protect the API key.** The key gives direct access to the connected WhatsApp.
+Store the key in a safe, encrypted location. Do not send the key to third
+parties. The key cannot be changed. If the key leaks, delete the instance and
+create a new one.
+</Warning>
+
+## Procedure
+
+<Steps>
+  <Step title="Open the route reference">
+    Open [Send text message](/api-reference/mensagens/enviar-mensagem-de-texto) in the API Reference.
+  </Step>
+  <Step title="Open the test form">
+    Click **Try it**.
+  </Step>
+  <Step title="Fill in the authentication">
+    In `instanceId`, enter the instance id. In `X-Api-Key`, enter the API key.
+  </Step>
+  <Step title="Fill in the message">
+    In `jid`, enter the destination number with the country code. Example: `5512912345678`.
+    In `message`, type the text.
+  </Step>
+  <Step title="Send">
+    Click **Send**.
+  </Step>
+</Steps>
+
+## Result
+
+The API responds `200` with `status: "scheduled"` and a `jobId`. The message
+enters the instance queue and leaves at the interval set in the
+[instance settings](/api-reference/configurações/obter-configurações). See
+[Message queue](/en/definitions/queue).

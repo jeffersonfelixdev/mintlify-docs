@@ -1,0 +1,111 @@
+---
+title: Tags
+description: "Create, apply, edit, and delete tags to identify the instances"
+---
+
+import PanelNote from '/snippets/en-panel-note.mdx';
+
+**Location**: side menu > **Tags**.
+
+<PanelNote />
+
+## Description
+
+Tags are colored labels applied to instances. Use tags to identify the instances
+by use case: VIP customers, test environment, one customer per tag. Tags appear
+in the [instance list](/en/panel/instances) and work as a filter.
+
+Each tag belongs to the user who created it. Other users do not see your tags.
+
+## Limits
+
+| Limit | Value |
+|---|---|
+| Tags in the catalog | 50 |
+| Tags per instance | 5 |
+| Characters in the name | 30 |
+
+When you reach a limit, the panel reports the reason and disables the
+corresponding button.
+
+## Create a tag
+
+There are two ways. Both produce the same tag.
+
+- **From the instance**: in the instance list, open the tag selector of the row.
+  Type the name, choose the color, and confirm. The tag is created already
+  applied to the instance.
+- **From the Tags screen**: click **New tag** (*Nova tag*). Fill in the name and the color.
+
+The name is unique per user. The comparison ignores case: if `Cliente VIP`
+exists, typing `cliente vip` shows the existing tag. Accents are considered:
+`Órgão` and `Orgao` are different tags.
+
+### Colors
+
+The color comes from a fixed palette of ten colors. The palette ensures
+readability in the light and dark themes. There is no free color field.
+
+The tag name is always visible next to the color.
+
+## Apply and remove
+
+In the tag selector of an instance, click a tag to apply it. Click again to
+remove it. Removing the tag from the instance does not delete it from the
+catalog.
+
+When the instance already has 5 tags, the other tags are disabled until you
+remove one.
+
+## Tags screen
+
+The table lists the tags with the color, the name, and the number of instances
+where each one is applied.
+
+- **Edit** (*Editar*) changes the name and the color. The change appears on all
+  instances that use the tag. Instances point to the tag, they do not keep a copy
+  of the name.
+- **Delete** (*Excluir*) removes the tag from the catalog and from all instances.
+
+## Delete a tag
+
+<Warning>
+**The deletion cannot be undone.** Deleting a tag removes it from all instances
+where it is applied. Before you confirm, the panel reports how many instances are
+affected.
+</Warning>
+
+The instances are not changed. They only lose the tag. Their other tags remain.
+
+Deleting an instance has the opposite effect: its tags stop being applied, but
+they stay in the catalog.
+
+## Filter instances by tag
+
+In the instance list, the **Tags** filter accepts one or more tags. The list
+shows the instances with any of the selected tags.
+
+- **No tag** (*Sem tag*) shows only the instances without tags.
+- The filter combines with the name search and with the status filter.
+- The filter is kept in the page address. A reload keeps the view, and the link can be shared.
+
+## Through the API
+
+Everything the screen does is in the **Instance API**, in the **Instance API
+Reference** tab. The routes list, create, change, and delete tags. They also
+apply and remove tags on instances. The listing accepts the `tag_ids` and
+`untagged` filter parameters.
+
+The `tags` field accompanies each instance in the response of `GET /instances`
+and `GET /instances/{instanceId}`. It is a new field. No previous field changed.
+
+<Warning>
+`DELETE /tags/{tagId}` deletes immediately, with no confirmation. The count of
+affected instances is in `GET /tags`, in the `instanceCount` field. Check the
+value before you delete.
+</Warning>
+
+## See also
+
+- [Instances](/en/panel/instances): the list where the tags appear.
+- [Global API key](/en/panel/global-api-key): the credential of the Instance API.

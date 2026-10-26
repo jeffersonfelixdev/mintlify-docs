@@ -1,58 +1,52 @@
 ---
 title: Chamadas
-description: "Originar, atender, conduzir, gravar e encerrar chamadas de voz pelo número da instância"
+description: "Originar, atender, reproduzir áudio, gravar e encerrar chamadas de voz pela API"
 ---
 
-A ZapperHub conduz chamadas de voz pelo número da instância: sua aplicação
-origina a ligação, atende uma chamada recebida, reproduz áudio para o contato,
-grava a conversa e encerra — tudo por API, sem operador humano discando.
+## Descrição
 
-Antes desta capacidade, a plataforma apenas **avisava** que uma chamada tinha
-acontecido. Agora ela participa da chamada.
+A ZapperHub conduz chamadas de voz pelo número da instância. A sua aplicação
+origina a chamada, atende uma chamada recebida, reproduz um áudio para o contato,
+grava a conversa e encerra. Tudo por API, sem operador humano.
 
-<Card title="PROCURANDO CONVERSA AO VIVO?">
-As operações desta página conduzem a chamada **por API**: sua aplicação liga e
-reproduz um arquivo, sem operador humano. Para um atendente conversar em tempo
-real pelo headset, dentro do seu sistema, veja o [Softphone](/functions/softphone).
+<Note>
+**Conversa ao vivo.** As rotas desta página conduzem a chamada por API: a
+aplicação liga e reproduz um arquivo. Para um atendente conversar em tempo real
+pelo headset, use o [Softphone](/functions/softphone). As duas formas conduzem a
+mesma chamada, com os mesmos eventos e o mesmo histórico.
+</Note>
 
-As duas capacidades convivem: o softphone é outra forma de conduzir a mesma
-chamada, com os mesmos eventos e o mesmo histórico.
-</Card>
+<Warning>
+**Disponível só em conexão não oficial.** As rotas desta página valem só para
+instâncias de conexão não oficial (`device`). Em conexão oficial (Cloud API),
+qualquer rota responde `422` com `code: UNSUPPORTED_FOR_INSTANCE_TYPE`. A conexão
+oficial continua a receber os eventos `calls.update`.
+</Warning>
 
-<Card title="DISPONÍVEL APENAS EM CONEXÃO NÃO OFICIAL">
-As operações desta página valem somente para instâncias de **conexão não
-oficial** (`device`). Em conexão oficial (Cloud API), qualquer uma delas responde
-`422` com `code: UNSUPPORTED_FOR_INSTANCE_TYPE`, e nada acontece com a instância.
+## Pré-requisitos
 
-Conexão oficial continua **recebendo** os eventos `calls.update` normalmente —
-o que não existe lá é a capacidade de conduzir a chamada.
-</Card>
+- Uma instância de conexão não oficial, com o status **Conectado**.
+- Um webhook com a assinatura `calls.update`. Veja [Webhooks](/integrations/webhooks).
 
-<Card title="PARA ACOMPANHAR A CHAMADA, ASSINE `calls.update`">
-As respostas das rotas desta página descrevem o instante do comando, não o
-desfecho: originar devolve `RINGING`, e o que vem depois — atendida, recusada,
-não atendida, encerrada — chega pelo evento `calls.update` no seu
-[webhook](/integrations/webhooks).
+<Note>
+**Assine `calls.update`.** As respostas das rotas descrevem o instante do comando,
+não o desfecho. Originar responde `RINGING`. O que vem depois (atendida,
+recusada, não atendida, encerrada) chega pelo evento `calls.update`. Sem a
+assinatura, a aplicação não sabe que a chamada terminou. A alternativa é
+consultar o [histórico](#consultar-o-historico) por `callId`.
+</Note>
 
-Sem assinar esse evento, sua aplicação não fica sabendo que a chamada terminou.
-A alternativa é consultar o histórico por `callId`, descrito mais abaixo nesta página,, que
-é o mesmo estado, só que sob demanda.
-
-Isso vale para os dois caminhos: chamadas conduzidas por API e pelo
-[softphone](/functions/softphone).
-</Card>
-
-## Limites desta versão
+## Limites
 
 | Limite | Valor |
 | --- | --- |
-| Chamadas simultâneas | **Uma por instância**, contando a que ainda está tocando |
+| Chamadas simultâneas | Uma por instância, inclusive a que ainda toca |
 | Vídeo | Não disponível |
 | Chamada em grupo | Não disponível |
 | Duração da chamada | Sem limite |
-| Chamadas por período | Sem limite da plataforma — o controle de uso abusivo é do próprio WhatsApp |
+| Chamadas por período | Sem limite da plataforma. O WhatsApp controla o uso abusivo |
 | Gravações por dia | 30 por instância, por dia-calendário de Brasília |
-| Duração da gravação | 1 hora; passado isso a chamada continua, sem gravação |
+| Duração da gravação | 1 hora. Depois disso, a chamada continua sem gravação |
 | Retenção da gravação | 7 dias após o encerramento |
 | Retenção do registro | 90 dias após o encerramento |
 
@@ -69,8 +63,8 @@ POST /{instanceId}/calls
 }
 ```
 
-A resposta traz o `callId`, que identifica a chamada em todas as operações
-seguintes e em todos os eventos dela:
+A resposta traz o `callId`. Ele identifica a chamada em todas as operações e em
+todos os eventos seguintes:
 
 ```json
 {
@@ -81,8 +75,8 @@ seguintes e em todos os eventos dela:
 }
 ```
 
-O aparelho do contato começa a tocar. **Nenhum áudio toca sozinho quando o
-contato atende** — reproduzir é sempre um comando explícito seu.
+O aparelho do contato começa a tocar. Nenhum áudio toca sozinho quando o contato
+atende. A reprodução é sempre um comando seu.
 
 | Resposta | `code` | Quando |
 | --- | --- | --- |
@@ -92,22 +86,17 @@ contato atende** — reproduzir é sempre um comando explícito seu.
 
 ## Atender uma chamada recebida
 
-<Card title="NÚMERO EM COEXISTÊNCIA NÃO RECEBE CHAMADAS">
-Se o mesmo número também está conectado à Cloud API — o arranjo de
-**coexistência**, com o aplicativo WhatsApp Business e a API oficial no mesmo
-número —, as chamadas recebidas são recusadas antes de tocar.
+<Warning>
+**Número em coexistência não recebe chamadas.** Se o mesmo número também está
+conectado à Cloud API (aplicativo WhatsApp Business e API oficial no mesmo
+número), o WhatsApp recusa as chamadas recebidas antes de tocar. O dispositivo da
+Cloud API responde `uncallable`, e o WhatsApp encerra a chamada em todos os
+dispositivos. A aplicação vê a chamada aparecer e sumir no mesmo instante.
+Originar continua a funcionar nesses números. Para atender chamadas, use um
+número fora da coexistência.
+</Warning>
 
-O dispositivo hospedado da Cloud API responde à oferta com `uncallable`, e o
-WhatsApp encerra a chamada para todos os dispositivos daquele número. Sua
-aplicação vê a chamada aparecer e sumir no mesmo instante, sem que nada possa ser
-atendido.
-
-**Originar continua funcionando normalmente** nesses números; a limitação é só
-para receber. Para atender chamadas, use um número que não esteja em
-coexistência.
-</Card>
-
-Use o `callId` que chegou no evento `calls.update` com `event: "connect"`.
+Use o `callId` do evento `calls.update` com `event: "connect"`.
 
 ```http
 POST /{instanceId}/calls/{callId}/answer
@@ -133,10 +122,10 @@ POST /{instanceId}/calls/{callId}/audio
 { "audio": "https://exemplo.com.br/aviso-de-entrega.mp3" }
 ```
 
-Aceita as mesmas formas do envio de mensagem de áudio: URL `http`/`https`,
-base64 ou data-URL, nos formatos mp3, mp4, wav e ogg. A plataforma converte.
+A rota aceita as mesmas formas da mensagem de áudio: URL `http`/`https`, base64
+ou data URL, nos formatos mp3, mp4, wav e ogg. A plataforma converte o arquivo.
 
-A resposta sai **depois** que a reprodução começou de fato:
+A resposta sai depois que a reprodução começou:
 
 ```json
 {
@@ -145,18 +134,17 @@ A resposta sai **depois** que a reprodução começou de fato:
 }
 ```
 
-Reproduções sucessivas na mesma chamada são permitidas. Um pedido novo
-**substitui** o áudio em curso — a chamada nunca reproduz dois áudios ao mesmo
-tempo.
+Reproduções sucessivas na mesma chamada são permitidas. Um pedido novo substitui
+o áudio em curso. A chamada nunca reproduz dois áudios ao mesmo tempo.
 
-<Card title="FALHA DE ÁUDIO NÃO DERRUBA A CHAMADA">
-Áudio inacessível, em formato não reproduzível ou acima do limite de tamanho
-responde `422` com `code: INVALID_CALL_MEDIA`, e **a chamada continua ativa**.
-Corrija e tente outro áudio com o contato ainda na linha.
+<Note>
+**Uma falha de áudio não encerra a chamada.** Um áudio inacessível, em formato não
+reproduzível ou acima do limite de tamanho responde `422` com
+`code: INVALID_CALL_MEDIA`. A chamada continua ativa. Corrija e envie outro áudio.
 
-Pedir reprodução antes de o contato atender responde `409` com
-`code: CALL_NOT_ESTABLISHED`. A chamada segue tocando.
-</Card>
+Um pedido de reprodução antes de o contato atender responde `409` com
+`code: CALL_NOT_ESTABLISHED`. A chamada continua a tocar.
+</Note>
 
 ## Encerrar e recusar
 
@@ -165,26 +153,25 @@ POST /{instanceId}/calls/{callId}/hangup
 POST /{instanceId}/calls/{callId}/reject
 ```
 
-`hangup` encerra uma chamada em andamento e interrompe qualquer áudio em
-reprodução. `reject` recusa uma chamada recebida que ainda está tocando — uma
-chamada já atendida se encerra, não se recusa.
+- `hangup` encerra uma chamada em andamento e interrompe o áudio em reprodução.
+- `reject` recusa uma chamada recebida que ainda toca. Uma chamada atendida se
+  encerra, não se recusa.
 
 A instância fica livre para uma nova chamada imediatamente.
 
 Repetir o encerramento de uma chamada já encerrada responde `409` com
-`code: CALL_NOT_AVAILABLE`, sem efeito colateral.
+`code: CALL_NOT_AVAILABLE`, sem efeito.
 
 ## Gravar a conversa
 
-Peça a gravação no momento em que origina ou atende, com `"record": true`. A
-gravação contém **os dois lados** da conversa e começa quando a chamada é
-estabelecida.
+Peça a gravação ao originar ou ao atender, com `"record": true`. A gravação
+contém os dois lados da conversa e começa quando a chamada é estabelecida.
 
-Quando fica pronta, chega um evento `calls.update` com `event: "recording"`,
-trazendo um endereço de download pronto. Veja
-[Gravação disponível](/integrations/webhooks).
+Quando a gravação fica pronta, chega um evento `calls.update` com
+`event: "recording"`, com um endereço de download. Veja
+[Gravação disponível](/integrations/webhooks#gravacao-disponivel).
 
-A resposta ao pedido de chamada diz se a gravação foi concedida:
+A resposta ao pedido de chamada informa se a gravação foi concedida:
 
 ```json
 {
@@ -196,17 +183,15 @@ A resposta ao pedido de chamada diz se a gravação foi concedida:
 }
 ```
 
-<Card title="A COTA LIMITA A GRAVAÇÃO, NUNCA A CHAMADA">
-Atingida a cota de 30 gravações no dia, as chamadas seguintes **acontecem
-normalmente** — apenas sem gravação, com a condição sinalizada em
-`recording.granted`. Nenhuma chamada é recusada por causa da cota.
+<Note>
+**A cota limita a gravação, não a chamada.** Depois de 30 gravações no dia, as
+chamadas seguintes acontecem sem gravação, com `recording.granted: false`.
+Nenhuma chamada é recusada por causa da cota. Uma chamada sem gravação não retém
+áudio da conversa.
+</Note>
 
-Chamada sem gravação solicitada não retém áudio algum da conversa.
-</Card>
-
-Passada 1 hora, a gravação é encerrada e **a chamada continua**, sem interrupção
-para o contato. O arquivo entregue traz a primeira hora, marcado com
-`truncated: true`.
+Depois de 1 hora, a gravação termina, e a chamada continua. O arquivo entregue
+traz a primeira hora, com `truncated: true`.
 
 ## Consultar o histórico
 
@@ -215,19 +200,17 @@ GET /{instanceId}/calls
 GET /{instanceId}/calls/{callId}
 ```
 
-O histórico é a rede de segurança de quando seu endpoint de webhook esteve fora
-do ar: toda chamada aparece com contato, direção, horários, duração e desfecho,
-independentemente de os eventos terem sido entregues.
+O histórico registra toda chamada, com contato, direção, horários, duração e
+desfecho, mesmo quando o webhook não foi entregue.
 
-A listagem é paginada por cursor e aceita os filtros `state` e `direction`.
-Chamada em andamento aparece com `state: "ACTIVE"` e `endedAt: null`.
+A listagem é paginada por cursor e aceita os filtros `state` e `direction`. Uma
+chamada em andamento aparece com `state: "ACTIVE"` e `endedAt: null`.
 
-É também por aqui que se obtém um **novo** endereço de download da gravação
-quando o anterior expirou — um endereço vencido nunca é a última chance de
-acesso.
+Use o histórico também para obter um novo endereço de download da gravação quando
+o anterior expirou.
 
-Passados os 7 dias, o registro continua disponível e informa que a gravação já
-não existe:
+Depois dos 7 dias, o registro continua disponível e informa que a gravação não
+existe mais:
 
 ```json
 {
@@ -241,31 +224,30 @@ não existe:
 
 ## Desfechos
 
-O campo `outcome` do registro, e o `status` do evento de encerramento, usam o
-mesmo vocabulário:
+O campo `outcome` do registro e o `status` do evento de encerramento usam os
+mesmos valores:
 
 | Valor | Significado |
 | --- | --- |
 | `COMPLETED` | Atendida e concluída |
 | `REJECTED` | Recusada |
 | `MISSED` | Não atendida |
-| `UNAVAILABLE` | Contato indisponível — em outra ligação |
+| `UNAVAILABLE` | Contato indisponível, em outra ligação |
 | `TERMINATED_BY_BUSINESS` | Encerrada por comando seu |
 | `FAILED` | Falha: perda de sessão, reinício do servidor ou erro de sinalização |
 
 ## Autoria da chamada
 
-Toda chamada registra **como foi conduzida**, e por quem:
+Toda chamada registra como foi conduzida e por quem:
 
 | Campo | Conteúdo |
 | --- | --- |
-| `conductedVia` | `API` para o caminho automatizado desta página, `SOFTPHONE` para uma conversa conduzida por um atendente |
-| `agent` | `{ id, displayName? }` do atendente. **Ausente** — e não nulo — nas chamadas originadas pela API |
+| `conductedVia` | `API` para o caminho automatizado desta página. `SOFTPHONE` para uma conversa conduzida por um atendente |
+| `agent` | `{ id, displayName? }` do atendente. Ausente, e não nulo, nas chamadas originadas pela API |
 
-A ausência do campo `agent` é informação, e não falta de dado: uma chamada por
-API **não teve** atendente, o que é diferente de não sabermos qual foi.
+A ausência de `agent` é informação: uma chamada por API não teve atendente.
 
-Para ver apenas as chamadas de um atendente:
+Para listar só as chamadas de um atendente:
 
 ```http
 GET /{instanceId}/calls?agentId=op-1183
@@ -274,9 +256,9 @@ GET /{instanceId}/calls?agentId=op-1183
 O filtro convive com `state`, `direction`, `limit` e `cursor`, e é preservado no
 endereço da página seguinte.
 
-<Card title="NENHUMA CHAMADA SOBREVIVE À QUEDA DA SESSÃO">
-Se a instância perder a sessão do WhatsApp, ou o servidor de instância for
-reiniciado, a chamada em andamento é encerrada com `FAILED` e a instância volta
-imediatamente apta a iniciar novas chamadas. A gravação parcial, quando existir,
-é finalizada e entregue.
-</Card>
+<Warning>
+**Queda da sessão.** Se a instância perde a sessão do WhatsApp, ou o servidor da
+instância reinicia, a chamada em andamento termina com `FAILED`. A instância
+volta a aceitar chamadas imediatamente. A gravação parcial, quando existe, é
+finalizada e entregue.
+</Warning>

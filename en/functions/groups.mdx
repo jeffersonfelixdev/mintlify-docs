@@ -1,0 +1,27 @@
+---
+title: Groups
+description: "Operations on groups and communities"
+---
+
+## Operations
+
+The API supports these operations on groups:
+
+- Create a group or a community.
+- Get the details of a group.
+- Update the name and the photo of a group.
+- Add and remove participants.
+- Promote a participant to admin and remove that permission.
+- Generate the invite link.
+- List the groups the number participates in.
+- List the participants of a group.
+
+To send text and media to a group, use the
+[Sending messages](/en/functions/sending-messages) routes with the group JID in
+`jid`.
+
+<Note>
+If the connected number is not an admin of the group, Meta can hide the phone
+numbers of the participants. In that case, the API shows the LID of the contact
+instead of the number.
+</Note>

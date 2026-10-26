@@ -1,38 +1,43 @@
 ---
 title: Mensagens
-description: "Envie mensagens de texto, áudio, mídias, e interaja com seus contatos"
+description: "Os tipos de mensagem que a ZapperHub envia e os destinos aceitos"
 ---
 
-Com a ZapperHub, você poderá enviar mensagens para contatos individuais, grupos,
-comunidades ou canais.
+## Descrição
 
-As mensagens podem ser do tipo:
-- Somente texto
-- Imagem
-- Imagem com legenda
+A ZapperHub envia mensagens para contatos, grupos, comunidades e canais.
+
+## Tipos de mensagem
+
+- Texto
+- Imagem, com ou sem legenda
 - Áudio
-- Nota de áudio (como se fosse gravado pelo dispositivo)
-- Nota de áudio gerada a partir de um texto
+- Nota de voz (como gravada no aparelho)
+- Nota de voz gerada a partir de um texto
 - Vídeo
 - Documento
-- Contato (formato vCARD)
+- Contato (vCard)
 - Sticker
 - Localização
 - Botões de ação ou de resposta rápida
 - Lista de opções (menu interativo)
+- Carrossel (apenas em conexão oficial)
 - Template aprovado pela Meta (apenas em conexão oficial)
 
-E podem ser direcionadas para:
-- Número de telefone (@s.whatsapp.net)
-- Identificador único do usuário (@lid)
-- Grupo (@g.us)
-- status (status@broadcast)
-- Canais (@newsletter)
+## Destinos
 
-O detalhamento de cada tipo — a rota, os campos, os limites e o que muda entre
-uma conexão oficial e uma não oficial — está em
-[Envio de mensagens](/functions/sending-messages).
+| Destino | Sufixo |
+|---|---|
+| Número de telefone | `@s.whatsapp.net` |
+| Identificador único do usuário | `@lid` |
+| Grupo | `@g.us` |
+| Status | `status@broadcast` |
+| Canal | `@newsletter` |
 
-Além de enviar, você pode **reagir** a uma mensagem (também no Instagram) e
-**excluir** uma mensagem já enviada. Para maiores informações, acesse a documentação de referência da API
-para detalhes de como enviar mensagens pela ZapperHub.
+## Outras operações
+
+Além de enviar, a API permite reagir a uma mensagem, marcar mensagens como lidas
+e excluir uma mensagem enviada.
+
+A rota, os campos, os limites e as diferenças entre conexão oficial e não oficial
+de cada tipo estão em [Envio de mensagens](/functions/sending-messages).

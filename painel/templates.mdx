@@ -3,38 +3,41 @@ title: Templates
 description: "Criar templates de mensagem, acompanhar a aprovação, enviá-los com variáveis e mídia e excluí-los na Meta"
 ---
 
-**Onde fica**: Instâncias → (selecione a instância) → Templates
+**Onde fica**: **Instâncias** > selecione a instância > **Templates**.
 
-Templates são as mensagens modelo aprovadas pela Meta, usadas para iniciar conversa na API
-oficial. A tela se chama **Templates de mensagem** (`dash/instances/[id]/templates`); a criação
-acontece em uma tela própria (`dash/instances/[id]/new-template`).
+## Descrição
 
-Quando a instância ainda não tem nenhum, a tela mostra **Nenhum template encontrado para esta
-instância. Talvez seja necessário sincronizar os templates.**, com o botão **Sincronizar
-templates** logo abaixo.
+Templates são mensagens modelo aprovadas pela Meta. Eles iniciam conversas na
+API oficial. A tela se chama **Templates de mensagem**
+(`dash/instances/[id]/templates`). A criação acontece em uma tela própria
+(`dash/instances/[id]/new-template`).
+
+Sem nenhum template, a tela mostra **Nenhum template encontrado para esta
+instância** e o botão **Sincronizar templates**.
+
+## Pré-requisitos
+
+- Uma instância de conexão oficial (Cloud API). Veja [Conexão oficial](/painel/conexao-oficial).
 
 ## Sincronizar templates
 
-Os templates ficam salvos em uma base local, que pode ficar desatualizada em relação à Meta —
-por exemplo, depois que um template muda de status por lá. O botão **Sincronizar templates**
-aparece na barra de ações do topo da tela e também no estado vazio, e busca todos os templates
-atuais da conta na Meta para atualizar a base local.
+A ZapperHub guarda os templates em uma base local. A base pode ficar diferente da
+Meta, por exemplo depois que um template muda de status. O botão **Sincronizar
+templates** busca os templates atuais da conta na Meta e atualiza a base local.
 
-Enquanto a sincronização roda o botão fica **indisponível** e o ícone gira. Ao final, o painel
-mostra **Templates sincronizados.** e a lista é recarregada — ou **Erro ao sincronizar
-templates.**, caso a Meta não responda.
+Durante a sincronização, o botão fica indisponível. Ao final, o painel mostra
+**Templates sincronizados.** e recarrega a lista. Se a Meta não responder: **Erro
+ao sincronizar templates.**
 
 <Note>
-A mesma sincronização está disponível na API em
+A mesma operação existe na API:
 [Sincronizar templates de mensagens](/api-reference/cloud-api/sincronizar-templates-de-mensagens)
 (`POST /{instanceId}/message-templates/sync`).
 </Note>
 
-## A lista
+## Lista
 
-Cada template aparece com estes atributos:
-
-| Atributo | O que mostra |
+| Atributo | Conteúdo |
 |---|---|
 | **Nome** | O identificador do template |
 | **Idioma** | Português (Brasil), Inglês (EUA), Espanhol, Alemão, Italiano, Turco, Francês, Indonésio, Russo, entre outros |
@@ -42,154 +45,149 @@ Cada template aparece com estes atributos:
 | **Categoria** | **Utilitário**, **Autenticação** ou **Marketing** |
 | **Preview** | O começo do corpo da mensagem |
 
-A lista pode ser vista como **Lista** ou **Cards**, e carrega aos poucos — use **Carregar mais**
-para trazer o próximo bloco.
+A lista tem as visões **Lista** e **Cards**. Ela carrega por blocos. Clique em
+**Carregar mais** para o próximo bloco.
 
-Cada template traz três ações: **Ver detalhes**, **Enviar mensagem** e **Excluir**.
-
-**Ver detalhes** abre **Detalhes do template**, com o **Formato dos parâmetros**
-(**Posicional** ou **Nomeado**) e os **Componentes** do template.
+Cada template tem três ações: **Ver detalhes**, **Enviar mensagem** e **Excluir**.
+**Ver detalhes** mostra o **Formato dos parâmetros** (**Posicional** ou
+**Nomeado**) e os **Componentes**.
 
 ## Criar um template
 
-O botão **Novo template** abre **Criar template de mensagem**, que já avisa: *Preencha os dados do
-template. Nome, categoria e corpo são obrigatórios.*
+Clique em **Novo template**. O painel abre **Criar template de mensagem**.
 
 | Campo | Obrigatório | Validação |
 |---|---|---|
-| **Nome** | Sim | identificador do template, no formato `boas_vindas` |
+| **Nome** | Sim | Identificador no formato `boas_vindas` |
 | **Categoria** | Sim | **Utilitário**, **Autenticação** ou **Marketing** |
-| **Idioma** | Sim | um dos idiomas da lista |
-| **Corpo** | Sim | o texto da mensagem; aceita variáveis |
-| **Cabeçalho** | Não | texto ou mídia, conforme o **Formato do cabeçalho** |
-| **Rodapé** | Não | texto curto, marcado como *Opcional* |
-| **Botões** | Não | até o limite da Meta, via **Adicionar botão** |
+| **Idioma** | Sim | Um dos idiomas da lista |
+| **Corpo** | Sim | O texto da mensagem. Aceita variáveis |
+| **Cabeçalho** | Não | Texto ou mídia, conforme o **Formato do cabeçalho** |
+| **Rodapé** | Não | Texto curto |
+| **Botões** | Não | Até o limite da Meta, com **Adicionar botão** |
 
-O **Formato do cabeçalho** pode ser **Texto**, **Imagem**, **Vídeo**, **Documento** ou
-**Localização**. Quando o formato é de mídia, o campo de exemplo pede a **URL ou base64 da
-mídia**.
+O **Formato do cabeçalho** é **Texto**, **Imagem**, **Vídeo**, **Documento** ou
+**Localização**. Nos formatos de mídia, o campo de exemplo pede a **URL ou base64
+da mídia**.
 
-Os **Botões** têm **Texto do botão** e **Tipo**: **URL**, **Telefone**, **Resposta rápida** ou
-**OTP**. No tipo OTP existe ainda o **Tipo OTP** — **Copiar código** ou **Um toque** — e o
-**Texto de preenchimento automático**.
+Cada botão tem **Texto do botão** e **Tipo**: **URL**, **Telefone**, **Resposta
+rápida** ou **OTP**. No tipo OTP, há também o **Tipo OTP** (**Copiar código** ou
+**Um toque**) e o **Texto de preenchimento automático**.
 
-Ao salvar: **Template criado. Ele ficará pendente de aprovação.** Em caso de falha, **Erro ao
-criar template.**
+Ao salvar: **Template criado. Ele ficará pendente de aprovação.** Em caso de
+falha: **Erro ao criar template.**
 
-## Variáveis: nomeadas e posicionais
+## Variáveis: posicionais e nomeadas
 
-Um template pode ter trechos que mudam a cada envio. O **Formato dos parâmetros** define como
-você os declara — e os dois formatos não se misturam no mesmo template.
+Um template pode ter trechos que mudam a cada envio. O **Formato dos parâmetros**
+define como você os declara. Os dois formatos não se misturam no mesmo template.
 
 ### Posicionais
 
-As variáveis são **números entre chaves duplas**, e valem pela **ordem**. O painel orienta:
-*Digite o texto. Use números entre chaves duplas para variáveis (ex.: 1, 2, 3)*.
+As variáveis são números entre chaves duplas e valem pela ordem.
 
 ```text Corpo do template
 Olá {{1}}, seu pedido {{2}} foi enviado.
 ```
 
-Na hora de enviar, o painel mostra **Variáveis posicionais (ordem do template)** e pede os
-valores na sequência: o primeiro campo preenche `{{1}}`, o segundo `{{2}}`. Trocar a ordem troca
-o texto — não há nome para conferir.
+No envio, o painel mostra **Variáveis posicionais (ordem do template)** e pede os
+valores na sequência. O primeiro campo preenche `{{1}}`, o segundo `{{2}}`.
 
 ### Nomeadas
 
-As variáveis têm **nome** em vez de número, e cada valor é preenchido pelo nome correspondente.
+As variáveis têm nome em vez de número. Cada valor é preenchido pelo nome.
 
 ```text Corpo do template
 Olá {{nome}}, seu pedido {{pedido}} foi enviado.
 ```
 
-Ao enviar, o painel mostra **Variáveis nomeadas (preencha cada valor)** e apresenta um campo por
-nome. A ordem em que você preenche não importa — o que casa é o nome.
+No envio, o painel mostra **Variáveis nomeadas (preencha cada valor)**, com um
+campo por nome. A ordem de preenchimento não importa.
 
-Em ambos os casos, o painel pede um **Exemplo para variável** durante a criação: é o valor de
-amostra que a Meta usa para avaliar o template.
+Nos dois casos, a criação pede um **Exemplo para variável**. A Meta usa o exemplo
+para avaliar o template.
 
 ## Enviar um template
 
-O botão **Enviar mensagem** abre **Enviar mensagem de template**, com uma **Pré-visualização** do
-que será entregue.
+Clique em **Enviar mensagem**. O painel abre **Enviar mensagem de template**, com
+uma **Pré-visualização**.
 
 | Campo | Obrigatório | Validação |
 |---|---|---|
-| **Número do telefone** | Sim | número com código do país, como `5511999999999`; **Informe o número do telefone.** se ficar vazio |
-| **Link da mídia do cabeçalho** | Sim, quando o cabeçalho é de mídia | URL válida; **Informe o link da mídia do cabeçalho.** se ficar vazio |
-| **Variáveis** | Sim, quando o template tem | um valor por variável |
+| **Número do telefone** | Sim | Número com o código do país, como `5511999999999`. Erro se vazio: **Informe o número do telefone.** |
+| **Link da mídia do cabeçalho** | Sim, se o cabeçalho é de mídia | URL válida. Erro se vazio: **Informe o link da mídia do cabeçalho.** |
+| **Variáveis** | Sim, se o template tem variáveis | Um valor por variável |
 
-Durante o envio a tela mostra **Enviando...**; ao final, **Mensagem enviada.** ou **Erro ao enviar
-mensagem.**
+Durante o envio, a tela mostra **Enviando...**. Ao final: **Mensagem enviada.** ou
+**Erro ao enviar mensagem.**
 
 ### Mídia no cabeçalho
 
-O campo **não recebe arquivo** — ele recebe **um endereço público**:
+O campo não recebe um arquivo. Ele recebe um endereço público:
 
-- **Imagem**: *URL pública da imagem que será usada no cabeçalho do template.* O painel usa como
-  exemplo um endereço terminado em `.png`.
-- **Vídeo**: *URL pública do vídeo que será usado no cabeçalho do template.* O exemplo do painel
-  termina em `.mp4`.
+- **Imagem**: URL pública da imagem. Exemplo terminado em `.png`.
+- **Vídeo**: URL pública do vídeo. Exemplo terminado em `.mp4`.
 
-O endereço precisa estar acessível publicamente — a Meta busca o arquivo por conta própria na hora
-de entregar a mensagem. Onde a ZapperHub guarda arquivos está em
-[Armazenamento](/definitions/storage).
+A Meta busca o arquivo por conta própria na entrega. O endereço precisa estar
+acessível publicamente. Veja [Armazenamento de arquivos](/definitions/storage).
 
-## Por que um template não aprovado não envia
+### Template não aprovado
 
-O botão **Enviar mensagem** fica **indisponível** enquanto o template não estiver aprovado, e o
-painel explica: **Template precisa estar aprovado para enviar mensagem**.
+O botão **Enviar mensagem** fica indisponível enquanto o template não está
+**Aprovado**. O painel mostra **Template precisa estar aprovado para enviar
+mensagem**.
 
-A razão não é do painel, é da Meta: **todo template precisa passar por revisão antes de poder
-iniciar conversa**. Um template recém-criado nasce **Pendente** — como o próprio aviso de criação
-diz, *Ele ficará pendente de aprovação*. Só depois de virar **Aprovado** ele pode ser enviado.
+A regra é da Meta: todo template passa por revisão antes de iniciar conversa. Um
+template novo nasce **Pendente**. Só depois de **Aprovado** ele pode ser enviado.
 
-Os demais status também bloqueiam o envio, por motivos diferentes: **Rejeitado** (a Meta recusou o
-conteúdo), **Limite atingido**, **Desativado** e **Pausado** (a Meta suspendeu o template, em
-geral por qualidade). Em qualquer um deles, a correção acontece do lado da Meta — criar um
-template novo, ajustado, costuma ser o caminho.
+Os outros status também bloqueiam o envio: **Rejeitado** (a Meta recusou o
+conteúdo), **Limite atingido**, **Desativado** e **Pausado** (a Meta suspendeu o
+template, em geral por qualidade). A correção acontece do lado da Meta. Em geral,
+o caminho é criar um template novo, ajustado.
 
 ## Excluir um template
 
-O botão **Excluir** aparece em cada template da lista — com o rótulo na visão **Lista** e
-apenas com o ícone de lixeira na visão **Cards**. Antes de qualquer coisa, o painel abre a
-confirmação **Excluir template**:
-
-> Tem certeza que deseja excluir o template `nome_do_template`? A exclusão acontece na Meta,
-> remove todas as versões de idioma e é irreversível.
-
-**Cancelar** fecha sem excluir; **Sim, excluir** confirma. Enquanto a Meta responde o botão
-mostra **Excluindo...** e o diálogo não fecha. Ao final, **Template excluído.** e a lista é
-recarregada — ou **Erro ao excluir template.**
+O botão **Excluir** aparece em cada template. Na visão **Lista**, com o rótulo. Na
+visão **Cards**, só com o ícone de lixeira.
 
 <Warning>
-A exclusão é **por nome**, e por isso remove **todas as versões de idioma** do template de uma
-vez. Um template em `pt_BR` e `en_US` some da lista inteiro, não só a linha que você clicou.
+**A exclusão é irreversível e por nome.** Ela acontece na Meta e remove todas as
+versões de idioma do template. Um template em `pt_BR` e `en_US` some inteiro.
+Envios já agendados que usam o template não são verificados nem cancelados.
 </Warning>
 
-### O que a Meta faz depois
+<Steps>
+  <Step title="Inicie">
+    Clique em **Excluir**. O painel abre **Excluir template**.
+  </Step>
+  <Step title="Confirme">
+    Clique em **Sim, excluir**. **Cancelar** fecha sem excluir.
+  </Step>
+</Steps>
 
-A exclusão não é do painel, é da Meta — e ela impõe algumas regras:
+Enquanto a Meta responde, o botão mostra **Excluindo...**. Ao final: **Template
+excluído.** e a lista recarrega. Falha: **Erro ao excluir template.**
 
-| Situação | O que acontece |
+### Regras da Meta após a exclusão
+
+| Situação | Efeito |
 |---|---|
-| Há mensagem já enviada e ainda não entregue | O template fica em `PENDING_DELETION` e a Meta segue tentando entregar por até 30 dias |
-| O template excluído estava **Aprovado** | A Meta bloqueia a recriação de um template com o mesmo nome por 30 dias |
+| Há mensagem enviada e ainda não entregue | O template fica em `PENDING_DELETION`. A Meta tenta a entrega por até 30 dias |
+| O template excluído estava **Aprovado** | A Meta bloqueia a recriação do mesmo nome por 30 dias |
 | O template está **Desativado** | Não pode ser excluído |
 
-Por causa da última regra, o botão **Excluir** fica **indisponível** em templates
-**Desativados**, e o painel explica: **A Meta não permite excluir templates desativados**.
-
-Envios já agendados que usem o template **não são verificados nem cancelados** pela exclusão.
+Por causa da última regra, o botão **Excluir** fica indisponível em templates
+**Desativados**, com a mensagem **A Meta não permite excluir templates
+desativados**.
 
 <Note>
-A mesma exclusão está disponível na API em
+A mesma operação existe na API:
 [Excluir template de mensagem](/api-reference/cloud-api/excluir-template-de-mensagem)
 (`DELETE /{instanceId}/message-templates/{name}`).
 </Note>
 
 ## Veja também
 
-- [Log de mensagens](/painel/log-de-mensagens) — conferir o que aconteceu com o envio
-- [Conexão oficial](/painel/conexao-oficial) — templates exigem conexão pela API oficial
-- [Mensagens](/functions/messages) — as funções de envio na API
+- [Log de mensagens](/painel/log-de-mensagens): conferir o que aconteceu com o envio.
+- [Conexão oficial](/painel/conexao-oficial): templates exigem a API oficial.
+- [Envio de mensagens](/functions/sending-messages#template): o envio de template pela API.

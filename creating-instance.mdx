@@ -1,33 +1,46 @@
 ---
-title: Criando uma instância
-description: "Como criar uma instância na ZapperHub"
+title: Criar uma instância
+description: "O que é uma instância e como criar uma no painel"
 ---
 
-## O que é uma instância
+## Descrição
 
-Uma instância representa o número de WhatsApp conectado à ZapperHub. Para cada
-número conectado é necessário criar uma instância, com isso, você pode conectar
-diversos números de WhatsApp em sua conta. 
+Uma instância é um número de WhatsApp conectado à ZapperHub. Cada número precisa
+de uma instância. Uma conta pode ter várias instâncias.
 
-Cada instância opera como uma sessão do WhatsApp Web em um navegador Chrome. 
-Nossa infraestrutura foi projetada para que cada instância opere de forma
-completamente isolada, de modo que o funcionamento de uma instância não interfere
-em outra.
+Cada instância é um serviço isolado na infraestrutura da ZapperHub. Uma
+instância não afeta o funcionamento de outra. Uma instância de conexão não
+oficial funciona como uma sessão do WhatsApp Web.
 
-## Como criar uma instância
+## Pré-requisitos
 
-- Acesse o dashboard da ZapperHub em https://app.zapperhub.com/dash;
-- Clique no botão **Nova Instância**;
-- Na caixa de diálogo que se abre, digite o **Nome da instância** e em seguida,
-clique em **Sim, criar nova instância**;
-- Aguarde alguns segundos enquanto o orquestrador da ZapperHub constrói sua nova
-instância em nossa infraestrutura.
+- Uma conta ativa na ZapperHub.
+- A assinatura em dia. Com a assinatura em atraso, o painel não cria instâncias.
 
-<Card title="IMPORTANTE">
-Cada instância possui um valor fixo mensal, e seu plano é atualizado 
-automaticamente quando novas instâncias são adicionadas ou removidas, sendo
-cobrado no momento da criação da instância o valor _pro rata_ referente aos dias
-de uso até o fechamento da fatura.<br />
-No caso de exclusão de instância, os créditos referentes aos dias não utilizados
-serão computados na próxima fatura.
-</Card>
+## Procedimento
+
+<Steps>
+  <Step title="Abra o painel">
+    Acesse [app.zapperhub.com/dash](https://app.zapperhub.com/dash).
+  </Step>
+  <Step title="Inicie a criação">
+    Clique em **Nova instância**.
+  </Step>
+  <Step title="Confirme">
+    Leia o aviso de custo e clique em **Sim, criar nova instância**.
+  </Step>
+  <Step title="Aguarde">
+    A ZapperHub cria a instância em alguns segundos. A nova instância aparece na lista.
+  </Step>
+</Steps>
+
+## Resultado
+
+A instância aparece na lista com o status **Não conectado**. O próximo passo é
+[conectar o WhatsApp](/connecting-whatsapp).
+
+<Note>
+**Cobrança.** Cada instância tem um valor fixo mensal. Na criação, a ZapperHub
+cobra o valor proporcional aos dias até o fechamento da fatura. Na exclusão, a
+ZapperHub lança o crédito dos dias não usados na fatura seguinte.
+</Note>

@@ -3,79 +3,65 @@ title: Instagram
 description: "Conectar uma conta profissional do Instagram à instância"
 ---
 
-**Onde fica**: Instâncias → (selecione a instância) → Conexão
+**Onde fica**: **Instâncias** > selecione a instância > **Conexão**.
 
-A conexão com o Instagram liga uma **conta profissional** à instância, para tratar mensagens
-diretas e interações. O cartão no painel se descreve como *Conecte sua conta profissional do
-Instagram para gerenciar mensagens diretas e interações.*
+## Descrição
 
-<Note>
-A conta do Instagram precisa ser **profissional** (comercial ou de criador de conteúdo). Contas
-pessoais não podem ser conectadas — converta a conta no próprio Instagram antes de começar.
-</Note>
+A conexão com o Instagram liga uma conta profissional à instância, para tratar
+mensagens diretas e interações.
 
-## Como conectar
+## Pré-requisitos
 
-O botão é **Conectar com Instagram**. O painel resume o processo em **Como conectar**:
+- Uma conta profissional do Instagram (comercial ou de criador de conteúdo).
+  Contas pessoais não podem ser conectadas. Converta a conta no Instagram antes
+  de começar.
+- Acesso de login a essa conta.
+
+## Procedimento
 
 <Steps>
   <Step title="Abra a página de conexão">
-    *Clique no botão acima para abrir a página de conexão em uma nova aba.*
+    Clique em **Conectar com Instagram**. O painel abre a página de conexão em uma aba nova.
   </Step>
   <Step title="Faça login e autorize">
-    *Faça login na conta profissional do Instagram que deseja conectar e autorize o acesso.*
+    Entre na conta profissional e autorize o acesso. Esta etapa acontece no Instagram.
   </Step>
   <Step title="Volte ao painel">
-    *Após autorizar, retorne a esta página para visualizar o status da conexão.*
+    Volte à página de conexão para ver o status.
   </Step>
 </Steps>
 
-O fluxo passa por três telas, nesta ordem.
+O fluxo passa por três telas:
 
-### 1. Redirecionamento
+1. **Conexão Instagram**, na rota `instagram-connection/[token]`. A tela mostra
+   **Carregando dados de conexão...** e depois **Redirecionando para o
+   Instagram...**. Se o link não vale mais, ela responde **Link de conexão
+   inválido.** ou **Erro ao carregar link de conexão.** Gere um link novo no painel.
+2. **Autorização no Instagram.** Você entra na conta e autoriza o acesso.
+3. **Autorização Instagram**, na rota `instagram/authorize`. A tela mostra
+   **Autorizando conexão...** e, ao concluir, **Conexão realizada com sucesso!**
+   Você pode fechar a janela.
 
-A página **Conexão Instagram**, na rota `instagram-connection/[token]`, é aberta pelo link de
-conexão. Ela se apresenta como *Conecte sua instância ao Instagram para gerenciar mensagens e
-interações.*
+## Resultado
 
-Enquanto prepara, mostra **Carregando dados de conexão...**; em seguida **Redirecionando para o
-Instagram...**, com o estado **Redirecionando**. É essa página que leva você ao Instagram.
+No painel, a página de conexão mostra **Instância conectada com sucesso!** O tipo
+de conexão da instância aparece como **Instagram**.
 
-Se o link não valer mais, ela responde **Link de conexão inválido.** ou **Erro ao carregar link de
-conexão.** — nesse caso gere um link novo no painel.
+## Erros
 
-### 2. Autorização no Instagram
+| Mensagem | Causa | Ação |
+|---|---|---|
+| **Código de autorização não encontrado.** | O retorno do Instagram veio sem o código | Refaça a autorização |
+| **Sessão de conexão não encontrada.** | A sessão expirou | Recomece pelo link de conexão |
+| **Não foi possível determinar a URL de retorno da autorização.** | O endereço de retorno não pôde ser resolvido | Gere um link novo |
+| **Erro ao autorizar conexão com o Instagram.** | A autorização falhou no Instagram | Tente de novo |
+| **Erro ao verificar status da conexão.** | O painel não conseguiu consultar o estado | Tente de novo |
 
-Você entra na sua conta profissional e autoriza o acesso. Essa etapa acontece **no Instagram**,
-não no painel da ZapperHub.
-
-### 3. Retorno
-
-Ao autorizar, o Instagram devolve você à página **Autorização Instagram**, na rota
-`instagram/authorize`, descrita como *Finalizando a conexão da sua instância com o Instagram.*
-
-Ela mostra **Autorizando conexão...** e, ao concluir, **Conexão realizada com sucesso!** com
-*Sua instância foi conectada ao Instagram.* e *Você já pode fechar esta janela.*
-
-De volta ao painel, a página de conexão passa a mostrar **Instância conectada com sucesso!**, com
-*Sua instância já está conectada ao Instagram.* e *A conexão está ativa e você já pode começar a
-usar a API do Instagram.* O tipo de conexão da instância aparece como **Instagram**.
-
-## Quando algo dá errado
-
-| Mensagem | O que significa |
-|---|---|
-| **Código de autorização não encontrado.** | O retorno do Instagram veio sem o código — refaça a autorização |
-| **Sessão de conexão não encontrada. Inicie o processo novamente pelo link de conexão.** | A sessão expirou; recomece pelo link |
-| **Não foi possível determinar a URL de retorno da autorização.** | O endereço de retorno não pôde ser resolvido |
-| **Erro ao autorizar conexão com o Instagram.** | A autorização falhou no Instagram |
-| **Erro ao verificar status da conexão.** | O painel não conseguiu consultar o estado |
-
-Todas as telas de erro trazem **Tentar novamente**. Se o erro persistir, gere um link de conexão
-novo pelo painel.
+Todas as telas de erro têm o botão **Tentar novamente**. Se o erro persistir,
+gere um link de conexão novo no painel.
 
 ## Veja também
 
-- [Conexão oficial](/painel/conexao-oficial) — WhatsApp pela API oficial da Meta
-- [Conexão não oficial](/painel/conexao-nao-oficial) — QR Code, pareamento e FastLink
-- [Instâncias](/painel/instancias) — status e tipo de cada instância
+- [Conexão oficial](/painel/conexao-oficial): WhatsApp pela API oficial da Meta.
+- [Conexão não oficial](/painel/conexao-nao-oficial): QR Code, pareamento e FastLink.
+- [Instâncias](/painel/instancias): status e tipo de cada instância.

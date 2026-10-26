@@ -1,0 +1,22 @@
+---
+title: File storage
+description: "How long ZapperHub keeps received files"
+---
+
+## Description
+
+ZapperHub stores the files received by the instances, at no additional cost and
+with no volume limit.
+
+ZapperHub keeps each file for **7 days**. After this period, ZapperHub deletes
+the file.
+
+## How to get the file
+
+When the instance receives a media message, the `messages.upsert` webhook
+carries the download URL in the `mediaUrl` field.
+
+<Warning>
+**File loss after 7 days.** If your application needs the file for longer,
+download the file and store it on your side within the period.
+</Warning>

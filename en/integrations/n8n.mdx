@@ -1,0 +1,59 @@
+---
+title: n8n
+description: "Call the ZapperHub API from an n8n workflow"
+---
+
+## Description
+
+n8n is a workflow automation tool. The integration with ZapperHub uses the n8n
+**HTTP Request** node.
+
+## Preliminary requirements
+
+- The URL and the API key of the instance. See [Quickstart](/en/quickstart).
+- A workflow in n8n.
+
+## Procedure
+
+<Steps>
+  <Step title="Add the HTTP Request node">
+    Click to add a node. In the side menu, select **Core**, then **HTTP Request**.
+
+    ![Selection of the HTTP Request node in n8n](/integrations/n8n-step-1.png)
+  </Step>
+  <Step title="Set the method">
+    In **Method**, select the method of the route. To send a message, select `POST`.
+  </Step>
+  <Step title="Enter the URL">
+    In **URL**, type the complete URL of the route. Example, to send a text message:
+    `https://api.zapperhub.com/inst_abcdefg123456/messages/text`.
+  </Step>
+  <Step title="Configure the authentication">
+    In **Authentication**, select **Generic Credential Type**. Then select **Header Auth**.
+  </Step>
+  <Step title="Create the credential">
+    In **Header Auth**, click **Create new credential**. Click the window title
+    and rename the credential to `ZapperHub Auth`. Fill in **Name** with
+    `X-Api-Key` and **Value** with the API key of the instance. Click **Save** and
+    close the window.
+  </Step>
+  <Step title="Fill in the body">
+    Check **Send Body**. In **Body Parameters**, fill in **Name** and **Value**
+    with the fields of the route. For a text message, enter `jid` and `message`.
+
+    ![Body parameters for the text send](/integrations/n8n-step-2.png)
+  </Step>
+  <Step title="Test">
+    Close the node window and click **Test Workflow**.
+  </Step>
+</Steps>
+
+## Result
+
+The API responds `200` with `status: "scheduled"`. The message enters the
+instance queue.
+
+<Note>
+Format the phone number with no parentheses, spaces, or dashes. See
+[Number format](/en/definitions/number-format).
+</Note>

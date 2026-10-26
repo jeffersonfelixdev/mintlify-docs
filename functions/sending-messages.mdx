@@ -1,40 +1,44 @@
 ---
 title: Envio de mensagens
-description: "Detalhamento de cada tipo de mensagem, com os campos, limites e diferenças entre os canais"
+description: "Cada tipo de mensagem, com a rota, os campos, os limites e as diferenças entre os canais"
 ---
 
-Esta página detalha **cada tipo de mensagem** que a ZapperHub envia: a rota, os
-campos que importam, os limites e o que muda entre uma instância oficial (Cloud
-API) e uma não oficial. Para a referência completa de cada campo, consulte a
-[documentação de referência da API](/api-reference).
+## Descrição
 
-## Como funciona o envio
+Esta página descreve cada tipo de mensagem que a ZapperHub envia: a rota, os
+campos, os limites e as diferenças entre uma instância oficial (Cloud API), uma
+não oficial (`device`) e o Instagram. A referência completa de cada campo está na
+[API Reference](/api-reference).
 
-Todo envio passa pela [fila da instância](/definitions/queue). Por isso a
-resposta da API é `200` com o **agendamento**, e não com a entrega:
+## Como o envio funciona
+
+Todo envio passa pela [fila da instância](/definitions/queue). Por isso, a API
+responde `200` com o agendamento, não com a entrega:
 
 ```json
 { "status": "scheduled", "jobId": "42" }
 ```
 
-O que aconteceu de fato chega por webhook: `messages.upsert` quando a mensagem
-foi enviada, `messages.error` quando as tentativas se esgotaram. Veja os
-[exemplos de payload](/integrations/webhooks).
+O resultado chega por webhook:
+
+- `messages.upsert` quando a mensagem foi enviada.
+- `messages.error` quando as tentativas se esgotaram.
+
+Veja os [exemplos de payload](/integrations/webhooks).
 
 Quando a falha vem da Meta (Cloud API), o `messages.error` mantém o código e o
-texto originais dela e, para os códigos conhecidos, acrescenta
-`error.localizedMessage` com a explicação em português — por exemplo, "A janela
-de 24h com este cliente está fechada". Códigos desconhecidos chegam sem esse
-campo.
+texto originais. Para os códigos conhecidos, ele acrescenta
+`error.localizedMessage` com a explicação em português. Exemplo: "A janela de 24h
+com este cliente está fechada".
 
-<Card title="EXCEÇÃO">
-**Reagir** e **excluir** não passam pela fila: são aplicados na hora e respondem
-`204`, sem corpo e sem `jobId`.
-</Card>
+<Note>
+**Exceção.** Reagir, marcar como lida e excluir não passam pela fila. A API
+aplica a operação na hora e responde `204`, sem corpo e sem `jobId`.
+</Note>
 
 ## O destinatário
 
-Salvo onde indicado, o destinatário vai no campo `jid` e aceita:
+Salvo onde indicado, o destinatário vai no campo `jid`:
 
 | Formato | Exemplo |
 | --- | --- |
@@ -43,38 +47,36 @@ Salvo onde indicado, o destinatário vai no campo `jid` e aceita:
 | Grupo | `120363012345678901@g.us` |
 | Canal | `120363012345678901@newsletter` |
 
-O número deve estar no formato completo, com código do país; o prefixo `+` é
-opcional. Veja [Formato dos números](/definitions/number-format).
+Informe o número completo, com o código do país. O prefixo `+` é opcional. Veja
+[Formato do número](/definitions/number-format).
 
-Na **Cloud API**, o destinatário também pode ser:
+Na Cloud API, o destinatário também pode ser:
 
 | Formato | Exemplo |
 | --- | --- |
 | BSUID do contato | `BR.13491208655302741918` |
 | Username do WhatsApp | `fulano` ou `@fulano` |
 
-O username é resolvido pelo vínculo que a ZapperHub guardou quando o contato
-escreveu para a empresa: o telefone, se for conhecido, ou o BSUID. Se não houver
-vínculo, a resposta é `404` com `code: "CONTACT_NOT_FOUND"` — o contato precisa
-ter escrito antes. Veja [Identidade do contato](/integrations/webhooks#identidade-do-contato-telefone-bsuid-e-username).
+A API resolve o username pelo vínculo guardado quando o contato escreveu para a
+empresa: o telefone, se conhecido, ou o BSUID. Sem vínculo, a resposta é `404`
+com `code: "CONTACT_NOT_FOUND"`. Veja
+[Identidade do contato](/integrations/webhooks#identidade-do-contato-telefone-bsuid-e-username).
 
 ## Campos comuns
 
-| Campo | Disponível em | O que faz |
+| Campo | Disponível em | Função |
 | --- | --- | --- |
-| `trackId` | todos os envios enfileirados | Identificador seu, devolvido no webhook do envio. Não precisa ser único |
-| `trackSource` | todos os envios enfileirados | Origem da mensagem (`crm`, `n8n`, …). Padrão: `api` |
-| `delay` | texto, áudio, mídia | Atraso antes do envio, de 0 a 20 segundos |
-| `expiration` | texto | Mensagem temporária: `none` (padrão), `24h`, `7d` ou `90d` |
-| `quotedMessageId` | todos os envios enfileirados, inclusive template | Id da mensagem a citar ("Responder"). Veja [Responder citando uma mensagem](#responder-citando-uma-mensagem) |
+| `trackId` | Todos os envios enfileirados | Identificador seu, devolvido no webhook do envio. Não precisa ser único. |
+| `trackSource` | Todos os envios enfileirados | Origem da mensagem (`crm`, `n8n`, …). Padrão: `api`. |
+| `delay` | Texto, áudio, mídia | Atraso antes do envio, de 0 a 20 segundos. |
+| `expiration` | Texto | Mensagem temporária: `none` (padrão), `24h`, `7d` ou `90d`. |
+| `quotedMessageId` | Todos os envios enfileirados, inclusive template | Id da mensagem a citar. Veja [Responder citando uma mensagem](#responder-citando-uma-mensagem). |
 
 ## Responder citando uma mensagem
 
-Para que a mensagem saia como resposta a outra, informe em `quotedMessageId` o
-id da mensagem que você quer citar — o mesmo `key.id` que chega no webhook
-`messages.upsert`. O campo é opcional e vale em todos os envios enfileirados:
-texto, mídia, áudio, sticker, localização, contato, botões, lista, carrossel,
-texto para voz e template.
+Para enviar uma mensagem como resposta a outra, informe em `quotedMessageId` o
+id da mensagem citada. É o mesmo `key.id` que chega no webhook `messages.upsert`.
+O campo é opcional e vale em todos os envios enfileirados.
 
 ```json
 {
@@ -84,7 +86,7 @@ texto para voz e template.
 }
 ```
 
-A resposta continua sendo `200` com o agendamento. O resultado da citação vem no
+A API responde `200` com o agendamento. O resultado da citação vem no
 `messages.upsert` de saída, em `quote`:
 
 ```json
@@ -95,39 +97,37 @@ A resposta continua sendo `200` com o agendamento. O resultado da citação vem 
 }
 ```
 
-Quando a citação foi aplicada, o conteúdo da mensagem traz o `contextInfo` com
+Quando a citação é aplicada, o conteúdo da mensagem traz `contextInfo` com
 `stanzaId` e `participant`, no mesmo formato da citação que você recebe.
 
-A citação **nunca impede o envio**. Se ela não puder ser aplicada, a mensagem
-sai normalmente, sem citar, e o evento diz por quê:
+A citação nunca impede o envio. Se a citação não puder ser aplicada, a mensagem
+sai sem citar, e o evento informa o motivo:
 
 ```json
 { "quote": { "id": "wamid.INEXISTENTE", "applied": false, "reason": "not_found" } }
 ```
 
-| `reason` | Quando acontece |
+| `reason` | Quando |
 | --- | --- |
-| `not_found` | A mensagem não está no histórico da instância — id errado, de outra instância ou de outra conversa — ou o autor dela não é conhecido |
-| `unsupported_type` | O tipo de mensagem não aceita citação neste canal. No canal não oficial, **botões e lista** não citam |
+| `not_found` | A mensagem não está no histórico da instância (id errado, de outra instância ou de outra conversa), ou o autor dela não é conhecido |
+| `unsupported_type` | O tipo de mensagem não aceita citação neste canal. No canal não oficial, botões e lista não citam |
 
-<Card title="ATENÇÃO">
-A busca da mensagem citada é feita **só no histórico da própria instância**. O id
-de uma mensagem de outra instância se comporta como um id inexistente.
+<Note>
+A busca da mensagem citada ocorre só no histórico da própria instância. O id de
+uma mensagem de outra instância se comporta como um id inexistente.
 
-Com `splitMessage` ou `processImageLink`, a mensagem vira várias; **só a
-primeira cita**.
-</Card>
+Com `splitMessage` ou `processImageLink`, a mensagem vira várias. Só a primeira cita.
+</Note>
 
 Na Cloud API, a Meta aceita a citação em template, mas o aparelho do contato não
-exibe a bolha de citação nesse caso.
+exibe a bolha de citação.
 
 ## Texto
 
 `POST /{instanceId}/messages/text`
 
-Só `message` é obrigatório — o destinatário vem em `jid` **ou** em `commentId`
-(resposta privada a um comentário do Instagram), e exatamente um dos dois deve
-estar presente.
+Só `message` é obrigatório. O destinatário vai em `jid` ou em `commentId`
+(resposta privada a um comentário do Instagram). Informe exatamente um dos dois.
 
 ```json
 {
@@ -136,25 +136,23 @@ estar presente.
 }
 ```
 
-Além do texto, a rota traz os recursos de composição:
-
-| Campo | O que faz |
+| Campo | Função |
 | --- | --- |
-| `mentions` | Números a mencionar. Só tem efeito em grupos |
-| `mentionsEveryone` | Menciona todos os participantes do grupo. Ignora `mentions` |
-| `splitMessage` | Divide a mensagem em várias, usando as quebras de linha como corte |
-| `processImageLink` | Envia os links de imagem do texto como imagem, logo após a mensagem |
-| `autoCaption` | Com `processImageLink` ativo, usa o texto da mensagem como legenda da imagem |
-| `showLinkPreview` | Exibe (ou não) o preview do link na mensagem |
-| `humanAgent` | Só Instagram. Veja [Responder em até 7 dias no Instagram](#responder-em-ate-7-dias-no-instagram) |
+| `mentions` | Números a mencionar. Só tem efeito em grupos. |
+| `mentionsEveryone` | Menciona todos os participantes do grupo. Ignora `mentions`. |
+| `splitMessage` | Divide a mensagem em várias, nas quebras de linha. |
+| `processImageLink` | Envia os links de imagem do texto como imagem, logo após a mensagem. |
+| `autoCaption` | Com `processImageLink` ativo, usa o texto da mensagem como legenda da imagem. |
+| `showLinkPreview` | Exibe ou oculta a prévia do link. |
+| `humanAgent` | Só Instagram. Veja [Responder em até 7 dias no Instagram](#responder-em-ate-7-dias-no-instagram). |
 
 ### Responder em até 7 dias no Instagram
 
-Por padrão, o Instagram só deixa responder até **24 horas** depois da última
-mensagem do contato. Com `humanAgent: true`, a mensagem é enviada como resposta de
-um atendente humano, e a janela passa a ser de **7 dias**. O campo vale em
-`messages/text`, `messages/media` e `messages/audio`, e é ignorado nos outros tipos
-de conexão.
+Por padrão, o Instagram só permite responder até 24 horas depois da última
+mensagem do contato. Com `humanAgent: true`, a API envia a mensagem como resposta
+de um atendente humano, e a janela passa a 7 dias. O campo vale em
+`messages/text`, `messages/media` e `messages/audio`. Os outros tipos de conexão
+ignoram o campo.
 
 ```json
 {
@@ -164,29 +162,30 @@ de conexão.
 }
 ```
 
-<Card title="ATENÇÃO">
-A política da Meta **proíbe** `humanAgent` em mensagens automáticas, como respostas
-de bot ou disparos programados: use só quando uma pessoa estiver respondendo. O app
-da Meta também precisa ter a permissão de atendimento humano aprovada; sem ela, a
-janela continua sendo de 24 horas e o envio fora dela é recusado pela Meta.
-</Card>
+<Warning>
+**Regra da Meta.** Não use `humanAgent` em mensagens automáticas, como respostas
+de bot ou disparos programados. Use só quando uma pessoa está respondendo. O app
+da Meta precisa ter a permissão de atendimento humano aprovada. Sem ela, a janela
+continua em 24 horas, e a Meta recusa o envio fora dela.
+</Warning>
 
 ### Citar uma mensagem no Instagram
 
-O `quotedMessageId` aceita o `mid` de uma mensagem do Instagram. A mensagem nunca
-deixa de ser enviada por causa da citação: se ela não puder ser aplicada, a
-mensagem sai normalmente, **sem** o balão de citação. Diferente do WhatsApp,
-o envio do Instagram não publica um `messages.upsert` de saída com o campo `quote`:
-o eco da mensagem enviada chega depois, pelo webhook da Meta, e traz a citação em
-`contextInfo.stanzaId` quando ela foi aplicada.
+O `quotedMessageId` aceita o `mid` de uma mensagem do Instagram. A citação nunca
+impede o envio. Se a citação não puder ser aplicada, a mensagem sai sem o balão de
+citação.
+
+Diferente do WhatsApp, o envio no Instagram não publica um `messages.upsert` de
+saída com o campo `quote`. O eco da mensagem chega depois, pelo webhook da Meta,
+com a citação em `contextInfo.stanzaId` quando ela foi aplicada.
 
 ## Mídia
 
 `POST /{instanceId}/messages/media`
 
-Imagem, vídeo, áudio e documento saem todos por esta rota, escolhidos em
-`mediaType`. O conteúdo vai em `media`, que aceita **URL (http/https), base64 ou
-data URL**.
+Imagem, vídeo, áudio e documento saem por esta rota. Escolha o tipo em
+`mediaType`. O conteúdo vai em `media`, que aceita URL (`http`/`https`), base64 ou
+data URL.
 
 ```json
 {
@@ -200,16 +199,16 @@ data URL**.
 | Campo | Observação |
 | --- | --- |
 | `mediaType` | `image`, `video`, `audio` ou `document` |
-| `caption` | Legenda. Não se aplica a `audio` |
-| `filename` | Nome do arquivo. Só para `document` |
-| `mimetype` | Mimetype do arquivo (ex.: `application/pdf`). Só para `document` |
+| `caption` | Legenda. Não se aplica a `audio`. |
+| `filename` | Nome do arquivo. Só para `document`. |
+| `mimetype` | Tipo MIME do arquivo, como `application/pdf`. Só para `document`. |
 
 ## Áudio (nota de voz)
 
 `POST /{instanceId}/messages/audio`
 
-A diferença para `mediaType: "audio"` é a forma: esta rota envia como **nota de
-voz**, aquela como arquivo de áudio anexado.
+Esta rota envia o áudio como nota de voz. A rota de mídia com
+`mediaType: "audio"` envia o áudio como arquivo anexado.
 
 ```json
 {
@@ -218,14 +217,15 @@ voz**, aquela como arquivo de áudio anexado.
 }
 ```
 
-Aceita `mp3`, `mp4`, `wav` e `ogg`, por URL, base64 ou data URL.
+A rota aceita `mp3`, `mp4`, `wav` e `ogg`, por URL, base64 ou data URL.
 
 ## Áudio a partir de texto
 
 `POST /{instanceId}/messages/text-to-speech`
 
-Converte o texto em áudio pela ElevenLabs e envia como nota de voz. Exige a chave
-da ElevenLabs cadastrada em `POST /{instanceId}/text-to-speech/key`.
+A API converte o texto em áudio pela ElevenLabs e envia o áudio como nota de voz.
+A rota exige a chave da ElevenLabs cadastrada em
+`POST /{instanceId}/text-to-speech/key`.
 
 ```json
 {
@@ -235,8 +235,8 @@ da ElevenLabs cadastrada em `POST /{instanceId}/text-to-speech/key`.
 }
 ```
 
-Sem `voiceId`, é usada a voz padrão configurada na instância. Veja
-[Text to Speech](/painel/text-to-speech).
+Sem `voiceId`, a API usa a voz padrão da instância. Veja
+[Texto para fala](/painel/text-to-speech).
 
 ## Sticker
 
@@ -249,8 +249,7 @@ Sem `voiceId`, é usada a voz padrão configurada na instância. Veja
 }
 ```
 
-O arquivo precisa estar em `image/webp` ou `video/mp4` — outros formatos são
-recusados.
+O arquivo deve ser `image/webp` ou `video/mp4`. A API recusa outros formatos.
 
 ## Localização
 
@@ -267,14 +266,14 @@ recusados.
 }
 ```
 
-`lat` e `lon` são obrigatórios; `name` é opcional.
+`lat` e `lon` são obrigatórios. `name` é opcional.
 
 ## Contato
 
 `POST /{instanceId}/messages/contact`
 
-O contato vai em campos estruturados no objeto `vcard`, convertido para vCard 3.0
-antes do envio. Só `fn` (nome completo) é obrigatório.
+O contato vai em campos estruturados no objeto `vcard`. A API converte o objeto
+para vCard 3.0 antes do envio. Só `fn` (nome completo) é obrigatório.
 
 ```json
 {
@@ -292,7 +291,7 @@ antes do envio. Só `fn` (nome completo) é obrigatório.
 
 `POST /{instanceId}/messages/buttons`
 
-De 1 a 5 botões, de quatro tipos, cada um exigindo um campo extra:
+A mensagem leva de 1 a 5 botões, de quatro tipos. Cada tipo exige um campo extra:
 
 | `type` | Campo exigido | Efeito ao tocar |
 | --- | --- | --- |
@@ -314,13 +313,13 @@ De 1 a 5 botões, de quatro tipos, cada um exigindo um campo extra:
 }
 ```
 
-Todo botão tem `type`, `displayText` e `id`. Para acompanhar a mensagem com
-imagem ou vídeo, use `media` e `mediaType`.
+Todo botão tem `type`, `displayText` e `id`. Para enviar a mensagem com imagem ou
+vídeo, use `media` e `mediaType`.
 
-<Card title="ATENÇÃO">
-Botões de **resposta rápida** (`reply`) não são aceitos em grupos — a mensagem
-inteira é recusada com `400`.
-</Card>
+<Warning>
+Botões de resposta rápida (`reply`) não são aceitos em grupos. A API recusa a
+mensagem inteira com `400`.
+</Warning>
 
 A resposta do contato chega no webhook `messages.upsert`, em
 `message.buttonsResponseMessage`.
@@ -329,14 +328,13 @@ A resposta do contato chega no webhook `messages.upsert`, em
 
 `POST /{instanceId}/messages/list`
 
-A mensagem de lista exibe um botão que, ao ser tocado, abre um menu com até 10
-opções agrupadas em seções. É a forma de oferecer um menu de escolhas — um
-cardápio, uma triagem de atendimento, uma agenda de horários — sem depender de o
-contato digitar a resposta certa.
+A mensagem de lista exibe um botão. Ao tocar no botão, o contato vê um menu com
+até 10 opções, agrupadas em seções. Use a lista para oferecer um menu de
+escolhas, como um cardápio, uma triagem ou uma agenda de horários.
 
-A rota é **única para instâncias oficiais e não oficiais**, e o corpo é idêntico
-nos dois casos: aplicamos sempre os limites da Cloud API, para que o mesmo
-payload funcione em qualquer instância.
+A rota é a mesma para instâncias oficiais e não oficiais, e o corpo é idêntico.
+A API aplica sempre os limites da Cloud API, para que o mesmo payload funcione em
+qualquer instância.
 
 ```json
 {
@@ -368,44 +366,44 @@ payload funcione em qualquer instância.
 | Campo | Obrigatório | Limite |
 | --- | --- | --- |
 | `buttonText` | Sim | 1 a 20 caracteres |
-| `title` | Não | até 60 caracteres |
+| `title` | Não | Até 60 caracteres |
 | `description` | Sim | 1 a 1024 caracteres |
-| `footer` | Não | até 60 caracteres |
+| `footer` | Não | Até 60 caracteres |
 | `sections` | Sim | 1 a 10 seções |
-| `sections[].title` | Condicional | até 24 caracteres — **obrigatório a partir de 2 seções** |
-| `sections[].rows` | Sim | ao menos 1, e no máximo **10 linhas somadas todas as seções** |
+| `sections[].title` | Condicional | Até 24 caracteres. Obrigatório a partir de 2 seções |
+| `sections[].rows` | Sim | Ao menos 1 linha, e no máximo 10 linhas somadas todas as seções |
 | `sections[].rows[].title` | Sim | 1 a 24 caracteres |
-| `sections[].rows[].description` | Não | até 72 caracteres |
-| `sections[].rows[].rowId` | Sim | 1 a 200 caracteres, **único em toda a mensagem** |
+| `sections[].rows[].description` | Não | Até 72 caracteres |
+| `sections[].rows[].rowId` | Sim | 1 a 200 caracteres. Único em toda a mensagem |
 
-Nada é truncado: o que exceder o limite é recusado com `400`, e nenhuma mensagem
-entra na fila.
+A API não trunca nada. Um valor acima do limite é recusado com `400`, e nenhuma
+mensagem entra na fila.
 
-<Card title="ATENÇÃO">
-**Grupos só recebem lista em instância não oficial**: a Cloud API não envia
-mensagens de lista para grupos, e a requisição é recusada com `400`.
-</Card>
+<Warning>
+Grupos só recebem lista em instância não oficial. A Cloud API não envia
+mensagens de lista para grupos, e a API recusa a requisição com `400`.
+</Warning>
 
-Quando `title` é omitido, a instância não oficial mostra o cabeçalho padrão
-`Menu`, enquanto na Cloud API a mensagem vai sem cabeçalho algum. Informe o
-`title` sempre que o cabeçalho importar.
+Sem `title`, a instância não oficial mostra o cabeçalho padrão `Menu`. Na Cloud
+API, a mensagem vai sem cabeçalho. Informe o `title` sempre que o cabeçalho
+importar.
 
-### Como recebo a opção escolhida
+### Como receber a opção escolhida
 
-O identificador que você definiu em `rowId` volta no webhook `messages.upsert`,
-em `message.listResponseMessage.selectedButtonId`, com o mesmo nome de campo nos
-dois canais — veja [Escolha de opção em mensagem de
-lista](/integrations/webhooks). Por isso o `rowId` deve ser único em toda a
-mensagem: é ele que identifica, sem ambiguidade, o que a pessoa escolheu.
+O `rowId` da opção escolhida volta no webhook `messages.upsert`, em
+`message.listResponseMessage.selectedButtonId`. O nome do campo é o mesmo nos
+dois canais. Veja
+[Escolha de opção em mensagem de lista](/integrations/webhooks#escolha-de-opcao-em-mensagem-de-lista).
+Por isso o `rowId` deve ser único em toda a mensagem.
 
 ## Carrossel
 
 `POST /{instanceId}/messages/carousel`
 
-Exclusivo de instâncias oficiais (Cloud API); os outros tipos de conexão
-respondem `422` com `code: "UNSUPPORTED_FOR_INSTANCE_TYPE"`. Envia de 2 a 10
-cartões deslizáveis, cada um com uma imagem ou vídeo, um texto opcional e
-botões.
+Disponível só em instâncias oficiais (Cloud API). Os outros tipos de conexão
+respondem `422` com `code: "UNSUPPORTED_FOR_INSTANCE_TYPE"`. A mensagem leva de 2
+a 10 cartões deslizáveis. Cada cartão tem uma imagem ou um vídeo, um texto
+opcional e botões.
 
 ```json
 {
@@ -432,49 +430,46 @@ botões.
 }
 ```
 
-Responde `{ "status": "scheduled", "jobId": "..." }`, como os demais envios. O
-`quotedMessageId`, o `trackId` e o `trackSource` valem como nos outros tipos.
+A API responde `{ "status": "scheduled", "jobId": "..." }`, como nos demais
+envios. `quotedMessageId`, `trackId` e `trackSource` valem como nos outros tipos.
 
 ### Regras de validação
 
-A API confere as regras da Meta antes de enfileirar. Quando uma é violada, a
-resposta é `400` e `validation` traz o caminho do cartão (por exemplo,
-`/cards/1/buttons`), com a explicação em português.
+A API confere as regras da Meta antes de enfileirar. Quando uma regra é violada,
+a resposta é `400`, e `validation` traz o caminho do cartão (por exemplo,
+`/cards/1/buttons`) com a explicação em português.
 
 | Campo | Regra |
 | --- | --- |
 | `body` | Obrigatório, até 1024 caracteres |
 | `cards` | De 2 a 10 cartões |
-| `cards[].header` | `type` `image` ou `video`, com `url` pública. Outros formatos são recusados |
+| `cards[].header` | `type` `image` ou `video`, com `url` pública. A API recusa outros formatos |
 | `cards[].body` | Opcional, até 160 caracteres e 2 quebras de linha |
-| `cards[].buttons` | **Ou** 1 botão `url`, **ou** de 1 a 2 botões `reply`. Não misture os dois no mesmo cartão |
-| Botões entre cartões | Todos os cartões devem ter o **mesmo tipo** de botão e a **mesma quantidade** |
+| `cards[].buttons` | Ou 1 botão `url`, ou de 1 a 2 botões `reply`. Não misture os dois no mesmo cartão |
+| Botões entre cartões | Todos os cartões devem ter o mesmo tipo e a mesma quantidade de botões |
 | `text` do botão | Até 20 caracteres |
-| `id` do botão `reply` | Até 256 caracteres. É seu, e a API não o altera |
-
-A API aceita até 2 respostas rápidas por cartão.
+| `id` do botão `reply` | Até 256 caracteres. A API não altera o valor |
 
 A imagem ou o vídeo de cada cartão vai para a Meta como link, sem upload prévio.
-Se a Meta não conseguir baixar uma mídia, o carrossel não é entregue e a mensagem
+Se a Meta não conseguir baixar uma mídia, o carrossel não é entregue. A mensagem
 fica com status `failed` (webhook `messages.error`), com o motivo da Meta. A Meta
-não informa qual cartão tinha o problema, então a API também não informa.
+não informa qual cartão tinha o problema.
 
-### Como recebo o botão tocado
+### Como receber o botão tocado
 
-Quando o contato toca num botão `reply`, chega um `messages.upsert` com
-`message.buttonsResponseMessage`, no mesmo formato dos [botões](#botões). O
-`contextInfo.stanzaId` traz o id do carrossel, que permite ligar a resposta ao
-envio, e `selectedButtonId` traz o `id` do botão como você o definiu — use ids
-únicos por cartão (como `tenis-quero` acima) para saber de qual cartão veio o
-toque. Botões de URL abrem o link e não geram evento.
+Quando o contato toca em um botão `reply`, chega um `messages.upsert` com
+`message.buttonsResponseMessage`, no mesmo formato dos [botões](#botoes).
+`contextInfo.stanzaId` traz o id do carrossel. `selectedButtonId` traz o `id` do
+botão como você o definiu. Use ids únicos por cartão, como `tenis-quero`, para
+saber de qual cartão veio o toque. Botões de URL abrem o link e não geram evento.
 
 ## Template
 
 `POST /{instanceId}/messages/template`
 
-Exclusivo de instâncias oficiais (Cloud API). É o único tipo que alcança um
-contato **fora da janela de 24 horas**, e exige um template previamente aprovado
-pela Meta — crie pelo [painel](/painel/templates) ou por
+Disponível só em instâncias oficiais (Cloud API). O template é o único tipo que
+alcança um contato fora da janela de 24 horas. Ele exige um template aprovado
+pela Meta. Crie o template pelo [painel](/painel/templates) ou por
 `POST /{instanceId}/message-templates`.
 
 ```json
@@ -491,17 +486,16 @@ pela Meta — crie pelo [painel](/painel/templates) ou por
 }
 ```
 
-Informe em `components` apenas o que tem variáveis: um template sem variáveis
-dispensa o campo. Para saber se ainda há janela aberta com o contato, use
+Informe em `components` só o que tem variáveis. Um template sem variáveis
+dispensa o campo. Para saber se a janela com o contato está aberta, use
 `GET /{instanceId}/check-message-window`.
 
 ### Consultar um template
 
 `GET /{instanceId}/message-templates/{templateId}`
 
-Consulta o template na Meta pelo `id` (o mesmo devolvido na criação e na
-listagem) e atualiza a cópia guardada pela API. Serve para acompanhar a revisão
-sem esperar o webhook:
+A rota consulta o template na Meta pelo `id` e atualiza a cópia guardada pela
+API. Use a rota para acompanhar a revisão sem esperar o webhook.
 
 ```json
 {
@@ -516,9 +510,8 @@ sem esperar o webhook:
 }
 ```
 
-`rejectedReason` traz o motivo informado pela Meta quando o template foi
-recusado, e vem `null` nos demais casos. O mesmo motivo chega no webhook de
-status do template e fica guardado na cópia local.
+`rejectedReason` traz o motivo da Meta quando o template foi recusado. Nos outros
+casos, vem `null`. O mesmo motivo chega no webhook de status do template.
 
 Um `id` que não existe, ou que pertence a outra conta do WhatsApp Business,
 responde `404` com `code: "TEMPLATE_NOT_FOUND"`.
@@ -527,10 +520,14 @@ responde `404` com `code: "TEMPLATE_NOT_FOUND"`.
 
 `PATCH /{instanceId}/message-templates/{templateId}`
 
-O corpo usa o mesmo formato da [criação](/api-reference/cloud-api/criar-template-de-mensagem)
-(`header`, `body`, `footer`, `buttons`), e `category` é opcional. A Meta
-**substitui todos os componentes**: envie o conteúdo completo do template, não
+O corpo usa o mesmo formato da
+[criação](/api-reference/cloud-api/criar-template-de-mensagem): `header`, `body`,
+`footer` e `buttons`. `category` é opcional.
+
+<Warning>
+A Meta substitui todos os componentes. Envie o conteúdo completo do template, não
 só o trecho que mudou.
+</Warning>
 
 ```json
 {
@@ -539,47 +536,54 @@ só o trecho que mudou.
 }
 ```
 
-Só templates `APPROVED`, `REJECTED` ou `PAUSED` aceitam edição. Nos demais status
-(`PENDING`, `IN_APPEAL`, `DISABLED`, `PENDING_DELETION`, `LOCKED`) a API responde
-`422` com `code: "TEMPLATE_NOT_EDITABLE"` e o status em `data.status`, **sem
-chamar a Meta**. Se a cópia local tiver mais de 5 minutos, a API relê o status na
+Só templates `APPROVED`, `REJECTED` ou `PAUSED` aceitam edição. Nos outros status
+(`PENDING`, `IN_APPEAL`, `DISABLED`, `PENDING_DELETION`, `LOCKED`), a API
+responde `422` com `code: "TEMPLATE_NOT_EDITABLE"` e o status em `data.status`,
+sem chamar a Meta. Se a cópia local tem mais de 5 minutos, a API relê o status na
 Meta antes de decidir.
 
-Depois de editado, o template volta para revisão: a resposta é
-`{ "id": "...", "status": "PENDING" }` e ele só pode ser enviado quando a Meta
-aprovar de novo. Cabeçalho de imagem ou vídeo informado por URL é enviado à Meta
-e trocado pelo `header_handle`, como na criação.
+Depois da edição, o template volta para revisão. A resposta é
+`{ "id": "...", "status": "PENDING" }`. O template só pode ser enviado quando a
+Meta aprovar de novo. Um cabeçalho de imagem ou vídeo informado por URL é enviado
+à Meta e trocado pelo `header_handle`, como na criação.
 
-A Meta limita quantas vezes um template pode ser editado num período e recusa a
-troca de categoria em template aprovado. Nesses casos a resposta é `422` com
-`code: "PROVIDER_REJECTED"`, o código original em `meta` e, quando a API conhece o
-código, o texto em português em `localizedMessage`.
+A Meta limita quantas vezes um template pode ser editado em um período e recusa a
+troca de categoria em template aprovado. Nesses casos, a resposta é `422` com
+`code: "PROVIDER_REJECTED"`, o código original em `meta` e, para os códigos
+conhecidos, o texto em português em `localizedMessage`.
 
 ### Excluir um template
 
 `DELETE /{instanceId}/message-templates/{name}`
 
-Exclui o template na Meta e responde `{ "success": true }`. Sem o parâmetro
-`language`, a exclusão é **por nome** e remove **todas as versões de idioma** do
-template de uma vez. É irreversível — envios pendentes que usem o template não
-são verificados nem cancelados. O `name` segue a regra da Meta: minúsculas,
-dígitos e underscore, até 512 caracteres.
+A rota exclui o template na Meta e responde `{ "success": true }`.
 
-Para excluir **só um idioma**, informe `language`:
+<Warning>
+**Exclusão irreversível.** Sem o parâmetro `language`, a rota exclui o template
+por nome e remove todas as versões de idioma de uma vez. A API não verifica nem
+cancela envios pendentes que usem o template.
+</Warning>
+
+O `name` segue a regra da Meta: minúsculas, dígitos e underscore, até 512
+caracteres.
+
+Para excluir só um idioma, informe `language`:
 
 `DELETE /{instanceId}/message-templates/{name}?language=pt_BR`
 
-Os demais idiomas do nome continuam na Meta e na cópia local. Um idioma que o
-template não tem responde `404` com `code: "TEMPLATE_NOT_FOUND"`.
+Os outros idiomas continuam na Meta e na cópia local. Um idioma que o template
+não tem responde `404` com `code: "TEMPLATE_NOT_FOUND"`.
 
-Três limitações vêm da própria Meta: uma mensagem já enviada e ainda não
-entregue coloca o template em `PENDING_DELETION`, com a entrega sendo tentada
-por até 30 dias; depois de excluir um template `APPROVED`, o mesmo nome fica
-bloqueado para recriação por 30 dias; e templates `DISABLED` não podem ser
-excluídos.
+Três limitações vêm da Meta:
 
-Repetir a exclusão de um template já removido responde `404` — a operação não é
-idempotente. Excluir também pelo [painel](/painel/templates).
+- Uma mensagem já enviada e ainda não entregue coloca o template em
+  `PENDING_DELETION`. A Meta tenta a entrega por até 30 dias.
+- Depois da exclusão de um template `APPROVED`, o mesmo nome fica bloqueado para
+  recriação por 30 dias.
+- Templates `DISABLED` não podem ser excluídos.
+
+Repetir a exclusão de um template já removido responde `404`. A operação não é
+idempotente. A exclusão também está no [painel](/painel/templates).
 
 ## Reagir a uma mensagem
 
@@ -593,39 +597,36 @@ idempotente. Excluir também pelo [painel](/painel/templates).
 }
 ```
 
-Responde `204`, sem corpo. Uma string vazia em `text` **remove** a reação
-existente. Só emojis funcionam.
+A API responde `204`, sem corpo. Uma string vazia em `text` remove a reação. Só
+emojis são aceitos.
 
-A reação vale para instâncias **não oficiais**, para a **Cloud API** e para o
-**Instagram**. Na Cloud API, o `remoteJid` também aceita o BSUID do contato. No
-Instagram, o `remoteJid` é o id do contato e o `id` é o `mid` da mensagem
-reagida; o emoji vai como está, e a string vazia retira a reação.
+A reação vale para instâncias não oficiais, para a Cloud API e para o Instagram.
+Na Cloud API, `remoteJid` também aceita o BSUID do contato. No Instagram,
+`remoteJid` é o id do contato, e `id` é o `mid` da mensagem.
 
-No Instagram, a reação do contato também chega no webhook `messages.upsert`, como
-`reactionMessage`, e a retirada vem com `removed: true`. O `key.id` desse evento
-é composto (`ig-reaction:<mid>:<remetente>:<timestamp>`), e não o `mid`: o Instagram
-não dá id próprio à reação, e usar o `mid` da mensagem reagida sobrescreveria a
-mensagem original no histórico. A mensagem reagida está em `reactionMessage.key.id`.
+No Instagram, a reação do contato chega no webhook `messages.upsert` como
+`reactionMessage`. A retirada vem com `removed: true`. O `key.id` desse evento é
+composto (`ig-reaction:<mid>:<remetente>:<timestamp>`), porque o Instagram não dá
+id próprio à reação. A mensagem reagida está em `reactionMessage.key.id`.
 
-<Card title="ATENÇÃO">
-Na Cloud API, a Meta só entrega a reação a mensagens de **até 30 dias** que não
-foram apagadas e não são, elas mesmas, reações. Fora disso, ela aceita o pedido e
-a reação falha depois: o `messages.status` chega com `failed` e o código `131009`.
-</Card>
+<Note>
+Na Cloud API, a Meta só entrega a reação a mensagens de até 30 dias, não
+apagadas e que não são reações. Fora disso, a Meta aceita o pedido, e a reação
+falha depois: o `messages.status` chega com `failed` e o código `131009`.
+</Note>
 
-Quando a Meta recusa o pedido na hora, a resposta traz o erro tipado, com o código
-original em `meta` e, para os códigos conhecidos, a explicação em português:
+Quando a Meta recusa o pedido na hora, a resposta traz o erro tipado:
 
 | Status | `code` | Quando |
 | --- | --- | --- |
-| `422` | `PROVIDER_REJECTED` | A Meta recusou por uma regra conhecida. `meta` traz o código e o subcódigo, e `localizedMessage` a explicação |
+| `422` | `PROVIDER_REJECTED` | A Meta recusou por uma regra conhecida. `meta` traz o código e o subcódigo. `localizedMessage` traz a explicação |
 | `429` | `RATE_LIMITED` | Limite de taxa da Meta |
-| `502` | `PROVIDER_ERROR` | Erro da Meta fora do catálogo; o código original vem em `meta` |
+| `502` | `PROVIDER_ERROR` | Erro da Meta fora do catálogo. O código original vem em `meta` |
 | `503` | `PROVIDER_UNAVAILABLE` | A Meta não respondeu |
 | `422` | `UNSUPPORTED_FOR_INSTANCE_TYPE` | Tipo de conexão sem suporte a reação |
 
-As reações **recebidas** chegam no webhook `messages.upsert`, como
-`reactionMessage` — veja os [exemplos de payload](/integrations/webhooks#recebimento-de-mensagens).
+As reações recebidas chegam no webhook `messages.upsert`, como `reactionMessage`.
+Veja os [exemplos de payload](/integrations/webhooks#recebimento-de-mensagens).
 
 ## Marcar como lida
 
@@ -638,18 +639,17 @@ As reações **recebidas** chegam no webhook `messages.upsert`, como
 }
 ```
 
-Avisa o WhatsApp de que mensagens **recebidas** foram lidas: o remetente passa a
-ver os dois checks azuis. Responde `204`, sem corpo.
+A rota informa ao WhatsApp que mensagens recebidas foram lidas. O remetente vê
+os dois checks azuis. A API responde `204`, sem corpo.
 
-- `remoteJid` é a conversa; `ids` são os `key.id` das mensagens, como chegam no
-  webhook `messages.upsert`.
-- Em **grupo**, informe também `senderJid` com quem escreveu as mensagens.
-- Vale só para instâncias **não oficiais**. O efeito depende da configuração de
-  privacidade da própria conta: com a confirmação de leitura desligada, o
-  WhatsApp não mostra os checks azuis ao remetente.
+- `remoteJid` é a conversa. `ids` são os `key.id` das mensagens, como chegam no webhook `messages.upsert`.
+- Em grupo, informe também `senderJid` com o autor das mensagens.
+- A rota vale só para instâncias não oficiais.
+- O efeito depende da privacidade da conta. Com a confirmação de leitura
+  desligada, o WhatsApp não mostra os checks azuis ao remetente.
 
-Para acompanhar a entrega e a leitura das mensagens que **você enviou**, assine
-o webhook [`messages.status`](/integrations/webhooks#estado-de-entrega-da-mensagem).
+Para acompanhar a entrega e a leitura das mensagens que você enviou, assine o
+webhook [`messages.status`](/integrations/webhooks#estado-de-entrega-da-mensagem).
 
 ## Excluir uma mensagem
 
@@ -665,21 +665,22 @@ o webhook [`messages.status`](/integrations/webhooks#estado-de-entrega-da-mensag
 }
 ```
 
-Informe a `key` exatamente como recebida no webhook — `remoteJid` e `id` são o
-que identifica a mensagem. Responde `204`, sem corpo. Só é possível excluir
-mensagens enviadas pela própria conta conectada ou, em grupos, sendo
-administrador.
+Informe a `key` exatamente como recebida no webhook. `remoteJid` e `id`
+identificam a mensagem. A API responde `204`, sem corpo.
+
+A conta só pode excluir mensagens que ela mesma enviou. Em grupos, um
+administrador pode excluir mensagens de outros participantes.
 
 ## Compatibilidade por tipo de conexão
 
 | Tipo | Não oficial | Oficial (Cloud API) | Instagram |
 | --- | :---: | :---: | :---: |
 | Texto | ✅ | ✅ | ✅ |
-| Mídia — imagem, vídeo, documento | ✅ | ✅ | ✅ |
-| Mídia — áudio | ✅ | ✅ | ✅ |
+| Mídia: imagem, vídeo, documento | ✅ | ✅ | ✅ |
+| Mídia: áudio | ✅ | ✅ | ✅ |
 | Áudio (nota de voz) | ✅ | ✅ | ✅ |
 | Áudio a partir de texto | ✅ | ✅ | — |
-| Sticker (somente `image/webp` na Cloud API) | ✅ | ✅ | — |
+| Sticker (só `image/webp` na Cloud API) | ✅ | ✅ | — |
 | Localização | ✅ | ✅ | — |
 | Contato | ✅ | ✅ | — |
 | Botões | ✅ | ✅ | — |
@@ -689,5 +690,5 @@ administrador.
 | Reagir | ✅ | ✅ | ✅ |
 | Excluir | ✅ | — | — |
 | Marcar como lida | ✅ | — | — |
-| Citar (`quotedMessageId`) — exceto botões e lista no não oficial | ✅ | ✅ | ⚠️ |
+| Citar (`quotedMessageId`), exceto botões e lista no não oficial | ✅ | ✅ | ⚠️ |
 | Atendimento humano (`humanAgent`) | — | — | ✅ |

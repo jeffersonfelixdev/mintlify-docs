@@ -1,0 +1,160 @@
+---
+title: Instances
+description: "List, create, rename, disconnect, restart, and delete instances"
+---
+
+import PanelNote from '/snippets/en-panel-note.mdx';
+
+**Location**: side menu > **Instances** (*Instâncias*).
+
+<PanelNote />
+
+## Description
+
+The instance list is the entry point of the panel. You reach it when you sign
+in. Each instance corresponds to one number. The concept is in
+[WhatsApp connection](/en/definitions/connection).
+
+With no instance, the screen shows *Nenhuma instância encontrada* (no instance
+found) and the shortcut **Create an instance now** (*Crie uma instância agora*).
+
+## List columns
+
+| Column | Content |
+|---|---|
+| **Name** (*Nome*) | The label of the instance |
+| **ID** | The identifier used in API calls |
+| **API key** (*Chave da API*, X-Api-Key) | The key of the instance, hidden by default |
+| **URL** | The address of the instance |
+| **Version** (*Versão*) | The running version |
+| **Type** (*Tipo*) | The connection type |
+| **Phone** (*Telefone*) | The connected number |
+| **Status** | **Connected** (*Conectado*), **Disconnected** (*Desconectado*), or **Not connected** (*Não conectado*) |
+| **Actions** (*Ações*) | The action menu of the row |
+
+The key is masked. Use **Show key** (*Mostrar chave*) and **Hide key** (*Ocultar
+chave*) to toggle. This is the instance key, sent in the `x-api-key` header. The
+account key is in [Global API key](/en/panel/global-api-key).
+
+## Search and filter
+
+- **Search by name...** (*Pesquisar por nome...*) filters the list by label.
+- **Connection status** (*Status da conexão*) filters by state. **All statuses** (*Todos os status*) turns the filter off.
+- **Tags** filters by one or more tags. **No tag** (*Sem tag*) shows the instances without tags.
+- The filters combine.
+- The list is paginated, with the indicator *Página X de Y* (page X of Y).
+
+The tag filter is kept in the page address. A reload keeps the view, and the link
+can be shared.
+
+## Tags
+
+Each row shows the tags of the instance. When not all fit, the **+N** indicator
+shows the rest.
+
+The tag button next to the name opens the selector. Click a tag to apply it.
+Click again to remove it. To create a tag, type the name and choose the color.
+
+Limits and deletion are in [Tags](/en/panel/tags).
+
+## Create an instance
+
+<Steps>
+  <Step title="Start">
+    Click **New instance** (*Nova instância*). The panel opens *Criar nova instância*, with the monthly cost notice.
+  </Step>
+  <Step title="Confirm">
+    Click **Yes, create new instance** (*Sim, criar nova instância*).
+  </Step>
+</Steps>
+
+The panel confirms with *Instância criada com sucesso* (instance created).
+
+With an overdue subscription, the button is disabled, with the message *É preciso
+regularizar a assinatura para criar uma instância*. See
+[Account and subscription](/en/panel/account-and-subscription).
+
+## Actions of each instance
+
+| Action | Function | Effect on the active connection |
+|---|---|---|
+| **Copy ID** (*Copiar ID*) | Copies the identifier | None |
+| **Copy URL** (*Copiar URL*) | Copies the address | None |
+| **Copy X-Api-Key** (*Copiar X-Api-Key*) | Copies the instance key | None |
+| **Edit instance name** (*Editar nome da instância*) | Opens a dialog to change the label | None |
+| **Connect instance** (*Conectar instância*) | Opens the connection flow | Starts a new connection |
+| **Disconnect instance** (*Desconectar instância*) | Ends the session of the number | Ends the connection. The status goes to **Disconnected**. The instance stops sending and receiving until it reconnects |
+| **Restart instance** (*Reiniciar instância*) | Restarts the instance service | Interrupts the service during the restart. The connection returns at the end |
+| **Delete instance** (*Excluir instância*) | Removes the instance from the account | Irreversible. See below |
+
+During execution, the screen shows a progress message. At the end, it confirms
+with *Instância desconectada*, *Instância reiniciada*, or *Instância excluída*. If
+the restart fails: *Ocorreu um erro ao reiniciar a instância. Tente novamente
+mais tarde.* (restart error, try again later).
+
+### Rename
+
+The dialog *Editar nome da instância* has the field **Instance name** (*Nome da
+instância*), free text and required.
+
+Success: *Nome da instância atualizado com sucesso*. Failure: *Erro ao atualizar
+nome*. A rename does not affect the ID, the key, or the connection.
+
+### Delete
+
+<Warning>
+**The deletion cannot be undone.** When you delete an instance:
+
+- The instance leaves the list. The ID and the API key stop working. Every integration that uses them fails.
+- The connection with the number is ended.
+- The message log of the instance is no longer accessible through the panel. Export or query the history before you delete.
+- To use the same number again, create a new instance and connect it. It will have another ID and another key.
+
+To stop temporarily, use **Disconnect instance**, which is reversible.
+</Warning>
+
+The dialog *Confirmar exclusão* asks for confirmation. Click **Yes, delete**
+(*Sim, excluir*).
+
+Instances created by a partner are not deleted through the panel. The message
+*Instância criada pelo parceiro. Faça a exclusão na aplicação do parceiro*
+(instance created by the partner, delete it in the partner application) says that
+the deletion must be done in the system that created it.
+
+## Instance panel
+
+When you open an instance, you reach its panel, at the `dash/instances/[id]`
+route.
+
+### Indicators
+
+Four cards at the top. Each one has the shortcut **View messages** (*Ver
+mensagens*), which opens the log already filtered:
+
+| Indicator | Count |
+|---|---|
+| **Processing** (*Em Processamento*) | Messages in processing at this moment |
+| **Queued** (*Na fila*) | Messages waiting for processing |
+| **Failed** (*Com falha*) | Messages that ended in error |
+| **Processed messages** (*Mensagens processadas*) | Total processed |
+
+The queue concept is in [Message queue](/en/definitions/queue).
+
+### Summary
+
+The **Summary** (*Resumo*) card shows the volume of the instance:
+
+- Messages processed today.
+- Messages processed this month.
+- Messages processed last month.
+- Messages processed in the last 90 days.
+- Average messages processed per day.
+
+To investigate a message, use the [Message log](/en/panel/message-log).
+
+## See also
+
+- [Unofficial connection](/en/panel/unofficial-connection): QR code, pairing code, and FastLink.
+- [Official connection](/en/panel/official-connection): official Meta API.
+- [Instance settings](/en/panel/instance-settings): send behavior.
+- [WhatsApp connection](/en/definitions/connection): the instance concept.

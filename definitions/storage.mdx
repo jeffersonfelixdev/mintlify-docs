@@ -1,17 +1,22 @@
 ---
 title: Armazenamento de arquivos
-description: Processe os arquivos recebidos pelo WhatsApp
+description: "Por quanto tempo a ZapperHub guarda os arquivos recebidos"
 ---
 
-A ZapperHub fornece um serviço de armazenamento de arquivos, sem custo adicional
-e sem limites, para suas instâncias. 
+## Descrição
 
-Todos os arquivos recebidos por meio do webhook são armazenados em nossos servidores
-pelo prazo de 7 dias. Após este período, os arquivos são excluídos. Por isso,
-recomendamos que realize o download e armazenamento dos arquivos em sua aplicação
-caso deseje guardá-los por um período maior.
+A ZapperHub armazena os arquivos recebidos pelas instâncias, sem custo adicional
+e sem limite de volume.
 
-<Card title="TOME NOTA!">
-Quando sua instância receber uma mensagem de mídia, a URL do arquivo para download
-estará disponível no webhook no campo `mediaUrl`.
-</Card>
+A ZapperHub guarda cada arquivo por **7 dias**. Depois desse prazo, a ZapperHub
+exclui o arquivo.
+
+## Como obter o arquivo
+
+Quando a instância recebe uma mensagem de mídia, o webhook `messages.upsert`
+traz a URL de download no campo `mediaUrl`.
+
+<Warning>
+**Perda do arquivo após 7 dias.** Se a sua aplicação precisa do arquivo por mais
+tempo, faça o download e guarde o arquivo no seu lado dentro do prazo.
+</Warning>

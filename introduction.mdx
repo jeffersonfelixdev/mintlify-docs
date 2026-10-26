@@ -1,63 +1,43 @@
 ---
 title: Introdução
-description: "Seja bem-vindo à documentação oficial da ZapperHub"
+description: "O que é a ZapperHub, para que ela serve e por onde começar"
 ---
 
-Esta é a documentação oficial da ZapperHub, sua API completa para integração com
-o WhatsApp.
+A ZapperHub é uma API HTTP para o WhatsApp. Com ela, a sua aplicação envia e
+recebe mensagens, gerencia grupos e recebe eventos por webhook. A referência de
+cada rota está na aba [API Reference](/api-reference).
 
-A ZapperHub é um serviço para integração do WhatsApp em aplicações, automações e 
-serviços de chatbots, utilizando requisições HTTP que estão detalhadas na sessão 
-<a href="/api-reference">API Reference</a>.
+## Usos previstos
 
-## A quem se destina
+A ZapperHub atende estes cenários:
 
-A ZapperHub pode ser utilizada em diversos cenários:
+- Automação de pré-venda, pós-venda e suporte.
+- Remarketing, recuperação de carrinho abandonado e cobrança por boleto ou PIX.
+- Chatbots, inclusive com agentes de IA.
+- Integração com gateways de pagamento e plataformas de venda.
+- Integração com ferramentas de automação, como n8n, Make e Zapier.
+- Envio de códigos de uso único (OTP).
+- Integração com formulários de pesquisa e captação de leads.
+- Integração direta com uma aplicação própria.
 
-- Automação do SDR, pós-venda e suporte;
-- Remarketing, recuperação de carrinho abandonado, cobrança de boleto ou PIX;
-- Criação de chatbots diversos, inclusive integrados com agentes de IA;
-- Integração com gateways de pagamentos, plataformas de vendas de produtos
-físicos ou digitais;
-- Integração com sistemas de automação como N8N, Make, Zapier, etc;
-- Integração com sistemas de autenticação por OTP (one-time password);
-- Integração com formulários de pesquisa, captação de leads, fake doors;
-- Integração direta com aplicação customizada.
+<Warning>
+**Uso proibido.** Não use a plataforma para SPAM, para mensagens ofensivas ou
+discriminatórias, nem para divulgar produtos ilícitos. O uso indevido causa o
+bloqueio da conta. Leia os
+[Termos de Uso](https://zapperhub.com/terms-of-use) antes de começar.
+</Warning>
 
-Como pode ver, a ZapperHub pode ser utilizada em diversos cenários em seu
-negócio. E você verá nesta documentação que sua utilização é bem simples e em
-poucos instantes você estará integrando a ZapperHub nos processos de sua empresa.
+## Primeiros passos
 
-<Card title="⛔️ IMPORTANTE">
-É estritamente proibido o uso desta plataforma para a prática de SPAM, envio de
-mensagens de teor ofensivo, discriminatório, ou que estimulam práticas ilícitas
-ou divulgam a venda, comercialização ou distribuição de produtos ilícitos ou de
-origem duvidosa. Por favor, antes de utilizar nossa plataforma leia atentamente
-nossos <a href="https://zapperhub.com/terms-of-use">Termos de Uso</a> para não
-ter problemas de bloqueio.
-</Card>
-
-## Configuração
-
-Estes são os primeiros passos para você integrar a ZapperHub à sua aplicação:
+Faça estes dois passos, nesta ordem:
 
 <CardGroup cols={2}>
-  <Card
-    title="Crie uma instância"
-    icon="grid"
-    href="/creating-instance"
-  >
-    Cada instância é um número de WhatsApp que pode ser conectado
+  <Card title="1. Crie uma instância" icon="grid" href="/creating-instance">
+    Uma instância é um número de WhatsApp conectado à ZapperHub.
   </Card>
-  <Card
-    title="Conecte seu WhatsApp"
-    icon="whatsapp"
-    href="/connecting-whatsapp"
-  >
-    Acesse a plataforma e leia o QR Code de conexão
+  <Card title="2. Conecte o WhatsApp" icon="whatsapp" href="/connecting-whatsapp">
+    Abra o painel e leia o QR Code com o celular.
   </Card>
 </CardGroup>
 
-Após estes passos, você estará pronto para o próximo passo, que é fazer seus 
-<a href="/quickstart">primeiros disparos de mensagem</a> pela API.
-
+Depois, envie a primeira mensagem pela API. Veja [Início rápido](/quickstart).

@@ -1,0 +1,106 @@
+---
+title: AI agents
+description: "How a Chatvolt AI agent answers the conversations of an instance and how to control it"
+---
+
+<Warning>
+**Change in the `type` field from 2026-09-10.** The route
+`POST /{instanceId}/integrations` accepts only `CHATVOLT` in `type`. Requests with
+`GPTMAKER` or `ZAIA` respond `400`. Before, they responded `204`.
+
+- If your integration already uses `CHATVOLT`, nothing changes.
+- If you send `GPTMAKER` or `ZAIA`, the call fails.
+
+Integrations of these two providers that are already registered continue to work
+while the legacy API is online. They can no longer be created or updated through
+this route. To continue with an AI agent, migrate to Chatvolt. See
+[Chatvolt AI](/en/integrations/chatvolt).
+
+The API rejects these providers to prevent a silent failure: an integration with
+an unprocessed provider would never respond.
+</Warning>
+
+## Description
+
+An AI agent answers the conversations of an instance automatically. ZapperHub
+forwards the received messages to **Chatvolt** and returns the agent reply to
+WhatsApp.
+
+<Note>
+GPT Maker and Zaia continue to be served while the legacy API is online, but
+they do not accept new registrations. Integrations created today use Chatvolt.
+</Note>
+
+The integration is per instance. Each connected number can have its own agent, or
+none. The agent answers all conversations of the instance. You can turn off the
+agent in one conversation without affecting the others, with the `#on` and `#off`
+commands.
+
+## Preliminary requirements
+
+On the agent platform, have at hand:
+
+- The **Agent ID**, which identifies the agent that answers.
+- The **API key** of the platform, which authorizes ZapperHub to use it.
+
+This page explains what the integration does and how to control it. The
+procedure in the panel is in [Integrations](/en/panel/integrations).
+
+## Integrate an agent
+
+### Through the API
+
+Use the route
+[Create/update integration](/api-reference/integrações/criaratualizar-integração).
+Enter in the body:
+
+- `type`: always `CHATVOLT`.
+- `agentId`: the agent id.
+- `apiKey`: the API token of your Chatvolt account.
+
+### In the panel
+
+<Steps>
+  <Step title="Open the instance">
+    Go to [app.zapperhub.com/dash](https://app.zapperhub.com/dash) and click the instance.
+  </Step>
+  <Step title="Open the agents tab">
+    Click **Integrations** (*Integrações*), then **AI agents** (*Agentes de IA*).
+  </Step>
+  <Step title="Fill in and save">
+    Fill in **Integration type** (*Tipo de Integração*), **Agent ID** (*ID do Agente*), and **API key** (*Chave de API*). Click **Update** (*Atualizar*).
+  </Step>
+</Steps>
+
+Each field, with its requirement and validation, is in
+[Integrations](/en/panel/integrations).
+
+## Control the agent through WhatsApp
+
+The commands apply per conversation. Turning off the AI for one contact does not
+affect the others.
+
+| Goal | Origin | Command |
+|---|---|---|
+| Turn off the agent | API | Send the contact a text message `#off` |
+| Turn off the agent | Phone, WhatsApp Web, or Desktop | Send `#off`. Or configure the instance to turn off with any text message |
+| Turn on the agent | API, phone, WhatsApp Web, or Desktop | Send `#on` |
+
+### Turn off the AI with any message from the device
+
+<Steps>
+  <Step title="Open the instance settings">
+    In the instance, click **Settings** (*Configurações*).
+  </Step>
+  <Step title="Turn on the option">
+    In the **Integration** (*Integração*) tab, turn on **Disable AI on messages from the device** (*Desativar IA em mensagens a partir do dispositivo*).
+  </Step>
+</Steps>
+
+With the option on, the agent stops answering in that conversation when the line
+owner replies from the phone, from WhatsApp Web, or from Desktop. Messages sent
+through the API routes do not trigger this pause. For them, use `#off`.
+
+The other behavior options, including **Debounce**, which groups the messages
+before it sends them to the agent, are in
+[Instance settings](/en/panel/instance-settings).

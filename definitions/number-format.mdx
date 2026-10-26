@@ -1,18 +1,19 @@
 ---
 title: Formato do número
-description: "Conheça os formatos válidos de números para enviar mensagens"
+description: "O formato válido de número de telefone nas requisições"
 ---
 
-Em todas as requisições que exigirem o preenchimento do número de telefone do 
-WhatsApp, seja de quem estiver enviando ou de quem estiver recebendo mensagens, 
-o número deverá ser preenchido de forma completa, inclusive com o código do país, 
-sem a necessidade de incluir o caracter `+`.
+## Regra
 
-É importante que o número de telefone não possua nenhuma formatação (parênteses
-no DDD, espaços ou traços), para que a integração funcione corretamente. Caso 
-esteja utilizando algum serviço de automação como N8N ou Make, verifique na
-documentação de sua aplicação se existe algum plugin para formatar campos de 
-número de telefone para o padrão exigido pelo WhatsApp.
+Informe o número de telefone completo, com o código do país. O sinal `+` é
+opcional.
 
-Por exemplo, para números de WhatsApp do Brasil, o número ficará assim: 
-`5511912345678`.
+Não use formatação no número. Não use parênteses, espaços nem traços.
+
+Exemplo de número do Brasil: `5511912345678`.
+
+## Ferramentas de automação
+
+Se você usa n8n, Make ou ferramenta parecida, verifique se ela tem um recurso
+para formatar números de telefone. Remova a formatação antes de enviar o número
+à ZapperHub.

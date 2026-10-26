@@ -1,0 +1,140 @@
+---
+title: Instance settings
+description: "Each behavior option of the instance and the effect of turning it on or off"
+---
+
+import PanelNote from '/snippets/en-panel-note.mdx';
+
+**Location**: **Instances** (*Instâncias*) > select the instance > **Settings** (*Configurações*).
+
+<PanelNote />
+
+## Description
+
+The screen **Instance settings** (*Configurações da Instância*,
+`dash/instances/[id]/settings`) controls the behavior of the instance on send
+and receive. It has two tabs: **Messages** (*Mensagens*) and **Integration**
+(*Integração*).
+
+Every change applies only after **Save settings** (*Salvar configurações*). The
+panel confirms with *Configurações atualizadas com sucesso.*
+
+The same options exist in the API. See
+[Get settings](/api-reference/configurações/obter-configurações) and
+[Update settings](/api-reference/configurações/atualizar-configurações).
+
+## Messages tab
+
+### Delay between messages
+
+The interval the instance waits between one send and the next. The field has four
+levels:
+
+| Level | Interval |
+|---|---|
+| **Very short** (*Muito curto*) | 0.5 to 2 seconds |
+| **Short** (*Curto*) | 2 to 3 seconds |
+| **Medium** (*Médio*) | 5 to 7 seconds |
+| **Long** (*Longo*) | 10 to 12 seconds |
+
+At the shortest level, the queue moves faster. At the longer levels, the send
+looks more like the rhythm of a person, and a large queue takes longer to drain.
+See [Message queue](/en/definitions/queue).
+
+### Send presence update
+
+Sends the recipient the status *typing...* or *recording audio...* before the
+message.
+
+- **On**: the recipient sees the status before the message arrives.
+- **Off**: the message appears without the status.
+
+<Note>
+This feature adds a delay of 5 to 15 seconds to each message. The delay adds to
+the delay between messages.
+</Note>
+
+### Enable link preview
+
+Shows a preview of the first link of the message, based on the link metadata.
+
+- **On**: the first link arrives with a title and a preview image.
+- **Off**: the link goes as text.
+
+It applies only to the first link of each message.
+
+### Mark messages as read
+
+Marks received messages as read automatically.
+
+- **On**: the sender sees the blue double check mark as soon as the instance receives the message.
+- **Off**: the message stays unread for the sender, even after your system processes it.
+
+## Integration tab
+
+These options apply to the behavior with AI agents. See
+[Integrations](/en/panel/integrations).
+
+### Debounce
+
+The wait time, in seconds, before the instance sends the user messages to the AI
+agent.
+
+| Field | Required | Validation |
+|---|---|---|
+| **Debounce** | Yes | Greater than 0 and less than 20 seconds |
+
+Outside the range, the panel responds *O debounce deve ser maior que 0* or *O
+debounce deve ser menor que 20*.
+
+When the contact sends three messages in a row, the debounce makes the instance
+wait and send the three to the agent at once, as a single context. A low value
+replies faster and increases the chance of a reply before the person finishes. A
+high value groups better and takes longer to reply.
+
+### Split agent messages
+
+Splits the agent reply into smaller parts, at the blank lines of the text.
+
+- **On**: a long reply arrives as several messages.
+- **Off**: the reply arrives as one message.
+
+### Process image links
+
+Converts the image links of the agent reply into image files.
+
+- **On**: an image link becomes an image in the chat.
+- **Off**: the link arrives as text.
+
+### Reply with audio
+
+Replies with audio to messages received as audio.
+
+- **On**: a contact who sends audio receives audio. A contact who sends text receives text.
+- **Off**: the reply is always text.
+
+### Default ElevenLabs voice
+
+The voice used in audio replies when the send does not specify another voice.
+
+<Note>
+The voice list depends on the ElevenLabs key registered on the instance. Without
+the key, there are no voices to choose. Register the key in
+[Text to speech](/en/panel/text-to-speech).
+</Note>
+
+### Disable AI on messages from the device
+
+Disables the AI in a conversation when the line owner sends a message from the
+phone, from WhatsApp Web, or from Desktop.
+
+- **On**: when a human agent replies from the phone or from WhatsApp Web, the
+  agent stops replying in that conversation. The two do not talk to the customer
+  at the same time.
+- **Off**: the agent continues to reply after the human intervention.
+
+## See also
+
+- [Text to speech](/en/panel/text-to-speech): the ElevenLabs key and the voices.
+- [Integrations](/en/panel/integrations): AI agents and Chatwoot.
+- [AI agents](/en/integrations/ai-agents): how the agent works.

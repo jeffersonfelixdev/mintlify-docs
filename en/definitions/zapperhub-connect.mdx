@@ -1,0 +1,80 @@
+---
+title: ZapperHub Connect
+description: "Chrome extension to connect the instance from WhatsApp Web"
+---
+
+## Description
+
+ZapperHub Connect is a Google Chrome extension. It exports a WhatsApp Web session
+to a ZapperHub instance.
+
+Use the extension when the device requires a passkey to connect to WhatsApp Web.
+In that case, the QR code and the pairing code do not work. WhatsApp shows this
+notice:
+
+![WhatsApp notice that asks for the passkey](/definitions/passkey-alert.png)
+
+<Note>
+Not all devices require the passkey. The connection through the extension works
+on any device.
+</Note>
+
+## Preliminary requirements
+
+- Google Chrome.
+- The id and the X-Api-Key of the instance. See [Quickstart](/en/quickstart).
+- The instance with the status **Disconnected** or **Not connected**.
+
+## Install the extension
+
+<Steps>
+  <Step title="Open the extension in the Chrome Web Store">
+    Go to [ZapperHub Connect](https://chromewebstore.google.com/detail/zapperhub-connect/ofpcjjnbbbgpaoaplobmkkflgakggdoe).
+  </Step>
+  <Step title="Install">
+    Click **Add to Chrome** and confirm.
+  </Step>
+  <Step title="Pin the extension to the toolbar">
+    Click **Extensions**, to the right of the address bar. Click the pin next to ZapperHub Connect.
+
+    ![Extensions menu with the ZapperHub Connect pin](/definitions/pin-ext.png)
+
+    The extension icon appears in the toolbar.
+
+    ![ZapperHub Connect icon in the Chrome toolbar](/definitions/pin-ext-2.png)
+  </Step>
+</Steps>
+
+## Connect the instance
+
+<Steps>
+  <Step title="Open WhatsApp Web">
+    Go to [web.whatsapp.com](https://web.whatsapp.com).
+  </Step>
+  <Step title="Connect the phone to WhatsApp Web">
+    Scan the QR code and follow the WhatsApp instructions. If WhatsApp asks for
+    the passkey, use a compatible passkey manager, such as Google Authenticator,
+    1Password, Face ID, or Touch ID.
+  </Step>
+  <Step title="Open the extension">
+    With WhatsApp Web connected, click the ZapperHub Connect icon.
+  </Step>
+  <Step title="Enter the instance">
+    Type the instance id and the X-Api-Key. Click **Connect session** (*Conectar sessão*).
+
+    ![Extension window with the id and key fields](/definitions/connect.png)
+  </Step>
+  <Step title="Wait for the export">
+    The extension exports the session to ZapperHub in a few seconds. Then the
+    extension disconnects WhatsApp Web to prevent a device conflict.
+  </Step>
+</Steps>
+
+## Result
+
+The instance status changes to **Connected**.
+
+<Note>
+If the export fails, reload the WhatsApp Web page and repeat the procedure.
+Before you repeat, make sure that the instance is disconnected.
+</Note>

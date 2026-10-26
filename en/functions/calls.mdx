@@ -1,0 +1,269 @@
+---
+title: Calls
+description: "Originate, answer, play audio, record, and end voice calls through the API"
+---
+
+## Description
+
+ZapperHub conducts voice calls through the number of the instance. Your
+application originates the call, answers a received call, plays an audio file to
+the contact, records the conversation, and ends the call. All through the API,
+with no human operator.
+
+<Note>
+**Live conversation.** The routes on this page conduct the call through the API:
+the application calls and plays a file. For an agent to talk in real time through
+a headset, use the [Softphone](/en/functions/softphone). Both ways conduct the same
+call, with the same events and the same history.
+</Note>
+
+<Warning>
+**Available only on the unofficial connection.** The routes on this page apply
+only to instances with an unofficial connection (`device`). On the official
+connection (Cloud API), every route responds `422` with
+`code: UNSUPPORTED_FOR_INSTANCE_TYPE`. The official connection continues to
+receive `calls.update` events.
+</Warning>
+
+## Preliminary requirements
+
+- An instance with an unofficial connection, with the status **Connected**.
+- A webhook with the `calls.update` subscription. See [Webhooks](/en/integrations/webhooks).
+
+<Note>
+**Subscribe to `calls.update`.** The route responses describe the moment of the
+command, not the outcome. Originate responds `RINGING`. What comes next
+(answered, rejected, missed, ended) arrives through the `calls.update` event.
+Without the subscription, the application does not know that the call ended. The
+alternative is to query the [history](#query-the-history) by `callId`.
+</Note>
+
+## Limits
+
+| Limit | Value |
+| --- | --- |
+| Simultaneous calls | One per instance, including a call that is still ringing |
+| Video | Not available |
+| Group call | Not available |
+| Call duration | No limit |
+| Calls per period | No platform limit. WhatsApp controls abusive use |
+| Recordings per day | 30 per instance, per calendar day in the Brasília time zone |
+| Recording duration | 1 hour. After that, the call continues without recording |
+| Recording retention | 7 days after the end of the call |
+| Record retention | 90 days after the end of the call |
+
+## Originate a call
+
+```http
+POST /{instanceId}/calls
+```
+
+```json
+{
+  "jid": "5511999999999",
+  "record": false
+}
+```
+
+The response carries the `callId`. It identifies the call in all following
+operations and in all its events:
+
+```json
+{
+  "callId": "3EB0C767D26B8CE6A1B4",
+  "state": "RINGING",
+  "direction": "BUSINESS_INITIATED",
+  "recording": { "requested": false, "granted": false }
+}
+```
+
+The device of the contact starts to ring. No audio plays by itself when the
+contact answers. Playback is always your command.
+
+| Response | `code` | When |
+| --- | --- | --- |
+| `409` | `CALL_IN_PROGRESS` | The instance already conducts a call. The error carries its `callId` |
+| `422` | `INVALID_CALL_TARGET` | The recipient has no WhatsApp account |
+| `422` | `INSTANCE_NOT_CONNECTED` | The instance has no active session |
+
+## Answer a received call
+
+<Warning>
+**A number in coexistence does not receive calls.** If the same number is also
+connected to the Cloud API (WhatsApp Business app and official API on the same
+number), WhatsApp rejects received calls before they ring. The Cloud API device
+responds `uncallable`, and WhatsApp ends the call on all devices. The
+application sees the call appear and disappear at the same instant. Originate
+continues to work on these numbers. To answer calls, use a number outside
+coexistence.
+</Warning>
+
+Use the `callId` from the `calls.update` event with `event: "connect"`.
+
+```http
+POST /{instanceId}/calls/{callId}/answer
+```
+
+```json
+{ "record": true }
+```
+
+| Response | `code` | When |
+| --- | --- | --- |
+| `404` | `CALL_NOT_FOUND` | No call with this identifier on this instance |
+| `409` | `CALL_NOT_AVAILABLE` | The call is no longer ringing |
+| `409` | `CALL_IN_PROGRESS` | The instance already conducts another call |
+
+## Play audio on the call
+
+```http
+POST /{instanceId}/calls/{callId}/audio
+```
+
+```json
+{ "audio": "https://exemplo.com.br/aviso-de-entrega.mp3" }
+```
+
+The route accepts the same forms as the audio message: `http`/`https` URL,
+base64, or data URL, in the formats mp3, mp4, wav, and ogg. The platform converts
+the file.
+
+The response leaves after the playback started:
+
+```json
+{
+  "callId": "3EB0C767D26B8CE6A1B4",
+  "playbackStartedAt": "2026-09-04T18:22:41.117Z"
+}
+```
+
+Successive playbacks on the same call are allowed. A new request replaces the
+current audio. The call never plays two audio files at the same time.
+
+<Note>
+**An audio failure does not end the call.** An inaccessible audio file, a
+non-playable format, or a file above the size limit responds `422` with
+`code: INVALID_CALL_MEDIA`. The call stays active. Correct and send another audio
+file.
+
+A playback request before the contact answers responds `409` with
+`code: CALL_NOT_ESTABLISHED`. The call continues to ring.
+</Note>
+
+## End and reject
+
+```http
+POST /{instanceId}/calls/{callId}/hangup
+POST /{instanceId}/calls/{callId}/reject
+```
+
+- `hangup` ends a call in progress and stops the audio in playback.
+- `reject` rejects a received call that is still ringing. An answered call is
+  ended, not rejected.
+
+The instance becomes free for a new call immediately.
+
+A repeated end of an already ended call responds `409` with
+`code: CALL_NOT_AVAILABLE`, with no effect.
+
+## Record the conversation
+
+Request the recording when you originate or answer, with `"record": true`. The
+recording contains both sides of the conversation and starts when the call is
+established.
+
+When the recording is ready, a `calls.update` event arrives with
+`event: "recording"`, with a download address. See
+[Recording available](/en/integrations/webhooks#recording-available).
+
+The response to the call request says whether the recording was granted:
+
+```json
+{
+  "recording": {
+    "requested": true,
+    "granted": false,
+    "reason": "DAILY_QUOTA_REACHED"
+  }
+}
+```
+
+<Note>
+**The quota limits the recording, not the call.** After 30 recordings in a day,
+the following calls happen without recording, with `recording.granted: false`.
+No call is rejected because of the quota. A call without recording keeps no audio
+of the conversation.
+</Note>
+
+After 1 hour, the recording ends, and the call continues. The delivered file
+carries the first hour, with `truncated: true`.
+
+## Query the history
+
+```http
+GET /{instanceId}/calls
+GET /{instanceId}/calls/{callId}
+```
+
+The history records every call, with contact, direction, times, duration, and
+outcome, even when the webhook was not delivered.
+
+The listing is paginated by cursor and accepts the `state` and `direction`
+filters. A call in progress appears with `state: "ACTIVE"` and `endedAt: null`.
+
+Use the history also to get a new download address of the recording when the
+previous one expired.
+
+After the 7 days, the record stays available and says that the recording no
+longer exists:
+
+```json
+{
+  "recording": {
+    "requested": true,
+    "status": "UNAVAILABLE",
+    "reason": "RETENTION_EXPIRED"
+  }
+}
+```
+
+## Outcomes
+
+The `outcome` field of the record and the `status` of the end event use the same
+values:
+
+| Value | Meaning |
+| --- | --- |
+| `COMPLETED` | Answered and completed |
+| `REJECTED` | Rejected |
+| `MISSED` | Not answered |
+| `UNAVAILABLE` | Contact unavailable, on another call |
+| `TERMINATED_BY_BUSINESS` | Ended by your command |
+| `FAILED` | Failure: session loss, server restart, or signaling error |
+
+## Call authorship
+
+Every call records how it was conducted and by whom:
+
+| Field | Content |
+| --- | --- |
+| `conductedVia` | `API` for the automated path on this page. `SOFTPHONE` for a conversation conducted by an agent |
+| `agent` | `{ id, displayName? }` of the agent. Absent, not null, on calls originated by the API |
+
+The absence of `agent` is information: a call through the API had no agent.
+
+To list only the calls of one agent:
+
+```http
+GET /{instanceId}/calls?agentId=op-1183
+```
+
+The filter works together with `state`, `direction`, `limit`, and `cursor`, and
+is kept in the address of the next page.
+
+<Warning>
+**Session loss.** If the instance loses the WhatsApp session, or the instance
+server restarts, the call in progress ends with `FAILED`. The instance accepts
+calls again immediately. The partial recording, when it exists, is finalized and
+delivered.
+</Warning>

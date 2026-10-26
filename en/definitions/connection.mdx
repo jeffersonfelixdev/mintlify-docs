@@ -1,0 +1,47 @@
+---
+title: WhatsApp connection
+description: "What an instance is and which connection types exist"
+---
+
+## Instance
+
+An instance is a ZapperHub service that communicates with one WhatsApp number.
+Each instance connects a single number.
+
+Each instance runs in an isolated environment. The resource usage of one instance
+does not affect another instance, even in the same account. This isolation gives
+separate environments to each of your customers.
+
+## Connection types
+
+| Type | API | Description |
+|---|---|---|
+| **Connect with Facebook** | Official API | Recommended. Meta guides the authorization of the number on its own site. |
+| **Manual setup (Meta)** | Official API | You create an app in Meta, generate the tokens, and register the webhook. |
+| **Gupshup** | Official API | For numbers already operated through Gupshup. The webhook is configured in Gupshup, not in ZapperHub. |
+| **QR code** | Unofficial API | The phone scans a QR code in **Linked devices** > **Link a device**. |
+| **Pairing code** | Unofficial API | You type a code of 8 letters and digits on the phone. |
+| **FastLink** | Official and unofficial API | A temporary link for another person to connect the number, without panel access. Intended for agencies. |
+| **ZapperHub Connect** | Unofficial API | Chrome extension for devices that require a passkey on WhatsApp Web. See [ZapperHub Connect](/en/definitions/zapperhub-connect). |
+| **Instagram** | Instagram | Connects a professional Instagram account to the instance, for direct messages and interactions. |
+
+With the QR code or the pairing code, the instance works as WhatsApp Web. The
+phone registers the instance as a linked device.
+
+<Warning>
+**Risk of ban.** The unofficial connection is subject to restrictions and bans
+by Meta. Use the official Meta API whenever possible. ZapperHub is a Meta
+Business Provider: you do not need to create apps or do manual setups, and
+ZapperHub handles the support with Meta.
+</Warning>
+
+## Where to operate each type
+
+This page describes what each connection type is. The procedure for each type is
+in the Panel tab:
+
+| Connection type | Panel page |
+|---|---|
+| Connect with Facebook, Manual setup (Meta), Gupshup | [Official connection](/en/panel/official-connection) |
+| QR code, Pairing code, FastLink, ZapperHub Connect | [Unofficial connection](/en/panel/unofficial-connection) |
+| Professional Instagram account | [Instagram](/en/panel/instagram) |

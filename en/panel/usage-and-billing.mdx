@@ -1,0 +1,229 @@
+---
+title: Usage and billing
+description: "Follow the free service message allowance, the volume by category, and the payment method of the account at Meta"
+---
+
+import PanelNote from '/snippets/en-panel-note.mdx';
+
+**Location**: **Instances** (*Instâncias*) > select the instance > **Usage and billing** (*Consumo e cobrança*).
+
+<PanelNote />
+
+## Description
+
+The tab exists only for official API instances (WhatsApp Cloud API). On
+unofficial instances, the tab does not appear.
+
+Since **October 1, 2026**, Meta charges for **service messages**: the free-form
+replies, without a template, sent inside the 24-hour customer service window.
+Each number has **1,000 free service messages per month**. The charge starts at
+the 1,001st delivered message. The allowance does not accumulate from one month
+to the next. The month is the calendar month in the time zone of the account at
+Meta.
+
+<Warning>
+**Without a payment method, messages stop.** Without a card registered at Meta,
+service messages stop being delivered when they become chargeable. Customers
+continue to write, but the replies do not arrive. This screen shows the usage
+before that happens.
+</Warning>
+
+<Note>
+**The numbers on this screen are estimates.** Meta does not offer an allowance
+counter and does not report whether a card is registered. ZapperHub estimates the
+allowance from the sum of delivered service messages and infers the payment
+status. Official Meta data arrives with a delay of some hours. See
+[Official Meta data](#official-meta-data).
+</Note>
+
+## Payment method
+
+The first card shows the payment status and the button **Register/manage card at
+Meta** (*Cadastrar/gerenciar cartão na Meta*). The button opens the payment
+methods screen of the Meta Business Suite in a new tab. The card registration is
+done at Meta.
+
+| Status | Meaning |
+|---|---|
+| **Not verified** (*Não verificado*) | There was no payment verification for this account yet |
+| **Payment problem detected** (*Problema de pagamento detectado*) | Meta rejected messages because of a payment problem, or marked the number as blocked for billing. The button is highlighted, and a red banner appears at the top of the instance pages |
+| **No problem detected** (*Nenhum problema detectado*) | No sign of a payment problem |
+
+ZapperHub infers the status from two signals: Meta error **131042** (*Business
+eligibility payment issue*) on sends and events, and the health state of the
+number. ZapperHub queries the health state every 6 hours. While a problem is
+detected, the query happens every 15 minutes.
+
+The status returns to **No problem detected** when two conditions occur, in any
+order. The health query returns with no billing error. A message is delivered
+after the problem. After you register the card, the alert disappears at the next
+delivered message.
+
+<Note>
+A number blocked for another reason, such as a rejected template, does not change
+the payment status.
+</Note>
+
+## Free service messages
+
+The bar shows **N / 1,000** in the month, how many messages remain, and, when the
+allowance is exhausted, how many went beyond it (**+N charged by Meta**).
+
+Delivered service messages count. Not counted:
+
+- Undelivered messages.
+- Messages inside a free 72-hour entry window, opened by ads or contact buttons.
+- Reactions sent by ZapperHub. Reactions sent from outside can appear in the estimate until the next check with Meta.
+
+Two notices appear at the top of the instance pages, only in the current month:
+
+| When | Notice |
+|---|---|
+| From **80%** of the allowance | Yellow banner: you used 80% of the free service messages of the month |
+| From **100%** of the allowance | Red banner: the next service messages will be charged by Meta |
+
+## Messages by category
+
+Four cards show the volume of the month in each Meta pricing category
+(**Marketing**, **Utility**, **Authentication**, and **Service**) and the total.
+Two extra cards appear only with volume:
+
+- **Referral conversion** (*Conversão de indicação*): messages from conversations opened by ads that lead to WhatsApp. They do not consume the allowance.
+- **Other** (*Outras*): pricing categories that ZapperHub does not recognize.
+
+Each card also shows the cost, in the currency of the account at Meta:
+
+- The cost is summed only on days already checked with Meta.
+- With volume on unchecked days, the card shows **Cost to confirm** (*Custo a confirmar*).
+- **Cost unavailable** (*Custo indisponível*) appears when Meta does not report
+  the cost to partner apps, which is the case for accounts connected through
+  ZapperHub. The volume stays official. To see the charged amount, check
+  **Billing and payments** in the Meta account.
+
+In a month with no delivery, the cards show zero and the screen reports *Nenhuma
+mensagem entregue neste mês* (no message delivered this month).
+
+## Official Meta data
+
+Every 6 hours, ZapperHub checks the usage of each instance against the official
+Meta data. On closed days, ZapperHub uses the Meta numbers, even when they differ
+from the real-time count. A day is treated as official only some hours after it
+ends.
+
+The screen reports **Official Meta data until** (*Dados oficiais da Meta até*) a
+date and time. After that, the numbers are the real-time estimate. The check also
+includes messages sent by the same number outside ZapperHub.
+
+If the check fails, the numbers do not disappear. The screen keeps the real-time
+count and the last official data. It shows *Não foi possível conferir com a Meta
+desde* (could not check with Meta since) with a date and the reason. ZapperHub
+retries the check automatically.
+
+<Note>
+The check uses the instance token, which needs the `whatsapp_business_management`
+permission. On manually connected instances, the token can lack the permission.
+When this is the reason for the failure, or the token expired, the screen shows
+the **Reconnect instance** (*Reconectar instância*) button.
+</Note>
+
+## Previous months
+
+The **Month** (*Mês*) selector, at the top of the screen, lists the months from
+the start of collection to the current month, limited to the last 13 months. In a
+previous month, the screen shows the used allowance, the volume, and the cost by
+category, with no notice banners.
+
+The time zone used in the calculations appears next to the selector. If the time
+zone of the account at Meta cannot be obtained, ZapperHub uses the Brasília time
+zone and reports it on the screen.
+
+The history starts on the date the feature went live. There is no retroactive
+data.
+
+## Who sees the tab
+
+The owner of the instance, the partner who created the instance, and the sub-user
+who owns it. Other users do not see the tab.
+
+## Through the API
+
+The same data is in
+[Meta usage and billing](/api-reference/cloud-api/consumo-e-cobrança-da-meta)
+(`GET /{instanceId}/billing/usage`). The call uses the `x-api-key` of the
+instance. Only `cloud_api` instances accept it.
+
+```bash
+curl "https://api.zapperhub.com/{instanceId}/billing/usage" \
+  -H "x-api-key: YOUR_KEY"
+```
+
+The optional `month` parameter (`YYYY-MM`) selects a previous month. Without it,
+the API uses the current month in the time zone of the account.
+
+```json
+{
+  "instanceId": "inst_123",
+  "month": "2026-10",
+  "isCurrentMonth": true,
+  "timezone": { "name": "America/Sao_Paulo", "fallback": false },
+  "currency": "BRL",
+  "freeTier": {
+    "used": 640,
+    "limit": 1000,
+    "remaining": 360,
+    "overage": 0,
+    "alertLevel": "none"
+  },
+  "categories": [
+    { "category": "marketing", "volume": 120, "cost": 7.5, "costPending": false },
+    { "category": "utility", "volume": 300, "cost": 2.1, "costPending": true },
+    { "category": "authentication", "volume": 40, "cost": null, "costPending": false },
+    { "category": "service", "volume": 900, "cost": 0, "costPending": true }
+  ],
+  "totalVolume": 1360,
+  "dataFreshness": {
+    "officialUntil": "2026-10-14T03:00:00.000Z",
+    "lastReconcileAttemptAt": "2026-10-15T12:00:00.000Z",
+    "lastReconcileSuccessAt": "2026-10-15T12:00:00.000Z",
+    "reconcileFailure": null
+  },
+  "payment": {
+    "status": "ok",
+    "lastCheckedAt": "2026-10-15T11:55:00.000Z",
+    "problemDetectedAt": null,
+    "problemSignal": null,
+    "billingHubUrl": "https://business.facebook.com/latest/billing_hub/payment_methods"
+  },
+  "availableMonths": { "first": "2026-10", "last": "2026-10" }
+}
+```
+
+| Field | Content |
+|---|---|
+| `freeTier` | Service message allowance. `alertLevel` is `none`, `warning` (from 80%), or `exceeded` (from 100%). It applies only to the current month |
+| `categories` | Volume and cost by category (`marketing`, `utility`, `authentication`, `service`). The four main ones always appear, even at zero. `referral_conversion` and `other` appear only with volume. `cost` is `null` with no confirmed cost. `costPending` indicates volume on unchecked days |
+| `dataFreshness` | Until when the data is official. If the last check failed, `reconcileFailure` carries `kind` (`requires_reconnect`, `transient`, or `unexpected`), `since`, and `message` |
+| `payment` | Inferred payment status (`not_verified`, `problem_detected`, or `ok`), the detection source (`problemSignal`), and the Meta link to register the card |
+| `availableMonths` | The first and the last month that can be queried |
+
+### Errors
+
+| Situation | Response |
+|---|---|
+| `x-api-key` missing or from another instance | `401` |
+| Instance that is not `cloud_api` | `400` |
+| `month` outside the `YYYY-MM` format | `400` validation |
+| `month` outside the queryable range | `400` with `code: BILLING_MONTH_UNAVAILABLE` and the first available month in `detail` |
+
+An instance with no data yet is not an error. The response comes with zero
+volumes and the payment **not verified**.
+
+## Limitations
+
+- The allowance is an estimate. Meta does not expose a counter.
+- The payment status is inferred. Meta does not report whether a card is registered.
+- Official data arrives with a delay of some hours. Meta does not report the cost
+  to partner apps. The volume is official, but the charged amount is in the Meta
+  account.
+- The history starts on the date the feature went live and keeps at most 13 months.
+- The notices appear only in the panel. There is no email or webhook for them.

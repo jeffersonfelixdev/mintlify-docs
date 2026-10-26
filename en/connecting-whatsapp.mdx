@@ -1,0 +1,47 @@
+---
+title: Connect WhatsApp
+description: "How to connect a WhatsApp number to an instance"
+---
+
+## Description
+
+After you create the instance, connect a WhatsApp number to it. The QR code
+connection adds the instance as a linked device of the phone, as WhatsApp Web
+does.
+
+ZapperHub recommends the connection through the official Meta API. See the
+connection types in [WhatsApp connection](/en/definitions/connection).
+
+## Preliminary requirements
+
+- A created instance. See [Create an instance](/en/creating-instance).
+- The phone with the number to connect, with WhatsApp installed and with internet access.
+
+## Procedure
+
+<Steps>
+  <Step title="Open the connection dialog">
+    In the panel, in the instance row, click **Connect** (*Conectar*).
+    The panel shows the connection dialog with the QR code.
+
+    ![Connection dialog with the QR code](/connect.png)
+  </Step>
+  <Step title="Open the QR code reader on the phone">
+    In WhatsApp, tap **Settings**, then **Linked devices**, then **Link a device**.
+  </Step>
+  <Step title="Scan the QR code">
+    Point the phone camera at the QR code. Wait for the confirmation on the screen.
+  </Step>
+</Steps>
+
+If another person has the phone, send them the connection link shown in the
+dialog. See [FastLink](/en/panel/unofficial-connection#fastlink-connect-without-panel-access).
+
+## Result
+
+The instance status changes to **Connected**.
+
+<Note>
+If the connection fails after the scan, wait for the QR code to refresh. The QR
+code changes every 60 seconds. Scan the new QR code.
+</Note>

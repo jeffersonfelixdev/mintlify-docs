@@ -1,0 +1,77 @@
+---
+title: Text to speech
+description: "Register the ElevenLabs key on the instance and send synthesized voice messages"
+---
+
+import PanelNote from '/snippets/en-panel-note.mdx';
+
+**Location**: **Instances** (*Instâncias*) > select the instance > **Text to speech** (*Texto para fala*).
+
+<PanelNote />
+
+## Description
+
+The screen **Text to speech (ElevenLabs)** (*Texto para Fala (ElevenLabs)*,
+`dash/instances/[id]/text-to-speech`) links the instance to your ElevenLabs
+account. With it, the instance converts text to voice and sends the message as
+audio.
+
+## Preliminary requirements
+
+- An ElevenLabs account. ZapperHub does not provide the key. ElevenLabs charges for the usage.
+- An API key generated in the ElevenLabs panel.
+
+<Warning>
+**Key permissions.** Create the key with access to **Text to Speech** (has
+Access) and to **Voices** (at least Read Only). Without **Text to Speech**, the
+instance does not generate the audio. Without **Voices**, the instance does not
+list the voices, and the default voice has no options.
+</Warning>
+
+## Register the key
+
+| Field | Required | Validation |
+|---|---|---|
+| **ElevenLabs API key** (*Chave da API da ElevenLabs*) | Yes | Text. Error if empty: *Chave secreta é obrigatória* |
+
+Paste the key and click **Update** (*Atualizar*). The panel confirms with
+*Configurações atualizadas com sucesso.*
+
+## Result
+
+With the key accepted:
+
+- The voices of the ElevenLabs account appear in the selection list.
+- The instance can reply with audio and send synthesized voice.
+
+<Warning>
+Replacing the key replaces the previous one immediately. If the new key does not
+have the correct permissions, the feature stops working.
+</Warning>
+
+## Default voice and per-message voice
+
+There are two levels. The more specific one wins:
+
+| Level | Where it is set | When it applies |
+|---|---|---|
+| **Default voice of the instance** | Instance settings > **Default ElevenLabs voice** (*Voz padrão ElevenLabs*) | When the send does not specify another voice |
+| **Message voice** | At the send, through the API | Only on that send |
+
+The default voice is chosen in [Instance settings](/en/panel/instance-settings).
+The field offers options only after the key registration.
+
+The **Reply with audio** (*Responder com áudio*) option, also in the instance
+settings, makes the instance return audio to a contact who sends audio.
+
+## Through the API
+
+- [Send audio from text](/api-reference/mensagens/enviar-áudio-a-partir-de-texto): sends the message synthesized as voice.
+- [List ElevenLabs voices](/api-reference/elevenlabs/listar-vozes-da-elevenlabs): the voices of the account.
+- [Select ElevenLabs voice](/api-reference/elevenlabs/selecionar-voz-da-elevenlabs): sets the default voice.
+- [Update ElevenLabs API key](/api-reference/elevenlabs/atualizar-api-key-da-elevenlabs): the same operation as this screen.
+
+## See also
+
+- [ElevenLabs](/en/integrations/eleven-labs): the integration.
+- [Instance settings](/en/panel/instance-settings): default voice and audio reply.

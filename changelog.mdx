@@ -1,14 +1,20 @@
 ---
-title: "Novidades"
-description: "O que mudou na API da ZapperHub, com os avisos de mudança de comportamento"
+title: Novidades
+description: "Mudanças na API da ZapperHub e avisos de mudança de comportamento"
 ---
 
 <Update label="Outubro de 2026" description="Entrega e leitura na conexão não oficial" tags={["DEVICE", "Webhooks"]}>
 
-## Entrega e leitura de mensagens na DEVICE
+## Entrega e leitura de mensagens na conexão não oficial
 
-- O webhook **`messages.status`** agora também é disparado em conexão não oficial, com `status` `delivered` (dois checks) ou `read` (checks azuis). Quem já assina `messages.status` em instâncias oficiais passa a receber o evento também das DEVICE, com os mesmos campos `messageId`, `recipientId`, `status` e `timestamp`, mais `chatId`. Veja [Estado de entrega da mensagem](/integrations/webhooks#estado-de-entrega-da-mensagem).
-- Nova rota **`POST /{instanceId}/messages/read`** para avisar o WhatsApp de que mensagens recebidas foram lidas — [Marcar como lida](/functions/sending-messages#marcar-como-lida).
+- O webhook `messages.status` agora também é publicado em conexão não oficial.
+  O campo `status` é `delivered` (dois checks) ou `read` (checks azuis). Os
+  campos são os mesmos da conexão oficial: `messageId`, `recipientId`, `status`
+  e `timestamp`, mais `chatId`. Veja
+  [Estado de entrega da mensagem](/integrations/webhooks#estado-de-entrega-da-mensagem).
+- Nova rota `POST /{instanceId}/messages/read`. Ela informa ao WhatsApp que
+  mensagens recebidas foram lidas. Veja
+  [Marcar como lida](/functions/sending-messages#marcar-como-lida).
 
 </Update>
 
@@ -16,19 +22,30 @@ description: "O que mudou na API da ZapperHub, com os avisos de mudança de comp
 
 ## Atenção: `messages.upsert` traz tipos novos
 
-Quem assina `messages.upsert` passa a receber, além das mensagens de antes:
+Quem assina `messages.upsert` recebe agora, além dos tipos anteriores:
 
-- **reações**, como `message.reactionMessage` (Cloud API e Instagram);
-- **resposta de Flow** (`flowResponseMessage`), **permissão de ligação** (`callPermissionReplyMessage`), **mensagem de sistema** (`systemMessage`), **pedido** (`orderMessage`) e **mensagem não suportada** (`unsupportedMessage`);
-- qualquer outro tipo que a Meta envie, como `unknownMessage`, com a mensagem original em `raw`.
+- Reações, em `message.reactionMessage` (Cloud API e Instagram).
+- Resposta de Flow (`flowResponseMessage`), permissão de ligação
+  (`callPermissionReplyMessage`), mensagem de sistema (`systemMessage`),
+  pedido (`orderMessage`) e mensagem não suportada (`unsupportedMessage`).
+- Qualquer outro tipo da Meta, como `unknownMessage`, com a mensagem original em `raw`.
 
-Nada do que já chegava mudou de formato: a mudança é aditiva. Mas um parser que rejeita campos desconhecidos em `message` pode estranhar, então vale tratar chaves novas com tolerância. Antes, esses eventos eram descartados em silêncio. Veja [Outros tipos de mensagem recebidos](/integrations/webhooks#outros-tipos-de-mensagem-recebidos).
+A mudança é aditiva. Nenhum formato anterior mudou. Antes, a ZapperHub descartava
+esses eventos.
 
-Uma mensagem `unsupported` continua gerando também o `messages.error` com o código 131051, como antes.
+<Warning>
+Um parser que rejeita campos desconhecidos em `message` pode falhar. Trate chaves
+novas com tolerância.
+</Warning>
+
+Uma mensagem `unsupported` continua a gerar também o `messages.error` com o
+código 131051. Veja
+[Outros tipos de mensagem recebidos](/integrations/webhooks#outros-tipos-de-mensagem-recebidos).
 
 ## Novos eventos (opt-in)
 
-Estes eventos só chegam a quem os incluir em `subscriptions`; quem não assina continua recebendo exatamente o que recebia:
+Estes eventos só chegam a quem os incluir em `subscriptions`. As assinaturas
+atuais não mudam.
 
 | Evento | Quando |
 | --- | --- |
@@ -38,12 +55,20 @@ Estes eventos só chegam a quem os incluir em `subscriptions`; quem não assina 
 
 ## Novos recursos
 
-- **Citar uma mensagem** em qualquer envio, com `quotedMessageId` — [Responder citando uma mensagem](/functions/sending-messages#responder-citando-uma-mensagem).
-- **Reagir** também na Cloud API e no Instagram, e receber as reações dos contatos.
-- **Contatos**: consultar o vínculo de identidade, listar e marcar opt-outs de marketing, bloquear e desbloquear, e excluir os dados de um contato (LGPD) — [Contatos](/functions/contacts). Um template de marketing para quem pediu para não recebê-lo é recusado antes de ir para a fila, com `MARKETING_OPT_OUT`.
-- **Templates**: consultar por id, editar e excluir um único idioma — [Template](/functions/sending-messages#template).
-- **Carrossel** na Cloud API — [Carrossel](/functions/sending-messages#carrossel).
-- **Instagram**: `humanAgent` para responder em até 7 dias — [Responder em até 7 dias no Instagram](/functions/sending-messages#responder-em-ate-7-dias-no-instagram).
-- **Erros da Meta tipados**: recusas por regra conhecida respondem `422` com `code: "PROVIDER_REJECTED"`, o código original em `meta` e a explicação em português em `localizedMessage`.
+- Citar uma mensagem em qualquer envio, com `quotedMessageId`. Veja
+  [Responder citando uma mensagem](/functions/sending-messages#responder-citando-uma-mensagem).
+- Reagir na Cloud API e no Instagram, e receber as reações dos contatos.
+- Contatos: consultar o vínculo de identidade, listar e marcar opt-outs de
+  marketing, bloquear e desbloquear, e excluir os dados de um contato (LGPD).
+  Veja [Contatos](/functions/contacts). Um template de marketing para um contato
+  em opt-out é recusado antes da fila, com `MARKETING_OPT_OUT`.
+- Templates: consultar por id, editar e excluir um único idioma. Veja
+  [Template](/functions/sending-messages#template).
+- Carrossel na Cloud API. Veja [Carrossel](/functions/sending-messages#carrossel).
+- Instagram: `humanAgent` para responder em até 7 dias. Veja
+  [Responder em até 7 dias no Instagram](/functions/sending-messages#responder-em-ate-7-dias-no-instagram).
+- Erros da Meta tipados: recusas por regra conhecida respondem `422` com
+  `code: "PROVIDER_REJECTED"`, o código original em `meta` e a explicação em
+  português em `localizedMessage`.
 
 </Update>

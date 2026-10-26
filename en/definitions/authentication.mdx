@@ -1,0 +1,29 @@
+---
+title: Authentication
+description: "How to authenticate requests to the instance API"
+---
+
+## Description
+
+All routes of the instance API require token authentication. The only exception
+is the API status route.
+
+The token is the **X-Api-Key** of the instance. It appears in the instance row,
+in the instance list of the [panel](https://app.zapperhub.com/dash). If you do
+not have access to the panel, ask the account administrator for the key.
+
+The account also has a global key, used only in the Instance API. See
+[Global API key](/en/panel/global-api-key).
+
+## How to send the token
+
+Send the token in the `X-Api-Key` header of each request:
+
+```http
+X-Api-Key: sk_example_token_123
+```
+
+<Warning>
+**Protect the key.** Do not send the API key to third parties. The ZapperHub team
+never asks for the key to give support. Store the key in a secure storage.
+</Warning>

@@ -1,51 +1,46 @@
 ---
 title: Webhooks
-description: "Processe as mensagens enviadas por seus contatos e automatize as conversas"
+description: "Receber os eventos da instância na sua aplicação, com a estrutura e os exemplos de cada evento"
 ---
 
-## Introdução
+## Descrição
 
-Um webhook é uma ferramenta que permite a comunicação entre aplicações, possibilitando
-o envio de dados para uma aplicação _A_ imediatamente após a ocorrência de um
-evento na aplicação _B_. 
-
-Também chamados de _callbacks_, os webhooks substituem a abordagem chamada _polling_, onde uma 
-aplicação fica solicitando de tempos em tempos o status de uma ocorrência. Com o
-uso de webhooks, a comunicação entre sistemas diferentes torna-se muito mais simples.
+Um webhook é uma requisição HTTP que a ZapperHub envia à sua aplicação quando um
+evento acontece na instância. O webhook substitui a consulta periódica
+(*polling*): a aplicação recebe o dado no momento do evento.
 
 ## Eventos disponíveis
 
-| Evento | Quando dispara |
+| Evento | Quando é publicado |
 | --- | --- |
-| `messages.upsert` | Uma mensagem foi recebida ou enviada pela instância |
-| `contacts.preference` | O contato pediu para parar (ou voltou a aceitar) mensagens de marketing, ou o integrador marcou isso pela API. Apenas em conexão oficial. **Assinatura opt-in** |
-| `contacts.identity` | O vínculo entre telefone, BSUID e username de um contato mudou. Apenas em conexão oficial. **Assinatura opt-in** |
-| `messages.update` | Uma mensagem recebida foi editada ou apagada pelo contato. Apenas em conexão oficial, e só em número em coexistência com o WhatsApp Business. **Assinatura opt-in** |
-| `messages.status` | O estado de uma mensagem enviada mudou. Em conexão oficial: enviada, entregue, lida ou falhou. Em conexão não oficial: entregue (dois checks) ou lida (checks azuis) |
+| `messages.upsert` | A instância recebeu ou enviou uma mensagem |
+| `contacts.preference` | O contato pediu para parar, ou voltou a aceitar, mensagens de marketing. Ou o integrador marcou isso pela API. Só em conexão oficial. Assinatura opt-in |
+| `contacts.identity` | O vínculo entre telefone, BSUID e username de um contato mudou. Só em conexão oficial. Assinatura opt-in |
+| `messages.update` | O contato editou ou apagou uma mensagem recebida. Só em conexão oficial, em número em coexistência com o WhatsApp Business. Assinatura opt-in |
+| `messages.status` | O estado de uma mensagem enviada mudou. Em conexão oficial: enviada, entregue, lida ou falhou. Em conexão não oficial: entregue ou lida |
 | `messages.error` | O envio de uma mensagem falhou em definitivo |
 | `connection.update` | A conexão da instância abriu ou fechou |
-| `group-participants.update` | Participantes entraram, saíram, foram promovidos ou rebaixados em um grupo. Apenas em conexão não oficial |
+| `group-participants.update` | Participantes entraram, saíram, foram promovidos ou rebaixados em um grupo. Só em conexão não oficial |
 | `calls.update` | Uma chamada de voz ou vídeo foi recebida, atendida ou encerrada. Em conexão oficial e não oficial |
-| `comments.upsert` | Um comentário foi recebido em um post da conta. Apenas em instância do Instagram |
-| `token.expired` | O token do Instagram expirou ou foi revogado, e exige nova autorização |
+| `comments.upsert` | A conta recebeu um comentário em um post. Só em instância do Instagram |
+| `token.expired` | O token do Instagram expirou ou foi revogado. Exige nova autorização |
 | `token.refresh.failed` | Uma tentativa de renovar o token do Instagram falhou |
 | `webhook.test` | Requisição de teste, enviada uma única vez no cadastro do webhook |
 
-Cada webhook recebe **apenas os eventos que assinou**. A assinatura é a lista
+Cada webhook recebe só os eventos que assinou. A assinatura é a lista
 `subscriptions` informada no cadastro.
 
-## Como usar
+## Cadastrar um webhook
 
 ### Pelo painel
 
-Instâncias → (selecione a instância) → **Webhook** → **Novo Webhook**. O passo a
-passo, com as validações e o limite de webhooks por instância, está em
-[Webhooks no painel](/painel/webhooks).
+Abra **Instâncias**, selecione a instância, abra **Webhook** e clique em **Novo
+Webhook**. O procedimento, as validações e o limite de webhooks por instância
+estão em [Webhooks no painel](/painel/webhooks).
 
 ### Pela API
 
-Cadastre com `POST /{instanceId}/webhooks`, informando um nome, a URL e os
-eventos que você quer receber:
+Envie `POST /{instanceId}/webhooks` com um nome, a URL e os eventos:
 
 ```json
 {
@@ -55,19 +50,18 @@ eventos que você quer receber:
 }
 ```
 
-O uso de **HTTPS é obrigatório**. Antes de criar o cadastro, a ZapperHub envia
-uma requisição `POST` de teste (`webhook.test`) para a URL informada: se ela não
-responder com sucesso, o webhook não é criado.
+A URL deve usar HTTPS. Antes de criar o cadastro, a ZapperHub envia uma
+requisição `POST` de teste (`webhook.test`) à URL. Se a URL não responder com
+sucesso, a ZapperHub não cria o webhook.
 
-Consulte a <a href="http://docs.zapperhub.com/api-reference/webhook">Seção
-Webhooks</a> na documentação de referência da API para as rotas de listagem,
-atualização e exclusão.
+As rotas de listagem, atualização e exclusão estão na seção
+[Webhooks](/api-reference/webhook/listar-webhooks) da API Reference.
 
 ## Autenticidade das requisições
 
-Toda entrega leva o cabeçalho **`x-webhook-signature`**: o HMAC-SHA256 do corpo
-da requisição, exatamente como recebido, usando a **API Key da instância** como
-chave. As requisições também levam o `User-Agent` `ZapperHub API`.
+Toda entrega leva o cabeçalho `x-webhook-signature`. O valor é o HMAC-SHA256 do
+corpo da requisição, exatamente como recebido, com a chave de API da instância
+como segredo. As requisições levam o `User-Agent` `ZapperHub API`.
 
 Para validar, recalcule a assinatura sobre o corpo bruto e compare:
 
@@ -80,62 +74,56 @@ function isFromZapperHub(rawBody, signature, apiKey) {
 }
 ```
 
-<Card title="IMPORTANTE">
-A assinatura é a única maneira de garantir que as requisições que sua aplicação
-recebe são oriundas do webhook da ZapperHub. Você é o responsável por executar
-a validação da informação, bem como proteger sua aplicação com outras regras de 
-segurança, como _rate limits_ e SSL. Nunca forneça a sua API Key, e sempre
-que possível, faça uma rotação regular de seu valor.
-</Card>
+<Warning>
+**Valide a assinatura.** A assinatura é a única forma de garantir que a
+requisição veio da ZapperHub. A validação é responsabilidade da sua aplicação.
+Proteja a aplicação também com outras regras, como limite de taxa e TLS. Não
+envie a chave de API a terceiros.
+</Warning>
 
 <Note>
-A requisição de teste enviada no cadastro (`webhook.test`) é a única que **não**
-leva assinatura — ela ocorre antes de o webhook existir.
+A requisição de teste do cadastro (`webhook.test`) é a única sem assinatura. Ela
+ocorre antes de o webhook existir.
 </Note>
 
 ## Entrega
 
-Cada entrega é feita por uma fila própria, com **5 tentativas** e intervalo
-crescente entre elas, começando em 10 segundos. Cada tentativa tem **7 segundos**
-de timeout: uma URL que demora mais do que isso para responder é tratada como
-falha.
+A ZapperHub entrega cada evento por uma fila própria, com 5 tentativas e
+intervalo crescente, a partir de 10 segundos. Cada tentativa tem 7 segundos de
+timeout. Uma URL que demora mais do que isso conta como falha.
 
-Sua aplicação deve responder com um status de sucesso o mais rápido possível, e
-processar o conteúdo depois — não deixe a resposta esperando pelo seu
-processamento.
+Responda com um status de sucesso o mais rápido possível. Processe o conteúdo
+depois da resposta.
 
-O resultado de cada tentativa fica registrado em um recibo de entrega, com o
-horário e o erro quando houver. Consulte por
-`GET /{instanceId}/webhook-receipts` ou em **Ver recibos de entrega**, no
-[Log de mensagens](/painel/log-de-mensagens).
+A ZapperHub registra cada tentativa em um recibo de entrega, com o horário e o
+erro, quando há. Consulte os recibos por `GET /{instanceId}/webhook-receipts` ou
+em **Ver recibos de entrega**, no [Log de mensagens](/painel/log-de-mensagens).
 
-<Card title="INFORMAÇÃO">
-Os arquivos recebidos pelos Webhooks da ZapperHub ficam armazenados em nossos
-servidores pelo prazo de 7 dias.
-</Card>
+<Note>
+A ZapperHub guarda os arquivos recebidos pelos webhooks por 7 dias. Veja
+[Armazenamento de arquivos](/definitions/storage).
+</Note>
 
-## Eventos da própria sessão conectada
+## Eventos da própria sessão
 
-Por padrão, o webhook da ZapperHub trará também as mensagens enviadas pela própria 
-sessão conectada. Isso ocorre porque trabalhamos com sistema de fila obrigatória,
-de modo que após o envio da mensagem, não é possível ter o ID da mensagem, apenas
-o jobId da fila.
+O webhook também traz as mensagens enviadas pela própria conta conectada. O
+motivo é a fila: no momento do envio, a API devolve só o `jobId`, não o id da
+mensagem.
 
-Assim, as mensagens do webhook que tiverem o campo `jobId` referem-se a mensagens
-disparadas pela ZapperHub, de modo que outras mensagens disparadas por outros
-dispositivos não terão esse campo no webhook.
+Uma mensagem com o campo `jobId` foi enviada pela ZapperHub. Uma mensagem
+enviada por outro dispositivo não tem esse campo.
 
 ## Estrutura do payload
 
-Os eventos de mensagem compartilham a mesma estrutura. O que muda de um tipo para
-outro é o conteúdo do objeto `message`.
+Os eventos de mensagem compartilham a mesma estrutura. O conteúdo do objeto
+`message` muda conforme o tipo.
 
 | Campo | Conteúdo |
 | --- | --- |
 | `type` | O evento, um dos listados acima |
 | `instanceId` | Id da instância que gerou o evento |
-| `chatId` | Id da conversa onde a mensagem ocorreu |
-| `key.remoteJid` | JID da conversa — o contato, ou o grupo |
+| `chatId` | Id da conversa |
+| `key.remoteJid` | JID da conversa: o contato ou o grupo |
 | `key.fromMe` | `true` quando a mensagem partiu da conta conectada |
 | `key.id` | Id da mensagem no WhatsApp |
 | `key.senderPn` / `key.senderLid` | Número e LID de quem enviou, em conversa individual |
@@ -143,24 +131,21 @@ outro é o conteúdo do objeto `message`.
 | `messageTimestamp` | Momento da mensagem, em segundos |
 | `pushName` | Nome de exibição de quem enviou |
 | `message` | O conteúdo, no formato do tipo da mensagem |
-| `mediaUrl` | URL do arquivo já processado, nas mensagens de mídia |
-| `jobId` | Id do job na fila, presente nas mensagens enviadas pela API |
+| `mediaUrl` | URL do arquivo processado, nas mensagens de mídia |
+| `jobId` | Id do job na fila. Presente nas mensagens enviadas pela API |
 | `trackId` / `trackSource` | Os valores informados no envio. Em mensagens recebidas, `trackSource` é `whatsapp` |
 
-Em conexão oficial (Cloud API), os eventos carregam também o corpo original
-enviado pela Meta, nos campos `object` e `entry`.
+Em conexão oficial (Cloud API), os eventos também trazem o corpo original da
+Meta, nos campos `object` e `entry`.
 
 ## Exemplos de payload
-
-A seguir, iremos listar os exemplos de payload dos webhooks da ZapperHub, para 
-os diferentes eventos.
 
 ### Teste do webhook
 
 Tipo: `webhook.test`
 
-Enviado uma única vez, no momento do cadastro, para verificar se a URL aceita
-requisições `POST`.
+A ZapperHub envia este evento uma única vez, no cadastro, para verificar se a URL
+aceita requisições `POST`.
 
 ```json
 {
@@ -174,9 +159,9 @@ requisições `POST`.
 
 Tipo: `connection.update`
 
-Disparado quando a instância conecta (`open`) ou é desconectada (`close`). O
-campo `reason` aparece nas desconexões com causa conhecida — por exemplo, uma
-conta removida na Meta ou um token do Instagram expirado.
+Publicado quando a instância conecta (`open`) ou desconecta (`close`). O campo
+`reason` aparece nas desconexões com causa conhecida, como uma conta removida na
+Meta ou um token do Instagram expirado.
 
 ```json
 {
@@ -266,8 +251,7 @@ Tipo: `messages.upsert`
 }
 ```
 
-**Envio de documento**
-
+**Documento**
 
 ```json
 {
@@ -315,7 +299,7 @@ Tipo: `messages.upsert`
 }
 ```
 
-**Envio de imagem**
+**Imagem**
 
 ```json
 {
@@ -363,7 +347,7 @@ Tipo: `messages.upsert`
 }
 ```
 
-**Envio de vídeo**
+**Vídeo**
 
 ```json
 {
@@ -408,7 +392,7 @@ Tipo: `messages.upsert`
 }
 ```
 
-**Envio de contato**
+**Contato**
 
 ```json
 {
@@ -440,12 +424,11 @@ Tipo: `messages.upsert`
 }
 ```
 
-**Envio de mensagem de lista**
+**Mensagem de lista enviada**
 
-Disparado quando a lista é efetivamente enviada, tanto em instância oficial
-(Cloud API) quanto não oficial. Os campos `title` e `footer` são omitidos quando
-não foram informados na requisição, e `sections` ecoa exatamente o que foi
-enviado.
+Publicado quando a lista é enviada, em instância oficial (Cloud API) e não
+oficial. Os campos `title` e `footer` são omitidos quando não foram informados.
+`sections` repete o que foi enviado.
 
 ```json
 {
@@ -488,14 +471,14 @@ enviado.
 
 **Reação** (Cloud API e Instagram)
 
-No Instagram, o evento chega com `trackSource: "instagram"`, o `key.id` é composto
-(`ig-reaction:<mid>:<remetente>:<timestamp>`) e a retirada vem com `removed: true`,
-como abaixo; o resto do formato é o mesmo.
-
-Quando o contato reage a uma mensagem — ou o número reage pelo aparelho, no modo
-de coexistência —, chega um `messages.upsert` com `reactionMessage`. O `key.id`
-do evento é o da **própria reação**; a mensagem reagida está em
+Quando o contato reage a uma mensagem, ou o número reage pelo aparelho em modo
+de coexistência, chega um `messages.upsert` com `reactionMessage`. O `key.id` do
+evento é o da própria reação. A mensagem reagida está em
 `reactionMessage.key.id`.
+
+No Instagram, o evento chega com `trackSource: "instagram"`. O `key.id` é
+composto (`ig-reaction:<mid>:<remetente>:<timestamp>`). A retirada vem com
+`removed: true`. O restante do formato é o mesmo.
 
 ```json
 {
@@ -527,8 +510,7 @@ do evento é o da **própria reação**; a mensagem reagida está em
 }
 ```
 
-- `reactionMessage.text` é o emoji. Quando o contato **retira** a reação, `text`
-  vem vazio (`""`) e `removed` vem `true`.
+- `reactionMessage.text` é o emoji. Quando o contato retira a reação, `text` vem vazio (`""`), e `removed` vem `true`.
 - `reactionMessage.key.fromMe` indica de quem é a mensagem reagida: `true` quando
   o contato reagiu a uma mensagem da empresa, `false` quando o número reagiu, pelo
   aparelho, a uma mensagem do contato.
@@ -539,11 +521,11 @@ do evento é o da **própria reação**; a mensagem reagida está em
 
 Tipo: `messages.upsert`
 
-Além de texto, mídia, localização, contato e resposta de botão ou lista, a conexão
-oficial (Cloud API) entrega os tipos abaixo. Todos chegam no mesmo envelope das
-demais mensagens recebidas (`chatId`, `key`, `messageTimestamp`, `pushName`) e
+Além de texto, mídia, localização, contato e resposta de botão ou lista, a
+conexão oficial (Cloud API) entrega os tipos abaixo. Todos chegam no mesmo
+envelope das outras mensagens (`chatId`, `key`, `messageTimestamp`, `pushName`) e
 aparecem em `GET /{instanceId}/messages` com o tipo correspondente. Nenhuma
-mensagem é descartada: um tipo que a ZapperHub ainda não conhece chega como
+mensagem é descartada. Um tipo que a ZapperHub não conhece chega como
 `unknownMessage`.
 
 | Conteúdo em `message` | Quando chega | Campos |
@@ -552,8 +534,8 @@ mensagem é descartada: um tipo que a ZapperHub ainda não conhece chega como
 | `callPermissionReplyMessage` | O contato responde ao pedido de permissão de ligação | `response` (`accept` ou `reject`), `expiresAt`, `permanent`, `source` e `contextInfo.stanzaId` |
 | `systemMessage` | A Meta avisa de uma mudança na conversa, como a troca de número do contato | `type` (por exemplo `user_changed_number` ou `user_changed_user_id`) e `body` |
 | `orderMessage` | O contato envia um pedido do catálogo | `catalogId`, `text` e `items[]` com `productRetailerId`, `quantity`, `itemPrice` e `currency` |
-| `unsupportedMessage` | A Meta não repassa o tipo (poll, edição fora da coexistência, etc.) | `type` (o tipo informado pela Meta, como `edit`) e `error` (`code`, `title`, `details`) |
-| `unknownMessage` | Qualquer tipo sem tratamento próprio | `type` (o tipo cru da Meta) e `raw` (a mensagem original) |
+| `unsupportedMessage` | A Meta não repassa o tipo (enquete, edição fora da coexistência etc.) | `type` (o tipo informado pela Meta, como `edit`) e `error` (`code`, `title`, `details`) |
+| `unknownMessage` | Qualquer tipo sem tratamento próprio | `type` (o tipo bruto da Meta) e `raw` (a mensagem original) |
 
 ```json
 {
@@ -585,44 +567,40 @@ mensagem é descartada: um tipo que a ZapperHub ainda não conhece chega como
 ```
 
 - `flowResponseMessage.responseJson` é o objeto que o Flow devolveu. Se a Meta
-  entregar um texto que não é JSON válido, ele vai como texto, sem perder a
-  resposta.
-- `callPermissionReplyMessage.expiresAt` é a data de validade da permissão em
-  formato ISO 8601, e só vem em permissão temporária. `permanent` é `true` quando
-  o contato aceitou de forma permanente.
-- `systemMessage` informa o fato; a ZapperHub também atualiza o vínculo do
-  contato quando se trata de troca de número ou de BSUID — veja
+  entregar um texto que não é JSON válido, ele vai como texto.
+- `callPermissionReplyMessage.expiresAt` é a validade da permissão, em ISO 8601.
+  Só vem em permissão temporária. `permanent` é `true` quando o contato aceitou
+  de forma permanente.
+- `systemMessage` informa o fato. A ZapperHub também atualiza o vínculo do
+  contato em troca de número ou de BSUID. Veja
   [Identidade do contato](#identidade-do-contato-telefone-bsuid-e-username).
-- Uma mensagem `unsupported` continua gerando também o `messages.error` com o
-  código **131051**, como antes. A novidade é a mensagem em si chegar como
-  `messages.upsert`.
-- `unknownMessage.raw` leva a mensagem original da Meta, para que você trate o
-  tipo novo sem esperar uma atualização da ZapperHub.
+- Uma mensagem `unsupported` continua a gerar também o `messages.error` com o
+  código 131051.
+- `unknownMessage.raw` traz a mensagem original da Meta. Assim, você trata o tipo
+  novo sem esperar uma atualização da ZapperHub.
 
 ### Identidade do contato: telefone, BSUID e username
 
-A Meta passou a identificar os contatos por um **BSUID** (`BR.13491208655302741918`)
-e, quando o contato adota um **username**, pode deixar de informar o telefone. A
-ZapperHub guarda o vínculo entre os três, **por empresa (WABA) e por dono**: todas
-as suas instâncias na mesma WABA compartilham o vínculo, e ele nunca é visto por
-outro dono, mesmo que ele use a mesma WABA.
+A Meta identifica os contatos por um BSUID (`BR.13491208655302741918`). Quando o
+contato adota um username, a Meta pode omitir o telefone. A ZapperHub guarda o
+vínculo entre os três, por empresa (WABA) e por dono. Todas as suas instâncias na
+mesma WABA compartilham o vínculo. Outro dono nunca vê o vínculo, mesmo com a
+mesma WABA.
 
-**Como a conversa é identificada.** O `key.remoteJid` (e o `chatId`) de uma mensagem
-segue sempre esta ordem:
+O `key.remoteJid` (e o `chatId`) de uma mensagem segue esta ordem:
 
-1. o **telefone**, quando a Meta o informa no evento;
-2. o telefone **já conhecido** para aquele BSUID;
-3. o próprio **BSUID** (por exemplo, `BR.13491208655302741918`), quando o telefone
-   ainda é desconhecido.
+1. O telefone, quando a Meta o informa no evento.
+2. O telefone já conhecido para aquele BSUID.
+3. O próprio BSUID, quando o telefone é desconhecido.
 
-O `key.bsuid` e o `username` acompanham a mensagem sempre que são conhecidos — nas
-mensagens recebidas, nos **ecos** de mensagens enviadas pelo aparelho e nos
+`key.bsuid` e `username` acompanham a mensagem quando são conhecidos: nas
+mensagens recebidas, nos ecos de mensagens enviadas pelo aparelho e nos
 [status de entrega](#estado-de-entrega-da-mensagem).
 
 Tipo: `contacts.identity`
 
 Quando o vínculo muda, a ZapperHub publica este evento em cada instância do mesmo
-dono na WABA. É por ele que você junta duas conversas que eram do mesmo contato.
+dono na WABA. Use o evento para juntar duas conversas do mesmo contato.
 
 ```json
 {
@@ -646,22 +624,18 @@ dono na WABA. É por ele que você junta duas conversas que eram do mesmo contat
 | `bsuid_changed` | O contato mudou de BSUID |
 | `link_removed` | O telefone passou a pertencer a outro BSUID e deixou este vínculo |
 
-- Use `chatId.previous` e `chatId.current` para migrar o histórico da conversa
-  antiga para a nova.
+- Use `chatId.previous` e `chatId.current` para migrar o histórico da conversa antiga para a nova.
 - Uma entrega repetida da Meta não republica o evento.
-- A primeira vez que a ZapperHub vê um contato **não** gera evento: só mudanças.
-- A assinatura é **opt-in**: só recebe quem incluir `contacts.identity` em
-  `subscriptions`.
+- A primeira vez que a ZapperHub vê um contato não gera evento. Só mudanças geram evento.
+- A assinatura é opt-in. Inclua `contacts.identity` em `subscriptions`.
 
 ### Opt-out de marketing
 
 Tipo: `contacts.preference`
 
-Quando um contato pede para **parar** (ou volta a **aceitar**) mensagens de
-marketing — pela Meta, ou à mão pela
-[API de contatos](/functions/contacts#opt-out-de-marketing) —, a ZapperHub publica
-este evento em **todas as instâncias do mesmo dono na mesma WABA**: a escolha vale
-para a empresa toda.
+Quando um contato pede para parar, ou volta a aceitar, mensagens de marketing,
+pela Meta ou pela [API de contatos](/functions/contacts#opt-out-de-marketing), a
+ZapperHub publica este evento em todas as instâncias do mesmo dono na mesma WABA.
 
 ```json
 {
@@ -677,23 +651,20 @@ para a empresa toda.
 
 - `status` é `opted_out` (não recebe marketing) ou `opted_in` (voltou a aceitar).
 - `source` é `meta` (o contato pediu) ou `manual` (o integrador marcou pela API).
-- `contact.phone` e `contact.bsuid` trazem o que a ZapperHub conhece do contato;
-  qualquer um pode ser `null`.
-- Entre a escolha da Meta e a manual vale a **mais recente**.
+- `contact.phone` e `contact.bsuid` trazem o que a ZapperHub conhece do contato. Qualquer um pode ser `null`.
+- Entre a escolha da Meta e a manual, vale a mais recente.
 - A mesma escolha repetida não gera um segundo evento.
-- Com `opted_out`, templates de **marketing** para o contato são recusados com
-  `MARKETING_OPT_OUT`; utilidade e autenticação seguem.
-- A assinatura é **opt-in**: só recebe quem incluir `contacts.preference` em
-  `subscriptions`.
+- Com `opted_out`, a API recusa templates de marketing para o contato com `MARKETING_OPT_OUT`. Utilidade e autenticação seguem.
+- A assinatura é opt-in. Inclua `contacts.preference` em `subscriptions`.
 
 ### Mensagem editada ou apagada
 
 Tipo: `messages.update`
 
-Quando o contato **edita** ou **apaga** uma mensagem — ou quando o próprio número
-faz isso pelo aparelho —, a ZapperHub avisa com este evento. Ele aponta para a
-mensagem **original**: `key.id` é o id dela, o mesmo que você recebeu antes em
-`messages.upsert`. O id do evento de edição ou remoção vem em `eventId`.
+Quando o contato edita ou apaga uma mensagem, ou o próprio número faz isso pelo
+aparelho, a ZapperHub publica este evento. O evento aponta para a mensagem
+original: `key.id` é o id dela, o mesmo recebido antes em `messages.upsert`. O id
+do evento de edição ou remoção vem em `eventId`.
 
 ```json
 {
@@ -723,38 +694,34 @@ Na remoção, `update` vem só com o tipo:
 ```
 
 - `update.kind` é `edited` ou `deleted`.
-- Na edição, `update.message` traz o **texto** novo (`extendedTextMessage`) ou a
-  **legenda** nova (`imageMessage`, `videoMessage` ou `documentMessage`, com
-  `caption`). A mídia em si não é reenviada, porque não muda numa edição de
-  legenda. Se a Meta não informar o conteúdo novo, `update.message` é omitido.
-- A assinatura é **opt-in**: só recebe quem incluir `messages.update` em
-  `subscriptions`. Quem assina apenas `messages.upsert` continua recebendo
-  exatamente o que recebia.
-- A Meta só envia estes eventos para números em **coexistência** com o app do
-  WhatsApp Business. A edição vale até **15 minutos** depois do envio, e a remoção
-  até **2 dias**.
+- Na edição, `update.message` traz o texto novo (`extendedTextMessage`) ou a
+  legenda nova (`imageMessage`, `videoMessage` ou `documentMessage`, com
+  `caption`). A mídia não é reenviada. Se a Meta não informa o conteúdo novo,
+  `update.message` é omitido.
+- A assinatura é opt-in. Inclua `messages.update` em `subscriptions`. Quem assina
+  só `messages.upsert` continua a receber o que recebia.
+- A Meta só envia estes eventos para números em coexistência com o app do
+  WhatsApp Business. A edição vale até 15 minutos depois do envio. A remoção vale
+  até 2 dias.
 - A mesma edição ou remoção entregue duas vezes pela Meta gera um único evento.
 
-<Card title="ATENÇÃO">
-A Meta entrega as **edições** como mensagem de tipo não suportado, e não no
-formato próprio de edição. Por isso a edição chega como `messages.upsert` com
-[`unsupportedMessage`](#outros-tipos-de-mensagem-recebidos) de `type` `edit`, sem
-o texto novo, e não como `messages.update`. A **remoção** gera `messages.update`
-normalmente.
-</Card>
+<Note>
+A Meta entrega as edições como mensagem de tipo não suportado, não no formato
+próprio de edição. Por isso, a edição chega como `messages.upsert` com
+[`unsupportedMessage`](#outros-tipos-de-mensagem-recebidos) de `type` `edit`,
+sem o texto novo, e não como `messages.update`. A remoção gera `messages.update`.
+</Note>
 
 ### Escolha de opção em mensagem de lista
 
 Tipo: `messages.upsert`
 
-Disparado quando o contato seleciona uma das opções da lista. O formato é o mesmo
-em instância oficial (Cloud API) e não oficial:
+Publicado quando o contato seleciona uma opção da lista. O formato é o mesmo em
+instância oficial (Cloud API) e não oficial:
 
-- `message.listResponseMessage.selectedButtonId`: o `rowId` **exato** da opção
-  escolhida, como você o definiu no envio
-- `message.listResponseMessage.selectedDisplayText`: o texto exibido da opção
-- `message.listResponseMessage.contextInfo.stanzaId`: o id da mensagem de lista
-  original, útil para saber a qual menu a resposta se refere
+- `message.listResponseMessage.selectedButtonId`: o `rowId` exato da opção escolhida, como definido no envio.
+- `message.listResponseMessage.selectedDisplayText`: o texto exibido da opção.
+- `message.listResponseMessage.contextInfo.stanzaId`: o id da mensagem de lista original.
 
 ```json
 {
@@ -784,25 +751,24 @@ em instância oficial (Cloud API) e não oficial:
 }
 ```
 
-<Card title="INFORMAÇÃO">
-Em instâncias não oficiais, o bloco `listResponseMessage` traz **também** os
-campos nativos do provedor (`title`, `description`, `listType`,
-`singleSelectReply.selectedRowID`). A diferença é apenas aditiva: uma integração
-que leia somente `selectedButtonId` e `selectedDisplayText` funciona sem
-alteração nos dois canais.
-</Card>
+<Note>
+Em instâncias não oficiais, o bloco `listResponseMessage` traz também os campos
+nativos do provedor (`title`, `description`, `listType`,
+`singleSelectReply.selectedRowID`). A diferença é aditiva. Uma integração que lê
+só `selectedButtonId` e `selectedDisplayText` funciona nos dois canais.
+</Note>
 
-A resposta a uma mensagem com **botões** chega da mesma forma, em
+A resposta a uma mensagem com botões chega da mesma forma, em
 `message.buttonsResponseMessage`.
 
 ### Estado de entrega da mensagem
 
 Tipo: `messages.status`
 
-Disparado a cada mudança de estado de uma mensagem enviada, em instâncias
-oficiais (Cloud API) e não oficiais (DEVICE). Na Cloud API, o campo `status`
-acompanha os valores da Meta — `sent`, `delivered`, `read` e `failed` —, e
-`error` só aparece nas falhas.
+Publicado a cada mudança de estado de uma mensagem enviada, em instâncias
+oficiais (Cloud API) e não oficiais (`device`). Na Cloud API, `status` segue os
+valores da Meta: `sent`, `delivered`, `read` e `failed`. `error` só aparece nas
+falhas.
 
 ```json
 {
@@ -815,10 +781,10 @@ acompanha os valores da Meta — `sent`, `delivered`, `read` e `failed` —, e
 }
 ```
 
-#### Em conexão não oficial (DEVICE)
+#### Em conexão não oficial (`device`)
 
 O evento chega com `status` `delivered` (dois checks) ou `read` (dois checks
-azuis), uma vez por mensagem — quando o WhatsApp agrupa vários recibos, cada
+azuis), uma vez por mensagem. Quando o WhatsApp agrupa vários recibos, cada
 mensagem do lote gera o seu evento. O `messageId` é o mesmo `key.id` recebido no
 `messages.upsert` do envio.
 
@@ -835,34 +801,31 @@ mensagem do lote gera o seu evento. O `messageId` é o mesmo `key.id` recebido n
 }
 ```
 
-- `chatId` é a conversa. Quando ela é identificada por LID, o evento traz
-  `recipientLid` com o LID e, se a ZapperHub já conhece o vínculo,
-  `recipientPn` com o telefone; sem o vínculo, `recipientId` carrega o LID.
-- Não há `sent` nem `failed` em conexão não oficial: a confirmação de envio é a
-  resposta da API, e a falha definitiva chega em `messages.error`.
-- Recibos de **grupo** não são entregues.
-- Se o contato desativou a confirmação de leitura nas configurações de
-  privacidade do WhatsApp, o evento `read` não chega — só o `delivered`.
-- Para avisar o WhatsApp de que **você** leu uma mensagem, use
+- `chatId` é a conversa. Quando a conversa é identificada por LID, o evento traz
+  `recipientLid` com o LID e, se a ZapperHub conhece o vínculo, `recipientPn` com
+  o telefone. Sem o vínculo, `recipientId` carrega o LID.
+- Não há `sent` nem `failed` em conexão não oficial. A confirmação de envio é a
+  resposta da API. A falha definitiva chega em `messages.error`.
+- Recibos de grupo não são entregues.
+- Se o contato desativou a confirmação de leitura, o evento `read` não chega. Só o `delivered` chega.
+- Para informar ao WhatsApp que você leu uma mensagem, use
   [Marcar como lida](/functions/sending-messages#marcar-como-lida).
 
 #### Em conexão oficial (Cloud API)
 
-Quando a ZapperHub conhece o BSUID ou o username do destinatário — porque a Meta
-os informou no próprio status ou porque o contato já tinha escrito antes —, o
-evento traz também `bsuid` e `username`. Se o destinatário não tem telefone
-visível, `recipientId` carrega o BSUID.
+Quando a ZapperHub conhece o BSUID ou o username do destinatário, o evento traz
+também `bsuid` e `username`. Se o destinatário não tem telefone visível,
+`recipientId` carrega o BSUID.
 
 ### Falha no envio de mensagens
 
 Tipo: `messages.error`
 
-Como o envio é feito por fila, o `200` da API confirma o enfileiramento e não a
-entrega. Quando as 5 tentativas automáticas de envio se esgotam, a ZapperHub
-dispara este evento — nenhuma mensagem chegou ao destinatário. Uma falha
-intermediária seguida de sucesso **não** dispara o evento.
+O `200` da API confirma o enfileiramento, não a entrega. Quando as 5 tentativas
+de envio se esgotam, a ZapperHub publica este evento. Nenhuma mensagem chegou ao
+destinatário. Uma falha intermediária seguida de sucesso não gera o evento.
 
-Ele vale para **todos os tipos de mensagem** enviados pela API.
+O evento vale para todos os tipos de mensagem enviados pela API.
 
 ```json
 {
@@ -889,35 +852,30 @@ Ele vale para **todos os tipos de mensagem** enviados pela API.
 }
 ```
 
-- O bloco `error` segue o **formato de erro da Cloud API**, o mesmo que a Meta já
-  usa nos erros que repassamos: uma integração escrita contra aquele formato lê
-  este evento sem tratamento novo.
-- `error.code` repassa o **código original da Meta** quando a falha veio da
-  própria Cloud API (por exemplo, `131047` para janela de 24 horas expirada, ou
-  `131026` para destinatário inalcançável). O código `131000` fica reservado ao
-  que não tem código de provedor: instâncias não oficiais, timeout e falhas de
-  rede.
-- `error.error_data.details` traz o erro real do envio; `error.message` é a
-  descrição estável do código.
-- `error.localizedMessage` traz a explicação **em português** para os códigos da
-  Meta que a ZapperHub conhece (por exemplo, `131047`: "Passaram mais de 24 horas
-  desde a última mensagem do contato. Envie um template de mensagem.").
-  O campo só aparece quando há tradução; os demais campos do bloco `error` não
-  mudam.
-- `key.id` é derivado do job (`job_<jobId>`), e não do provedor — o envio nunca
-  chegou a produzir um id de mensagem. É também o que distingue uma falha nascida
-  na nossa fila de um erro reportado pela Meta.
-- `trackId` e `trackSource` são os mesmos informados no envio, o que permite
-  relacionar a falha ao registro da sua aplicação.
+- O bloco `error` segue o formato de erro da Cloud API. Uma integração escrita
+  para aquele formato lê este evento sem tratamento novo.
+- `error.code` repassa o código original da Meta quando a falha veio da Cloud API
+  (por exemplo, `131047` para janela de 24 horas expirada, ou `131026` para
+  destinatário inalcançável). O código `131000` é usado quando não há código de
+  provedor: instâncias não oficiais, timeout e falhas de rede.
+- `error.error_data.details` traz o erro real do envio. `error.message` é a descrição estável do código.
+- `error.localizedMessage` traz a explicação em português para os códigos da Meta
+  que a ZapperHub conhece. Exemplo, `131047`: "Passaram mais de 24 horas desde a
+  última mensagem do contato. Envie um template de mensagem." O campo só aparece
+  quando há tradução.
+- `key.id` é derivado do job (`job_<jobId>`), não do provedor. O envio nunca
+  produziu um id de mensagem. Esse formato distingue uma falha da fila de um erro
+  da Meta.
+- `trackId` e `trackSource` são os mesmos informados no envio.
 
 ### Mudança de participantes em grupo
 
 Tipo: `group-participants.update`
 
-Disparado em instâncias não oficiais quando alguém entra, sai, é promovido a
+Publicado em instâncias não oficiais quando alguém entra, sai, é promovido a
 administrador ou rebaixado. Os campos `join`, `leave`, `promote` e `demote`
-trazem os participantes afetados — **apenas o correspondente ao que aconteceu
-vem preenchido**, os demais são omitidos.
+trazem os participantes afetados. Só o campo correspondente ao que aconteceu vem
+preenchido. Os outros são omitidos.
 
 ```json
 {
@@ -928,19 +886,19 @@ vem preenchido**, os demais são omitidos.
 }
 ```
 
-### Chamada recebida
+### Chamada
 
 Tipo: `calls.update`
 
-Disparado quando uma chamada de voz ou vídeo chega ao número da instância, é
-atendida ou é encerrada — **em conexão oficial e em conexão não oficial**. Cada
-ocorrência é um evento independente: a plataforma não junta a chamada em um
-bloco só. Correlacione as ocorrências de uma mesma chamada pelo `callId`.
+Publicado quando uma chamada de voz ou vídeo chega ao número da instância, é
+atendida ou é encerrada, em conexão oficial e não oficial. Cada ocorrência é um
+evento independente. Correlacione as ocorrências de uma mesma chamada pelo
+`callId`.
 
-O campo `event` é o discriminador. `key.id` é sempre igual a `callId`, e
+O campo `event` é o discriminador. `key.id` é sempre igual a `callId`.
 `timestamp` vem em segundos.
 
-#### Exemplo — instância de conexão oficial (Cloud API)
+#### Exemplo: instância de conexão oficial (Cloud API)
 
 ```json
 {
@@ -992,7 +950,7 @@ O campo `event` é o discriminador. `key.id` é sempre igual a `callId`, e
 }
 ```
 
-#### Exemplo — instância de conexão não oficial (device)
+#### Exemplo: instância de conexão não oficial (`device`)
 
 ```json
 {
@@ -1034,12 +992,11 @@ O campo `event` é o discriminador. `key.id` é sempre igual a `callId`, e
 }
 ```
 
-#### Exemplo — chamada de grupo (device)
+#### Exemplo: chamada de grupo (`device`)
 
-Em chamada de grupo, `chatId` e `key.remoteJid` são o grupo, `groupId` traz o
-mesmo JID e quem iniciou a chamada vai em `key.participantPn` —
-a mesma convenção das mensagens de grupo. Os campos `key.senderPn` e
-`key.senderLid` **não** aparecem.
+Em chamada de grupo, `chatId` e `key.remoteJid` são o grupo. `groupId` traz o
+mesmo JID. Quem iniciou a chamada vai em `key.participantPn`, como nas mensagens
+de grupo. Os campos `key.senderPn` e `key.senderLid` não aparecem.
 
 ```json
 {
@@ -1076,87 +1033,83 @@ a mesma convenção das mensagens de grupo. Os campos `key.senderPn` e
 
 #### Valores de `event` por origem
 
-| `event` | Conexão oficial (Cloud API) | Conexão não oficial (device) |
+| `event` | Conexão oficial (Cloud API) | Conexão não oficial (`device`) |
 | ------- | --------------------------- | ---------------------------- |
 | `connect` | Chamada do usuário chegando ao número. Sem `status` | Chamada chegando ao número. Sem `status` |
 | `status` | Progresso da chamada: `RINGING`, `ACCEPTED` ou `REJECTED` | Chamada atendida: `ACCEPTED` |
-| `terminate` | Encerramento: `COMPLETED` ou `FAILED` | Encerramento: `REJECTED`, `MISSED`, `ACCEPTED`, `COMPLETED`, `FAILED` — ou omitido |
+| `terminate` | Encerramento: `COMPLETED` ou `FAILED` | Encerramento: `REJECTED`, `MISSED`, `ACCEPTED`, `COMPLETED`, `FAILED`, ou omitido |
 | `error` | Falha reportada pela Meta | Não ocorre |
 
-`MISSED` — chamada que tocou até expirar — é **exclusivo da conexão não
-oficial**. A conexão oficial não publica esse desfecho.
+`MISSED` (chamada que tocou até expirar) só existe na conexão não oficial. A
+conexão oficial não publica esse desfecho.
 
-Em conexão não oficial, `status` **ausente** em um `terminate` significa que o
+Em conexão não oficial, `status` ausente em um `terminate` significa que o
 motivo não é previsto pela plataforma. Use `reason`, que vem sempre.
 
 #### Diferenças entre as duas origens
 
-| | Conexão oficial (Cloud API) | Conexão não oficial (device) |
+| | Conexão oficial (Cloud API) | Conexão não oficial (`device`) |
 | --- | --- | --- |
 | Campos exclusivos | `startTime`, `endTime`, `duration`, `bizOpaqueCallbackData`, `username` | `reason`, `groupId`, `key.senderLid` / `key.participantLid` |
 | `key.addressingMode` | Sempre `pn` | `pn` ou `lid`, conforme o contato |
 | Chamada de grupo | Não se aplica | `groupId` e `key.participantPn` |
-| Ocorrência bruta | Espalhada no payload (`object` e `entry`) | Em `rawEvent` |
+| Ocorrência bruta | Nos campos `object` e `entry` | Em `rawEvent` |
 
-Campo sem valor na origem é **omitido** — nunca enviado como `null` ou string
-vazia.
+Um campo sem valor na origem é omitido. A ZapperHub nunca envia `null` ou string
+vazia nesse caso.
 
-<Card title="IMPORTANTE">
-A assinatura de `calls.update` é **opt-in**: só recebe quem incluir a string
-explicitamente em `subscriptions`. Nenhuma assinatura existente é alterada
-automaticamente.
+<Note>
+**A assinatura de `calls.update` é opt-in.** Inclua a string em `subscriptions`.
+Nenhuma assinatura existente muda automaticamente. Assine pelo seletor de
+eventos do painel, ou pela API com `PUT /{instanceId}/webhooks/{webhookId}`.
 
-Assine pelo seletor de eventos do painel, ou pela API com
-`PUT /{instanceId}/webhooks/{webhookId}`.
+Chamada não é mensagem. O evento não é encaminhado ao Chatwoot e não é gravado
+no histórico de conversas.
+</Note>
 
-Chamada **não** é mensagem: o evento **não** é encaminhado ao Chatwoot e **não**
-é gravado no histórico de conversas.
-</Card>
+<Warning>
+**Conexão oficial: a assinatura habilita as chamadas no número.** A Meta só emite
+eventos de chamada, e só mostra o botão de ligação ao usuário, em número com o
+recurso de chamadas habilitado. Um número Cloud API nasce com o recurso
+desligado.
 
-<Card title="CONEXÃO OFICIAL: A ASSINATURA ATIVA AS CHAMADAS NO NÚMERO">
-Em conexão oficial, a Meta só emite eventos de chamada — e só mostra o botão de
-ligação ao usuário — em número com o recurso de chamadas **habilitado**. Um
-número Cloud API nasce com ele desligado.
+Por isso, ao assinar `calls.update`, a plataforma habilita o recurso no número
+antes de salvar o webhook. Você não precisa fazer nada na Meta. Se o recurso já
+está habilitado, nada muda: horário de atendimento, visibilidade do botão e SIP
+permanecem.
 
-Por isso, assinar `calls.update` faz a plataforma habilitar o recurso no seu
-número antes de salvar o webhook. Você não precisa fazer nada na Meta. Se o
-recurso já estiver habilitado, nada é alterado — suas preferências de horário de
-atendimento, visibilidade do botão e SIP permanecem intactas.
-
-Quando a habilitação não é possível, **o webhook não é salvo** e a resposta diz
-qual é o caso:
+Quando a habilitação não é possível, o webhook não é salvo. A resposta informa o caso:
 
 | Resposta | `code` | O que fazer |
 |---|---|---|
-| `422` | `CALLING_API_UNAVAILABLE` | O número não se qualifica para a Calling API. Salve novamente **sem** `calls.update` — repetir o mesmo pedido falhará de novo |
-| `503` | `PROVIDER_UNAVAILABLE` | Não foi possível falar com a Meta agora. Repita o mesmo pedido em instantes |
+| `422` | `CALLING_API_UNAVAILABLE` | O número não se qualifica para a Calling API. Salve de novo sem `calls.update`. Repetir o mesmo pedido falha de novo |
+| `503` | `PROVIDER_UNAVAILABLE` | A Meta não respondeu. Repita o mesmo pedido em instantes |
 
-A recusa vale para o pedido inteiro: nome, URL e as demais assinaturas enviadas
-junto também não são gravados.
+A recusa vale para o pedido inteiro. Nome, URL e as outras assinaturas também não
+são gravados.
 
-Os pré-requisitos da Calling API são da Meta, não da plataforma: número Cloud API
-**nativo** (coexistência não se qualifica), limite diário de pelo menos 2.000
-destinatários únicos e campo `calls` assinado na configuração do aplicativo.
+Os pré-requisitos da Calling API são da Meta: número Cloud API nativo
+(coexistência não se qualifica), limite diário de pelo menos 2.000 destinatários
+únicos e campo `calls` assinado na configuração do aplicativo.
 
-Em conexão **não oficial** nada disso se aplica — chamadas chegam sem
-configuração e a assinatura não passa por essa verificação.
-</Card>
+Em conexão não oficial, nada disso se aplica. As chamadas chegam sem
+configuração, e a assinatura não passa por essa verificação.
+</Warning>
 
-<Card title="ATENÇÃO">
+<Warning>
 Em conexão não oficial, chamadas recebidas enquanto a instância estava
-**desconectada não são recuperadas**. O WhatsApp não as reentrega quando a
-sessão volta, e a plataforma não as compensa — o evento simplesmente não existiu
-para a instância.
-</Card>
+desconectada não são recuperadas. O WhatsApp não as reentrega quando a sessão
+volta. O evento não existe para a instância.
+</Warning>
 
 ### Gravação disponível
 
 Tipo: `calls.update`, com `event: "recording"`
 
-Disparado quando a gravação de uma chamada fica pronta — **em conexão não
-oficial**, e apenas para chamadas em que a gravação foi solicitada. É um evento
-**separado** do encerramento: aquele sai assim que a chamada termina, sem esperar
-o processamento da gravação. Correlacione os dois pelo `callId`.
+Publicado quando a gravação de uma chamada fica pronta, em conexão não oficial,
+só para chamadas com gravação solicitada. É um evento separado do encerramento.
+O encerramento sai assim que a chamada termina, sem esperar o processamento da
+gravação. Correlacione os dois pelo `callId`.
 
 ```json
 {
@@ -1185,23 +1138,23 @@ o processamento da gravação. Correlacione os dois pelo `callId`.
 }
 ```
 
-O arquivo contém **os dois lados** da conversa. O endereço vem pronto e assinado:
-não é preciso autenticar para baixar, nem informar um destino próprio.
+O arquivo contém os dois lados da conversa. O endereço vem assinado. O download
+não exige autenticação nem destino próprio.
 
 | Campo | Descrição |
 | --- | --- |
 | `recording.status` | `AVAILABLE` ou `UNAVAILABLE` |
 | `recording.url` | Endereço de download, válido por 1 hora |
-| `recording.expiresAt` | Quando **este** endereço expira |
+| `recording.expiresAt` | Quando este endereço expira |
 | `recording.durationSeconds` | Duração do áudio gravado |
 | `recording.truncated` | `true` quando a gravação foi cortada no limite de 1 hora |
 
-O endereço expirar não é problema: consulte
+Um endereço expirado não é problema. Consulte
 `GET /{instanceId}/calls/{callId}` para obter um novo, enquanto a gravação
 existir.
 
-Quando a gravação fica definitivamente indisponível, o mesmo evento traz o
-motivo — e o evento de encerramento, já entregue, **não** é reenviado:
+Quando a gravação fica indisponível em definitivo, o mesmo evento traz o motivo.
+O evento de encerramento, já entregue, não é reenviado:
 
 ```json
 {
@@ -1211,24 +1164,22 @@ motivo — e o evento de encerramento, já entregue, **não** é reenviado:
 }
 ```
 
-<Card title="A GRAVAÇÃO EXPIRA EM 7 DIAS">
-Passados 7 dias do encerramento, o arquivo é descartado em definitivo. O
-**registro** da chamada continua consultável por 90 dias e informa que a gravação
-já não existe, em vez de devolver um endereço que não resolve.
+<Warning>
+**A gravação expira em 7 dias.** Depois de 7 dias do encerramento, a plataforma
+descarta o arquivo em definitivo. O registro da chamada continua consultável por
+90 dias e informa que a gravação não existe mais. Baixe e guarde o arquivo no seu
+lado se precisar dele por mais tempo.
+</Warning>
 
-Baixe e guarde o arquivo do seu lado se precisar dele por mais tempo.
-</Card>
-
-Consulte [Chamadas](/functions/calls) para originar, atender, gravar e encerrar
+Veja [Chamadas](/functions/calls) para originar, atender, gravar e encerrar
 chamadas por API.
 
 ### Comentário recebido no Instagram
 
 Tipo: `comments.upsert`
 
-Disparado em instâncias do Instagram quando um comentário é recebido em um post
-da conta. A estrutura é a mesma de `messages.upsert`, acrescida do bloco
-`comment`.
+Publicado em instâncias do Instagram quando a conta recebe um comentário em um
+post. A estrutura é a mesma de `messages.upsert`, mais o bloco `comment`.
 
 ```json
 {
@@ -1263,22 +1214,22 @@ da conta. A estrutura é a mesma de `messages.upsert`, acrescida do bloco
 }
 ```
 
-<Card title="ATENÇÃO">
-Diferente de uma mensagem, o comentário é **público**: qualquer visitante do
-perfil o vê. Ele não é encaminhado ao Chatwoot e **não é deduplicado** — a Meta
-pode reentregar a mesma notificação. Trate `comment.id` como chave de
-idempotência e ignore entregas repetidas do mesmo id.
-</Card>
+<Warning>
+O comentário é público. Qualquer visitante do perfil o vê. O comentário não é
+encaminhado ao Chatwoot e não é deduplicado. A Meta pode reentregar a mesma
+notificação. Use `comment.id` como chave de idempotência e ignore entregas
+repetidas do mesmo id.
+</Warning>
 
-Para responder em privado o autor do comentário, use `commentId` em
+Para responder em privado ao autor do comentário, use `commentId` em
 `POST /{instanceId}/messages/text`.
 
 ### Token do Instagram expirado
 
 Tipo: `token.expired`
 
-Disparado quando o token de acesso do Instagram expirou ou foi revogado. É um
-evento terminal: a instância é desconectada e **exige nova autorização**. Um
+Publicado quando o token de acesso do Instagram expirou ou foi revogado. É um
+evento terminal. A instância é desconectada e exige nova autorização. Um
 `connection.update` com `connection: "close"` acompanha o evento.
 
 ```json
@@ -1297,10 +1248,10 @@ O campo `reason` é `token_expired` ou `token_revoked`.
 
 Tipo: `token.refresh.failed`
 
-Disparado a cada tentativa de renovação que falha por causa temporária — uma
-instabilidade da Meta, por exemplo. A renovação continua sendo tentada, e
-`failureCount` acumula: use-o para escalonar o alerta interno antes que a falha
-se torne terminal.
+Publicado a cada tentativa de renovação que falha por causa temporária, como uma
+instabilidade da Meta. A renovação continua a ser tentada. `failureCount` acumula
+as falhas. Use o valor para escalar o alerta interno antes que a falha se torne
+terminal.
 
 ```json
 {
@@ -1317,8 +1268,8 @@ se torne terminal.
 `origin` indica se a tentativa partiu da rotina automática (`automatic`) ou da
 rota de renovação manual (`manual`).
 
-<Card title="IMPORTANTE">
-Sem assinar `token.refresh.failed` e `token.expired`, você só percebe o problema
-quando ele já é terminal, pelo `connection.update` — e não recebe aviso algum
+<Note>
+Sem a assinatura de `token.refresh.failed` e `token.expired`, você só percebe o
+problema quando ele é terminal, pelo `connection.update`. Você não recebe aviso
 durante a janela de retentativa.
-</Card>
+</Note>

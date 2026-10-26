@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "ZapperHub Docs",
-  "description": "Documentação oficial da ZapperHub, sua API de WhatsApp completa e fácil de usar",
+  "description": "Documentação oficial da ZapperHub, a API de WhatsApp para a sua aplicação",
   "colors": {
     "primary": "#7d52d1",
     "light": "#7d52d1",
@@ -15,111 +15,253 @@
   },
   "favicon": "/favicon.svg",
   "navigation": {
-    "tabs": [
+    "languages": [
       {
-        "tab": "Docs",
-        "groups": [
+        "language": "pt-BR",
+        "default": true,
+        "navbar": {
+          "links": [
+            {
+              "label": "Suporte",
+              "href": "https://api.whatsapp.com/send?phone=551231971643&text=Olá!+Preciso+de+ajuda"
+            }
+          ],
+          "primary": {
+            "type": "button",
+            "label": "Painel",
+            "href": "https://app.zapperhub.com"
+          }
+        },
+        "tabs": [
           {
-            "group": "Comece por aqui",
-            "icon": "rocket",
-            "pages": [
-              "introduction",
-              "creating-instance",
-              "connecting-whatsapp",
-              "quickstart",
-              "changelog"
+            "tab": "Docs",
+            "groups": [
+              {
+                "group": "Comece por aqui",
+                "icon": "rocket",
+                "pages": [
+                  "introduction",
+                  "creating-instance",
+                  "connecting-whatsapp",
+                  "quickstart",
+                  "changelog"
+                ]
+              },
+              {
+                "group": "Definições",
+                "icon": "book",
+                "pages": [
+                  "definitions/authentication",
+                  "definitions/connection",
+                  "definitions/zapperhub-connect",
+                  "definitions/number-format",
+                  "definitions/queue",
+                  "definitions/storage"
+                ]
+              },
+              {
+                "group": "Funções principais",
+                "icon": "edit",
+                "pages": [
+                  "functions/messages",
+                  "functions/sending-messages",
+                  "functions/contacts",
+                  "functions/chats",
+                  "functions/groups",
+                  "functions/calls",
+                  "functions/softphone"
+                ]
+              },
+              {
+                "group": "Integrações e webhooks",
+                "icon": "globe",
+                "pages": [
+                  "integrations/webhooks",
+                  "integrations/ai-agents",
+                  "integrations/chatvolt",
+                  "integrations/eleven-labs",
+                  "integrations/n8n",
+                  "integrations/make"
+                ]
+              }
             ]
           },
           {
-            "group": "Definições",
-            "icon": "book",
-            "pages": [
-              "definitions/authentication",
-              "definitions/connection",
-              "definitions/zapperhub-connect",
-              "definitions/number-format",
-              "definitions/queue",
-              "definitions/storage"
+            "tab": "Painel",
+            "groups": [
+              {
+                "group": "Começando",
+                "icon": "compass",
+                "pages": [
+                  "painel/visao-geral",
+                  "painel/conta-e-assinatura",
+                  "painel/chave-de-api-global"
+                ]
+              },
+              {
+                "group": "Instâncias",
+                "icon": "server",
+                "pages": [
+                  "painel/instancias",
+                  "painel/tags",
+                  "painel/conexao-nao-oficial",
+                  "painel/conexao-oficial",
+                  "painel/instagram"
+                ]
+              },
+              {
+                "group": "Operação",
+                "icon": "message",
+                "pages": [
+                  "painel/templates",
+                  "painel/consumo-e-cobranca",
+                  "painel/log-de-mensagens",
+                  "painel/webhooks"
+                ]
+              },
+              {
+                "group": "Ajustes e integrações",
+                "icon": "sliders",
+                "pages": [
+                  "painel/configuracoes-da-instancia",
+                  "painel/text-to-speech",
+                  "painel/integracoes"
+                ]
+              }
             ]
           },
           {
-            "group": "Funções principais",
-            "icon": "edit",
-            "pages": [
-              "functions/messages",
-              "functions/sending-messages",
-              "functions/contacts",
-              "functions/chats",
-              "functions/groups",
-              "functions/calls",
-                "functions/softphone"
-            ]
+            "tab": "API Reference",
+            "openapi": "/api-reference/openapi.json"
           },
           {
-            "group": "Integrações e webhooks",
-            "icon": "globe",
-            "pages": [
-              "integrations/webhooks",
-              "integrations/ai-agents",
-              "integrations/chatvolt",
-              "integrations/eleven-labs",
-              "integrations/n8n",
-              "integrations/make"
-            ]
+            "tab": "Instance API Reference",
+            "openapi": "/instance-api/openapi.json"
           }
         ]
       },
       {
-        "tab": "Painel",
-        "groups": [
+        "language": "en",
+        "navbar": {
+          "links": [
+            {
+              "label": "Support",
+              "href": "https://api.whatsapp.com/send?phone=551231971643&text=Hello!+I+need+help"
+            }
+          ],
+          "primary": {
+            "type": "button",
+            "label": "Panel",
+            "href": "https://app.zapperhub.com"
+          }
+        },
+        "tabs": [
           {
-            "group": "Começando",
-            "icon": "compass",
-            "pages": [
-              "painel/visao-geral",
-              "painel/conta-e-assinatura",
-              "painel/chave-de-api-global"
+            "tab": "Docs",
+            "groups": [
+              {
+                "group": "Start here",
+                "icon": "rocket",
+                "pages": [
+                  "en/introduction",
+                  "en/creating-instance",
+                  "en/connecting-whatsapp",
+                  "en/quickstart",
+                  "en/changelog"
+                ]
+              },
+              {
+                "group": "Definitions",
+                "icon": "book",
+                "pages": [
+                  "en/definitions/authentication",
+                  "en/definitions/connection",
+                  "en/definitions/zapperhub-connect",
+                  "en/definitions/number-format",
+                  "en/definitions/queue",
+                  "en/definitions/storage"
+                ]
+              },
+              {
+                "group": "Main functions",
+                "icon": "edit",
+                "pages": [
+                  "en/functions/messages",
+                  "en/functions/sending-messages",
+                  "en/functions/contacts",
+                  "en/functions/chats",
+                  "en/functions/groups",
+                  "en/functions/calls",
+                  "en/functions/softphone"
+                ]
+              },
+              {
+                "group": "Integrations and webhooks",
+                "icon": "globe",
+                "pages": [
+                  "en/integrations/webhooks",
+                  "en/integrations/ai-agents",
+                  "en/integrations/chatvolt",
+                  "en/integrations/eleven-labs",
+                  "en/integrations/n8n",
+                  "en/integrations/make"
+                ]
+              }
             ]
           },
           {
-            "group": "Instâncias",
-            "icon": "server",
-            "pages": [
-              "painel/instancias",
-              "painel/tags",
-              "painel/conexao-nao-oficial",
-              "painel/conexao-oficial",
-              "painel/instagram"
+            "tab": "Panel",
+            "groups": [
+              {
+                "group": "Getting started",
+                "icon": "compass",
+                "pages": [
+                  "en/panel/overview",
+                  "en/panel/account-and-subscription",
+                  "en/panel/global-api-key"
+                ]
+              },
+              {
+                "group": "Instances",
+                "icon": "server",
+                "pages": [
+                  "en/panel/instances",
+                  "en/panel/tags",
+                  "en/panel/unofficial-connection",
+                  "en/panel/official-connection",
+                  "en/panel/instagram"
+                ]
+              },
+              {
+                "group": "Operation",
+                "icon": "message",
+                "pages": [
+                  "en/panel/templates",
+                  "en/panel/usage-and-billing",
+                  "en/panel/message-log",
+                  "en/panel/webhooks"
+                ]
+              },
+              {
+                "group": "Settings and integrations",
+                "icon": "sliders",
+                "pages": [
+                  "en/panel/instance-settings",
+                  "en/panel/text-to-speech",
+                  "en/panel/integrations"
+                ]
+              }
             ]
           },
           {
-            "group": "Operação",
-            "icon": "message",
-            "pages": [
-              "painel/templates",
-              "painel/consumo-e-cobranca",
-              "painel/log-de-mensagens",
-              "painel/webhooks"
-            ]
+            "tab": "API Reference",
+            "openapi": "/api-reference/openapi.json"
           },
           {
-            "group": "Ajustes e integrações",
-            "icon": "sliders",
-            "pages": [
-              "painel/configuracoes-da-instancia",
-              "painel/text-to-speech",
-              "painel/integracoes"
-            ]
+            "tab": "Instance API Reference",
+            "openapi": "/instance-api/openapi.json"
           }
         ]
-      },
-      {
-        "tab": "API Reference",
-        "openapi": "/api-reference/openapi.json"
-      },
-      {
-        "tab": "Instance API Reference",
-        "openapi": "/instance-api/openapi.json"
       }
     ]
   },
@@ -142,19 +284,6 @@
       "og:title": "Documentação da ZapperHub",
       "og:image": "https://zapperhub.com/assets/sharing-image.png",
       "twitter:image": "https://zapperhub.com/assets/sharing-image.png"
-    }
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Suporte",
-        "href": "https://api.whatsapp.com/send?phone=551231971643&text=Olá!+Preciso+de+ajuda"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://app.zapperhub.com"
     }
   },
   "footer": {

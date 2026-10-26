@@ -1,0 +1,211 @@
+---
+title: Contacts
+description: "Query the identity link, block, manage the marketing opt-out, and delete the data of a contact"
+---
+
+## Description
+
+On the Cloud API, ZapperHub stores, for each contact that writes to the business:
+
+- The link between **phone**, **BSUID**, and **username**.
+- The choice of the contact about **marketing messages**.
+
+The routes on this page query and change this data.
+
+<Note>
+**Data scope.** The data belongs to the business (WABA), not to a number. All
+your instances on the same WABA share the link and the opt-out. Another owner
+never sees this data, even with the same WABA. The owner and the WABA come from
+the instance of the `x-api-key`.
+</Note>
+
+| Routes | Instance types |
+|---|---|
+| Query, opt-out, and deletion | Cloud API only |
+| Block and unblock | Cloud API and device (`device`) |
+
+On an unsupported instance type, the response is `422` with
+`code: "UNSUPPORTED_FOR_INSTANCE_TYPE"`.
+
+## Identify the contact
+
+In all routes, the `:contact` parameter accepts:
+
+| Format | Example |
+| --- | --- |
+| Phone | `5512912345678`, with or without `+` and with or without `@s.whatsapp.net` |
+| BSUID | `BR.13491208655302741918` |
+| Username | `fulano` or `@fulano` |
+
+The API recognizes a username only if the contact already wrote to the business.
+
+## Query a contact
+
+`GET /{instanceId}/contacts/{contact}`
+
+```json
+{
+  "phone": "5512912345678",
+  "waId": "5512912345678",
+  "bsuid": "BR.13491208655302741918",
+  "parentBsuid": null,
+  "username": "fulano",
+  "lastSeenAt": "2026-10-14T10:00:00.000Z",
+  "marketing": {
+    "status": "opted_out",
+    "source": "meta",
+    "changedAt": "2026-10-10T13:22:00.000Z"
+  }
+}
+```
+
+- `marketing` is `null` when there is no recorded choice.
+- An unknown contact responds `404` with `code: "CONTACT_NOT_FOUND"`.
+- After a [data deletion](#delete-the-data-of-a-contact-lgpd) with an active
+  opt-out, only `marketing` is filled. The identity fields are `null`.
+
+## Block and unblock
+
+A blocked contact cannot talk to the number of the instance. The routes apply to
+the Cloud API and to the device (`device`), with the same contract.
+
+`POST /{instanceId}/contacts/block`
+`POST /{instanceId}/contacts/unblock`
+
+Request:
+
+```json
+{ "contact": "5512912345678" }
+```
+
+Response:
+
+```json
+{ "contact": "5512912345678", "blocked": true }
+```
+
+`blocked` is the final state: `true` after block, `false` after unblock. A
+repeated operation responds `200`.
+
+| | Cloud API | Device (`device`) |
+| --- | --- | --- |
+| Who can be blocked | Contacts that sent a message in the last 24 hours | Any contact |
+| How to identify the contact | Phone, BSUID, or username | Phone only |
+| Invalid contact | `404` if the username has no link | `400` for BSUID and username |
+
+<Note>
+**Meta rule.** On the Cloud API, you can block only a contact that sent a message
+to the business in the last 24 hours. Otherwise, the response is `422` with
+`code: "PROVIDER_REJECTED"` and `localizedMessage` with the rule. Unblock has no
+such restriction.
+</Note>
+
+Meta errors arrive with the original code and subcode in `meta`. For known codes,
+`localizedMessage` carries the explanation in Portuguese. Examples: full list
+(64,000 blocked contacts) and block of the own number. Rate limit responds `429`.
+A Meta failure outside the catalog responds `502`. Meta unavailable responds
+`503`.
+
+### List blocked contacts
+
+`GET /{instanceId}/contacts/blocked?limit=20&cursor=...`
+
+```json
+{
+  "data": [
+    { "contact": "5512912345678", "waId": "5512912345678" }
+  ],
+  "next": "eyJhIjoiQVFE..."
+}
+```
+
+The API queries the list at the provider: Meta on the Cloud API, the device on
+`device`. ZapperHub does not keep a copy.
+
+- `limit` goes from 1 to 100.
+- For the next page, send the received `next` in `cursor`. `next: null` indicates the last page.
+- `waId` appears only on the Cloud API.
+- On the device, `contact` is the phone. An identifier that is not a phone, such as a LID, appears as received.
+- If the list changes during pagination on the Cloud API, the response is `409`
+  with `code: "BLOCKLIST_CHANGED"`. Restart the listing.
+- An invalid `cursor` responds `400` with `code: "INVALID_CURSOR"`.
+
+## Marketing opt-out
+
+When the contact asks to stop marketing messages, or to resume them, Meta
+notifies ZapperHub. ZapperHub stores the choice and publishes the
+[`contacts.preference`](/en/integrations/webhooks#marketing-opt-out) event on all
+your instances on the WABA.
+
+While the contact is opted out, the API rejects the send of a **marketing
+template** before it reaches Meta:
+
+```json
+{
+  "message": "O contato pediu para não receber mensagens de marketing desta empresa. Use um template de utilidade ou espere o contato voltar a aceitar marketing.",
+  "error": "Application Error",
+  "statusCode": 422,
+  "code": "MARKETING_OPT_OUT",
+  "data": { "optedOutAt": "2026-10-10T13:22:00.000Z", "source": "meta" }
+}
+```
+
+- Utility and authentication templates continue to be sent.
+- When the contact accepts marketing again, the API accepts the send again.
+- The opt-out applies to the phone and to the BSUID of the same contact.
+- If the API does not know the template category, the send continues. Meta
+  decides and rejects with code `131050`.
+
+### List opted-out contacts
+
+`GET /{instanceId}/contacts/marketing-opt-outs?limit=20&cursor=...`
+
+```json
+{
+  "data": [
+    { "contact": "5512912345678", "source": "meta", "changedAt": "2026-10-10T13:22:00.000Z" }
+  ],
+  "next": null
+}
+```
+
+The list goes from the most recent to the oldest. `limit` goes from 1 to 100. For
+the next page, send the received `next` in `cursor`. `next: null` indicates the
+last page. An invalid `cursor` responds `400` with `code: "INVALID_CURSOR"`.
+
+### Set or clear manually
+
+`PUT /{instanceId}/contacts/{contact}/marketing-preference`
+
+```json
+{ "status": "opted_out" }
+```
+
+Use this route when the contact asks through another channel, such as phone or
+email, to stop marketing. `status` is `opted_out` (blocks marketing) or
+`opted_in` (allows it). The response carries `source: "manual"` and the time of
+the change.
+
+- Applies to all instances of the same owner on the same WABA. They receive the `contacts.preference` event.
+- Between the manual choice and a Meta event, the most recent one applies.
+- The API accepts a contact that ZapperHub never saw, if identified by phone or
+  BSUID. This way, you set the opt-out before the contact writes. An unknown
+  username responds `404`.
+- A repeated choice responds `200` and does not publish the event again.
+
+## Delete the data of a contact (LGPD)
+
+`DELETE /{instanceId}/contacts/{contact}`
+
+The route deletes the link (phone, BSUID, and username) and the marketing choice
+of the contact. It responds `204`, with no body.
+
+<Warning>
+**An active opt-out is kept**, reduced to the minimum identifier. Deleting the
+opt-out would reopen marketing to a contact who asked to leave. If the contact
+writes again, ZapperHub recreates the link, and the opt-out continues to apply.
+</Warning>
+
+- An unknown contact also responds `204`. The API does not reveal whether the contact existed.
+- The route does not publish an event.
+- When a WABA has no Cloud API instance left, a daily routine deletes the data of the owner on that WABA.

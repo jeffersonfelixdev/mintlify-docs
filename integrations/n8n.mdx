@@ -1,39 +1,59 @@
 ---
-title: N8N
-description: "Integre a ZapperHub ao N8N"
+title: n8n
+description: "Chamar a API da ZapperHub a partir de um fluxo do n8n"
 ---
 
-N8N é uma ferramenta poderosa de automação de fluxos e tarefas. A integração da 
-ZapperHub no N8N é realizada via Nó de **HTTP Request**, conforme indicado nos
-passos a seguir:
+## Descrição
 
-1. Clique no botão para adicionar um novo nó, e selecione no menu lateral a
-opção **Core** e em seguida, **HTTP Request**;
+O n8n é uma ferramenta de automação de fluxos. A integração com a ZapperHub usa o
+nó **HTTP Request** do n8n.
 
-<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-  <img noZoom src="./n8n-step-1.png" />
-</div>
+## Pré-requisitos
 
-2. No campo **Method**, selecione o método que for utilizar. Por exemplo, para enviar
-mensagem, o método é o `POST`;
+- A URL e a chave de API da instância. Veja [Início rápido](/quickstart).
+- Um fluxo no n8n.
 
-3. Em **URL**, digite a URL completa de acesso ao recurso (ex: https://api.zapperhub.com/inst_abcdefg123456/messages/text para enviar uma mensagem de texto);
+## Procedimento
 
-4. Em **Authentication**, selecione a opção **Generic Credential Type**, e **Header Auth** para o tipo de autenticação genérica;
+<Steps>
+  <Step title="Adicione o nó HTTP Request">
+    Clique em adicionar um nó. No menu lateral, selecione **Core** e depois **HTTP Request**.
 
-5. No campo **Header Auth**, clique em **Create new credential**, e na janela 
-que se abre, nomeie o nome da credencial para `ZapperHub Auth` (basta clicar sobre o 
-título da janela para editar), preencher o campo **Name** com o valor `X-Api-Key`
-e o campo **Value** com o **valor da sua chave de API** (ex: `sk_abcdEfgH_123XPtO`).
-Em seguida, clique em **Save** e feche a janela;
+    ![Seleção do nó HTTP Request no n8n](/integrations/n8n-step-1.png)
+  </Step>
+  <Step title="Defina o método">
+    Em **Method**, selecione o método da rota. Para enviar mensagem, selecione `POST`.
+  </Step>
+  <Step title="Informe a URL">
+    Em **URL**, digite a URL completa da rota. Exemplo, para enviar uma mensagem de texto:
+    `https://api.zapperhub.com/inst_abcdefg123456/messages/text`.
+  </Step>
+  <Step title="Configure a autenticação">
+    Em **Authentication**, selecione **Generic Credential Type**. Em seguida, selecione **Header Auth**.
+  </Step>
+  <Step title="Crie a credencial">
+    Em **Header Auth**, clique em **Create new credential**. Clique no título da
+    janela e renomeie a credencial para `ZapperHub Auth`. Preencha **Name** com
+    `X-Api-Key` e **Value** com a chave de API da instância. Clique em **Save** e
+    feche a janela.
+  </Step>
+  <Step title="Preencha o corpo">
+    Marque **Send Body**. Em **Body Parameters**, preencha **Name** e **Value**
+    com os campos da rota. Para uma mensagem de texto, informe `jid` e `message`.
 
-6. Selecione o checkbox **Send Body** e em **Body Parameters**, preencha os campos
-*Name* e *Value* com os valores da requisição. Por exemplo, para enviar mensagem, os
-campos seriam preenchidos da seguinte maneira:
+    ![Parâmetros do corpo para o envio de texto](/integrations/n8n-step-2.png)
+  </Step>
+  <Step title="Teste">
+    Feche a janela do nó e clique em **Test Workflow**.
+  </Step>
+</Steps>
 
-<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-  <img noZoom src="./n8n-step-2.png" />
-</div>
+## Resultado
 
-7. Feche a janela de criação do Nó e em seguide clique em **Test Workflow** para
-realizar o teste de envio da mensagem.
+A API responde `200` com `status: "scheduled"`. A mensagem entra na fila da
+instância.
+
+<Note>
+Formate o número de telefone sem parênteses, espaços ou traços. Veja
+[Formato do número](/definitions/number-format).
+</Note>

@@ -1,0 +1,118 @@
+---
+title: Global API key
+description: "Create, rotate, and delete the Global API Key, and when to use it instead of the instance key"
+---
+
+import PanelNote from '/snippets/en-panel-note.mdx';
+
+**Location**: side menu > **Global API Key**.
+
+<PanelNote />
+
+## Description
+
+The screen **Configure your Global API Key** (*Configurar sua Global API Key*,
+`dash/api-key`) manages the key of the account. It is different from the key of
+each instance. Confusion between the two is the most common cause of a `401`
+error.
+
+## Which key to use
+
+| | **Global key** | **Instance key** |
+|---|---|---|
+| **Name in the panel** | Global API Key | API key (*Chave da API*, X-Api-Key) |
+| **Location** | Side menu > Global API Key | In the instance row, in [Instances](/en/panel/instances) |
+| **Scope** | The whole account | One instance |
+| **API** | Instance API | Instance API routes (messages, chats, settings) |
+| **Header** | `Authorization: Bearer <key>` | `x-api-key: <key>` |
+| **Function** | Create, rename, list, and delete instances | Send messages and operate the instance |
+| **Reference** | **Instance API Reference** tab. Example: [Get all instances](/api-reference/instâncias/obtém-todas-as-instâncias) | **API Reference** tab. Example: [Get settings](/api-reference/configurações/obter-configurações) |
+
+Rule: if the call creates or manages instances, use the global key. If the call
+operates inside an instance (send a message, read a chat, configure a webhook),
+use the instance key.
+
+The concept of the two keys is in [Authentication](/en/definitions/authentication).
+
+## Create the key
+
+With no key, the screen shows *Não há uma chave global criada* (no global key
+created) and the button **Create global key** (*Criar chave global*).
+
+<Steps>
+  <Step title="Create">
+    Click **Create global key** (*Criar chave global*). The panel opens the dialog *Nova Chave Global Criada* (new global key created).
+  </Step>
+  <Step title="Copy the key">
+    Click the copy button. The panel confirms with *Chave copiada para a área de transferência!* (key copied).
+  </Step>
+  <Step title="Store the key">
+    Save the key where your application will read it. Then click **Got it, close** (*Entendi, fechar*).
+  </Step>
+</Steps>
+
+If the creation fails, the panel shows *Ocorreu um erro ao criar chave global*
+(error on key creation).
+
+<Warning>
+**The key is shown once.** After you close the dialog, neither you nor support
+can see the key again. Copy the key before you close the dialog. If you lose the
+key, use **Rotate** to generate another one.
+
+Do not put the key in versioned code, in a support message, or in any public
+place.
+</Warning>
+
+## Rotate
+
+The **Rotate** (*Rotacionar*) button replaces the current key with a new one. Use
+the rotation when you lost the key or suspect a leak.
+
+<Warning>
+**The rotation invalidates the previous key immediately.** Every application that
+still uses the old key receives an authentication error immediately. There is no
+overlap period between the two keys.
+
+To rotate without a service interruption: have access to the applications ready
+before you confirm. Rotate, copy the new key, and update the applications right
+after. The downtime lasts from the rotation to the update.
+</Warning>
+
+<Steps>
+  <Step title="Start the rotation">
+    Click **Rotate** (*Rotacionar*). The panel opens *Confirmar rotação de chave* (confirm key rotation).
+  </Step>
+  <Step title="Confirm">
+    Click **Yes, rotate key** (*Sim, rotacionar chave*).
+  </Step>
+  <Step title="Copy the new key">
+    The new key appears in the dialog *Nova Chave Global Criada*. Copy and store the key. It is also shown once.
+  </Step>
+  <Step title="Update the applications">
+    Replace the key in all applications that use the Instance API.
+  </Step>
+</Steps>
+
+## Delete
+
+The **Delete global key** (*Excluir chave global*) button opens the dialog
+*Confirmar exclusão* (confirm deletion).
+
+<Warning>
+**The deletion cannot be undone.** The account is left with no global key. Every
+call to the Instance API fails until you create another key. Existing instances
+are not deleted and continue to operate with their own keys. Only the management
+through the Instance API stops.
+
+To replace the key, use **Rotate**, which creates the replacement in the same
+step.
+</Warning>
+
+Click **Yes, delete** (*Sim, excluir*). Success: *Chave global excluída com
+sucesso*. Failure: *Ocorreu um erro ao excluir chave global*.
+
+## See also
+
+- [Authentication](/en/definitions/authentication): the concept of the keys.
+- [Instances](/en/panel/instances): where the key of each instance is.
+- [Panel overview](/en/panel/overview): the organization of the panel.

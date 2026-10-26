@@ -1,0 +1,345 @@
+---
+title: Softphone
+description: "Live voice conversation through the number of the instance, with the agent on a headset, inside your system"
+---
+
+## Description
+
+[Calls through the API](/en/functions/calls) make automated notices: the platform
+calls and plays a file. The softphone allows a conversation.
+
+With the softphone, the agent clicks a button in your system. The call leaves
+through the WhatsApp number of the instance. The agent talks through the computer
+microphone and hears the contact through the headset, in real time.
+
+You include a library in your page. The platform handles microphone, playback,
+transport, and reconnection.
+
+<Warning>
+**Available only on the unofficial connection.** The softphone applies only to
+instances with an unofficial connection (`device`). On the official connection
+(Cloud API), every operation responds `422` with
+`code: UNSUPPORTED_FOR_INSTANCE_TYPE`.
+</Warning>
+
+## Limits
+
+| Limit | Value |
+| --- | --- |
+| Simultaneous calls | One per instance, including a call that is still ringing |
+| Connected agents | Several per instance, on the same line |
+| Browser context | HTTPS required. The browser requires HTTPS to use the microphone |
+| Video | Not available |
+| Group call | Not available |
+| Call transfer | Not available |
+| Hold | Not available |
+| Tone keypad (DTMF) | Not available |
+| Conversation duration | No limit |
+| Recording | Same rules as [Calls](/en/functions/calls): 30 per day, 1 hour, 7 days of retention |
+
+## How it works
+
+<Steps>
+  <Step title="Your backend issues the agent credential">
+    A route of yours exchanges the `x-api-key` of the instance for a short-lived
+    credential, bound to an agent.
+  </Step>
+  <Step title="The library opens the session">
+    The component in the browser uses the credential to open the voice session with the instance.
+  </Step>
+  <Step title="The agent talks">
+    Call, answer, mute, and hang up happen through the component. You draw the
+    buttons. The library gives the state and the commands.
+  </Step>
+</Steps>
+
+<Warning>
+**Never send the `x-api-key` to the browser.** Whoever has the key can dial on
+behalf of the business and read conversations of other instances. A malicious
+extension on the agent machine can also read it. The short-lived credential
+exists for this reason.
+</Warning>
+
+## Preliminary requirements
+
+<Warning>
+**Register the origin of your system.** The agent credential is valid only for
+pages served from one specific origin, registered on the instance. Without the
+registration, the credential route responds:
+
+```json
+{
+  "code": "PROVIDER_UNAVAILABLE",
+  "message": "A origem do CRM não está configurada para esta instância",
+  "statusCode": 503
+}
+```
+
+Today, ZapperHub does the registration. Ask support and give the exact origin of
+the pages that will embed the component. Example: `https://crm.yourcompany.com`,
+or `http://localhost:3000` for development.
+
+Give only scheme, domain, and port, with no trailing slash and no path. Use
+`https://crm.yourcompany.com`, never `https://crm.yourcompany.com/` or
+`https://crm.yourcompany.com/support`. The platform compares the value with the
+`Origin` header of the browser. With an extra slash, the credential is issued,
+and the session is rejected later with `AGENT_TOKEN_INVALID`.
+
+Each instance has one origin. If the same system serves several domains, talk to
+support before you integrate.
+</Warning>
+
+{/* TODO: when a public route exists for the customer to register the origin,
+    replace the "ask support" instruction with the corresponding call. */}
+
+## Step 1: issue the credential
+
+Call this route from your backend, with the `x-api-key` of the instance.
+
+```http
+POST /{instanceId}/softphone/tokens
+```
+
+```json
+{
+  "agentId": "op-1183",
+  "displayName": "Ana"
+}
+```
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `agentId` | Yes | Identifier of the agent in your system. The platform does not interpret the value. It appears in the history as authorship |
+| `displayName` | No | Name shown in the history and to the other agents when the line is busy |
+
+Response:
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9...",
+  "expiresAt": "2026-09-09T18:15:00.000Z",
+  "expiresIn": 900,
+  "endpoint": "wss://server-03.zapperhub.com/softphone"
+}
+```
+
+Return this body to the browser as received. The library uses the `endpoint`.
+
+<Note>
+**The credential is valid for 15 minutes.** The library renews the credential in
+the background with your `getToken`. A conversation in progress never drops
+because of expiration. The renewal affects only the following operations.
+
+The platform does not keep an agent registry and does not authenticate people. It
+stores only the identifier and the name that you give.
+</Note>
+
+## Step 2: include the component
+
+With a bundler:
+
+```bash
+npm install @zapperhub/softphone
+```
+
+```ts
+import { createSoftphone } from '@zapperhub/softphone'
+```
+
+Without a bundler:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@zapperhub/softphone@1/dist/softphone.global.js"></script>
+<!-- available as ZapperSoftphone.createSoftphone -->
+```
+
+## Step 3: create the softphone
+
+```ts
+const softphone = createSoftphone({
+  instanceId: 'inst_123',
+  getToken: async () => {
+    // the route of YOUR backend, from step 1
+    const r = await fetch('/api/softphone-token', { method: 'POST' })
+    return r.json() // { token, expiresAt, endpoint }
+  },
+})
+```
+
+`createSoftphone` never throws. In a browser without audio support, or on a page
+outside HTTPS, it returns an unavailable instance with the reason. The rest of
+the page continues to work:
+
+```ts
+if (softphone.status === 'unsupported') {
+  console.warn('Softphone unavailable:', softphone.unsupportedReason)
+}
+```
+
+## Commands
+
+| Method | Function |
+| --- | --- |
+| `call(jid, { record })` | Originates the call. It requests the microphone before it dials |
+| `answer({ record })` | Accepts the signaled incoming call |
+| `reject()` | Rejects the signaled incoming call |
+| `hangup()` | Ends the conversation, or cancels a call that is still ringing |
+| `mute()` / `unmute()` | Mutes and unmutes the microphone, without ending the call |
+| `devices.list()` | Lists the available microphones and audio outputs |
+| `devices.select({ inputId, outputId })` | Selects the devices and keeps the choice between page loads |
+| `devices.testInput()` | Starts the capture test. It returns `{ stop }` |
+| `connect()` / `disconnect()` | Opens and closes the session manually |
+| `destroy()` | Releases microphone, session, and connection |
+
+There are two direct reads: `softphone.line` (is the line busy?) and
+`softphone.muted`.
+
+## States and events
+
+```ts
+softphone.on('call', (call) => {
+  // render the state in your page
+})
+```
+
+| Event | Content | When |
+| --- | --- | --- |
+| `status` | `{ status, reason? }` | The session changes situation |
+| `call` | `{ callId, state, direction, contact, recording?, endedReason? }` | The call changes state |
+| `incoming` | `{ callId, contact }` | A received call starts to ring |
+| `incoming:cleared` | `{ callId, reason }` | The received call stops ringing |
+| `line` | `{ busy, callId?, agent? }` | The instance line becomes busy or free |
+| `mic` | `{ muted }` | The microphone is muted or unmuted |
+| `devices` | Device list | A device is connected or disconnected |
+| `level` | `{ level }` | During `devices.testInput()`, from 0 to 1 |
+| `error` | `{ code, message }` | Any rejection |
+
+### Call states (`call.state`)
+
+| State | Meaning |
+| --- | --- |
+| `IDLE` | No call in progress |
+| `DIALING` | The request left the browser. The call does not exist yet. `callId` absent |
+| `RINGING` | The device of the contact is ringing |
+| `ACTIVE` | Conversation established in both directions |
+| `RECONNECTING` | The agent lost the connection. The call continues for 15 seconds |
+| `ENDED` | Ended. See `endedReason` |
+
+### End reasons (`call.endedReason`)
+
+| Value | Meaning |
+| --- | --- |
+| `BY_AGENT` | The agent ended through the component |
+| `BY_CONTACT` | The contact hung up |
+| `REJECTED` | Rejected |
+| `MISSED` | Not answered |
+| `UNAVAILABLE` | Contact unavailable, on another call |
+| `FAILED` | Failure: microphone revoked, grace period exhausted, or instance drop |
+
+### Signaling end reasons (`incoming:cleared.reason`)
+
+| Value | Meaning |
+| --- | --- |
+| `ANSWERED_ELSEWHERE` | Another agent accepted. Normal situation, not an error |
+| `REJECTED` | An agent rejected |
+| `ABANDONED` | The contact gave up before any acceptance |
+
+## Several agents on the same instance
+
+The instance conducts one call at a time. All connected agents use this line.
+
+- A received call rings for all agents. The first one that accepts conducts the call. The others receive `incoming:cleared` with `ANSWERED_ELSEWHERE`.
+- When someone occupies the line, the others receive `line` with `busy: true` and the name of who is talking.
+- With two requests at the same time, exactly one is accepted. The other receives `409 CALL_IN_PROGRESS`.
+
+<Note>
+`ANSWERED_ELSEWHERE` and `CALL_IN_PROGRESS` are the normal operation with several
+agents. Show these cases as information ("answered by another agent", "line
+busy"), not as a failure.
+</Note>
+
+## Connection oscillation
+
+If the agent loses the connection, the call with the contact does not drop
+immediately. The platform waits 15 seconds.
+
+- Reconnection within the period: the conversation continues on the same call, with the same `callId`, without a new dial.
+- Period exhausted: the call ends with `FAILED`, and the line is released.
+- The contact hung up during the wait: the outcome is `BY_CONTACT`, not a failure.
+
+Closing the browser tab follows the same rule.
+
+## Recording
+
+Pass `record: true` when you originate or answer. The rules (daily quota,
+duration limit, delivery by event, signed link, and retention) are the same as in
+[Calls](/en/functions/calls).
+
+```ts
+const call = await softphone.call('5511999999999', { record: true })
+
+if (call.recording?.requested && !call.recording.granted) {
+  // the call HAPPENS; it is only not recorded
+  console.log('No recording:', call.recording.reason)
+}
+```
+
+<Warning>
+**The daily quota does not block the call.** The call happens without recording,
+and the reason arrives in `recording.reason`. Tell the agent at the moment of
+dialing.
+
+Telling the contact that the call is being recorded is your responsibility,
+according to the applicable data protection law (LGPD in Brazil).
+</Warning>
+
+## Errors and recommended action
+
+| Code | When | Action |
+| --- | --- | --- |
+| `MICROPHONE_DENIED` | The agent denied the microphone | Tell the agent to allow the microphone through the lock icon in the address bar and try again. No call was created |
+| `MICROPHONE_UNAVAILABLE` | No microphone, or microphone in use by another program | Ask the agent to connect the headset or close the other program |
+| `INSECURE_CONTEXT` | Page outside HTTPS | Serve the page over HTTPS. `localhost` counts as secure |
+| `UNSUPPORTED_ENVIRONMENT` | Browser without audio capture or without WebRTC | Tell the agent to use a recent Chrome, Edge, Firefox, or Safari |
+| `PROVIDER_UNAVAILABLE` | The origin of your system is not registered on the instance | Ask support for the registration, with the exact origin. See [Preliminary requirements](#preliminary-requirements) |
+| `AGENT_TOKEN_INVALID` | Credential expired, tampered, unknown, or presented by a page from another origin | Issue a new credential from the backend. If it persists, check that the registered origin is equal to the page origin, with no trailing slash |
+| `AGENT_TOKEN_SCOPE` | Credential used outside the call scope | Integration defect. The credential serves only the softphone |
+| `CALL_IN_PROGRESS` | The instance already conducts a call | Show the line as busy. `detail` carries the `callId` in progress |
+| `CALL_NOT_AVAILABLE` | The call was already answered by another agent, or already ended | Show as information, not as a failure |
+| `INVALID_CALL_TARGET` | The number has no WhatsApp account | Confirm the number with the agent |
+| `INSTANCE_NOT_CONNECTED` | The instance lost the WhatsApp session | Reconnect the instance in the panel |
+| `UNSUPPORTED_FOR_INSTANCE_TYPE` | Instance with an official connection | The softphone does not exist for the Cloud API |
+| `DEVICE_LOST` | The selected device was disconnected | The call continues on the default device. Refresh the device list in the page |
+| `MEDIA_NEGOTIATION_FAILED` | The audio could not be established | Check the agent connection and try to reconnect |
+| `SESSION_CLOSED` | Command sent with the session closed | Call `connect()` first, or wait for the automatic reconnection |
+
+## History and authorship
+
+Softphone calls appear in the [call history](/en/functions/calls) with the
+authorship of the agent. Filter by agent:
+
+```http
+GET /{instanceId}/calls?agentId=op-1183
+```
+
+```json
+{
+  "callId": "...",
+  "conductedVia": "SOFTPHONE",
+  "agent": { "id": "op-1183", "displayName": "Ana" }
+}
+```
+
+Calls originated by the API appear with `"conductedVia": "API"` and without the
+`agent` field.
+
+## Compatibility
+
+The softphone is another way to conduct the same call. If you already consume
+calls through the API:
+
+- The events continue in `calls.update`, with the same format.
+- The API routes stay available and unchanged.
+- The history gained new fields. No existing field changed.
+
+An instance with no connected agent behaves as before.

@@ -1,0 +1,139 @@
+---
+title: Unofficial connection
+description: "Connect a number through QR code, pairing code, or FastLink"
+---
+
+import PanelNote from '/snippets/en-panel-note.mdx';
+
+**Location**: **Instances** (*Instâncias*) > select the instance > **Connection** (*Conexão*).
+
+<PanelNote />
+
+## Description
+
+The unofficial connection links the number as WhatsApp Web does: the instance
+joins as a linked device of the phone. The concept and the comparison with the
+official API are in [WhatsApp connection](/en/definitions/connection).
+
+The screen is named **Instance connection** (*Conexão da instância*,
+`dash/instances/[id]/connection`).
+
+<Note>
+With an overdue subscription, the screen responds *É preciso regularizar a
+assinatura para conectar a instância* (regularize the subscription to connect
+the instance). See [Account and subscription](/en/panel/account-and-subscription).
+</Note>
+
+<Warning>
+**Risk of ban.** The WhatsApp MultiDevice (QR code) connection is less stable and
+is subject to Meta restrictions. The number can be restricted or banned, and the
+connection drops more often than through the official API. Use the
+[Official connection](/en/panel/official-connection) whenever possible.
+</Warning>
+
+## Preliminary requirements
+
+- An instance with the status **Disconnected** or **Not connected**.
+- The phone with the number to connect, with WhatsApp installed and with internet.
+
+## Start the connection
+
+<Steps>
+  <Step title="Open the MultiDevice card">
+    On the connection screen, click **Connect with WhatsApp MultiDevice** (*Conectar com WhatsApp MultiDevice*).
+  </Step>
+  <Step title="Accept the notice">
+    Read the notice *Conectar com WhatsApp MultiDevice?* and click **Continue anyway** (*Continuar mesmo assim*).
+  </Step>
+  <Step title="Choose the method">
+    Click **Connect with QR code** (*Conectar com QR Code*) or **Connect with pairing code** (*Conectar com código de pareamento*).
+  </Step>
+</Steps>
+
+## Connect with QR code
+
+The dialog is named *Conectar instância de* followed by the instance name.
+
+<Steps>
+  <Step title="Open WhatsApp on the phone">
+    Use the device with the number to connect.
+  </Step>
+  <Step title="Open the settings">
+    Tap the menu or **Settings**.
+  </Step>
+  <Step title="Open Linked devices">
+    Tap **Linked devices**.
+  </Step>
+  <Step title="Tap Link a device">
+    Tap **Link a device**.
+  </Step>
+  <Step title="Scan the QR code">
+    Point the phone camera at the QR code on the screen. Wait for the connection to complete.
+  </Step>
+</Steps>
+
+The QR code changes every 60 seconds, with no page reload. If the code expires,
+the next one appears on the screen. If the code does not work, reload the page.
+
+On completion, the panel shows *Instância conectada* (instance connected), and
+the status becomes **Connected**.
+
+## Connect with pairing code
+
+Use this method when it is not possible to point the camera.
+
+| Field | Required | Validation |
+|---|---|---|
+| Phone number (*Número do telefone*) | Yes | Number with the country code |
+
+<Steps>
+  <Step title="Enter the number">
+    Type the number in **Enter the phone number** (*Digite o número do telefone*). Click **Generate pairing code** (*Gerar código de pareamento*).
+  </Step>
+  <Step title="Type the code on the phone">
+    In WhatsApp, tap **Linked devices** > **Link a device** > **Link with phone number**. Type the code shown in the panel.
+  </Step>
+</Steps>
+
+The shortcut **How to do this?** (*Como fazer isso?*) shows the path on the
+device.
+
+## FastLink: connect without panel access
+
+Use FastLink when the person with the phone does not manage the account. The
+panel generates a temporary link, with the text *Não é o responsável pela linha?
+Compartilhe o link abaixo com o responsável* (not the line owner? share the link
+below). The copy button confirms with *URL copiada* (URL copied).
+
+The recipient of the link opens the **WhatsApp connection** (*Conexão WhatsApp*)
+page, at the `instance-connection/[token]` route, without signing in. The page:
+
+- Shows the QR code and the five connection steps.
+- Refreshes the QR code every 60 seconds. The **Refresh** (*Atualizar*) button forces the refresh.
+- Shows the state **Waiting** (*Aguardando*), **Connected** (*Conectado*), or **Error** (*Erro*).
+- On completion, shows *Conectado com sucesso!* (connected).
+
+### Link validity
+
+FastLink is temporary and is valid for one connection. When the link expires, the
+page shows *Erro na conexão* (connection error) and the **Try again** (*Tentar
+novamente*) button.
+
+<Note>
+**Try again** does not reactivate an expired link. Generate a new link in the
+panel and send the new address to the line owner.
+</Note>
+
+## Extra WhatsApp verification
+
+On some devices, WhatsApp requires a passkey to connect to WhatsApp Web. The
+panel signals this in **Problems connecting?** (*Problemas ao conectar?*), with
+the guidance to use the **ZapperHub Connect** extension.
+
+The procedure is in [ZapperHub Connect](/en/definitions/zapperhub-connect).
+
+## See also
+
+- [Official connection](/en/panel/official-connection): the recommended way, through Meta.
+- [Instances](/en/panel/instances): disconnect, restart, and delete.
+- [WhatsApp connection](/en/definitions/connection): all connection types.

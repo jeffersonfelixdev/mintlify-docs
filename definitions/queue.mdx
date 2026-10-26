@@ -1,40 +1,42 @@
 ---
-title: Sistema de filas
-description: "Como a ZapperHub protege seu número contra bloqueios com uma fila customizada"
+title: Fila de mensagens
+description: "Como a fila de envio de cada instância funciona"
 ---
 
-Nós nos preocupamos com a integridade de seu número do WhatsApp. Além de termos
-um sistema robusto contra uso indevido e SPAM, cada instância da ZapperHub conta
-com uma fila individual de disparo de todas as mensagens, sejam elas de texto, 
-imagens, vídeos, documentos ou áudios.
+## Descrição
 
-Cada instância possui uma fila única, para disparo de mensagens para pessoas ou
-grupos, com 4 tipos de intervalos pré-configuráveis entre as mensagens:
-- **shortest**: de 1 a 3 segundos;
-- **short**: de 5 a 10 segundos;
-- **medium**: de 15 a 45 segundos;
-- **long**: de 60 a 90 segundos.
+Cada instância tem uma fila única de envio. Toda mensagem passa pela fila:
+texto, imagem, vídeo, documento e áudio, para pessoas ou grupos.
 
-Além disso, você pode adicionar um delay antes do envio das mensagens, com o
-status de *Digitando* ou *Gravando áudio*, o que permite uma abordagem ainda
-mais humanizada em chatbots.
+A fila protege o número contra bloqueios. Ela aplica um intervalo entre as
+mensagens, em quatro níveis:
 
-Consulte a <a href="/api-reference/configurações/atualizar-configurações">
-documentação de referência da API</a> e saiba como atualizar essas configurações.
+| Nível | Intervalo |
+|---|---|
+| `shortest` | de 1 a 3 segundos |
+| `short` | de 5 a 10 segundos |
+| `medium` | de 15 a 45 segundos |
+| `long` | de 60 a 90 segundos |
 
-Como o envio passa pela fila, a resposta da API confirma o enfileiramento e não a
-entrega. Cada mensagem é tentada até 5 vezes; esgotadas as tentativas, sua
-aplicação é avisada pelo webhook <a href="/integrations/webhooks">`messages.error`</a>.
+Você também pode adicionar um atraso antes de cada envio, com o status
+*Digitando* ou *Gravando áudio*. Esse recurso dá um ritmo mais humano ao chatbot.
+Para alterar essas opções, veja
+[Atualizar configurações](/api-reference/configurações/atualizar-configurações).
 
-<Card title="IMPORTANTE">
-Não é possível desligar o sistema de filas e disparar mensagens simultâneas para
-diferentes pessoas ou grupos, nem fazer disparo de transmissões (broadcast).
-A ZapperHub é contra a prática de SPAM e o uso indevido poderá ser penalizado
-conforme os <a href="https://zapperhub.com/terms-of-use">Termos de Uso</a> da
-plataforma.
-</Card>
+## Resposta da API
 
-<Card title="INFORMAÇÃO">
-A funcionalidade de exibir status de *Digitando* ou *Gravando áudio* não está
-disponível para envio de mensagens em grupos.
-</Card>
+Como o envio passa pela fila, a resposta da API confirma o enfileiramento, não a
+entrega. A ZapperHub tenta cada mensagem até 5 vezes. Quando as tentativas se
+esgotam, a ZapperHub publica o webhook
+[`messages.error`](/integrations/webhooks#falha-no-envio-de-mensagens).
+
+<Warning>
+**A fila não pode ser desligada.** Não é possível enviar mensagens simultâneas
+para pessoas ou grupos diferentes, nem fazer transmissões (broadcast). O uso
+indevido é penalizado conforme os
+[Termos de Uso](https://zapperhub.com/terms-of-use).
+</Warning>
+
+<Note>
+O status *Digitando* ou *Gravando áudio* não está disponível em grupos.
+</Note>

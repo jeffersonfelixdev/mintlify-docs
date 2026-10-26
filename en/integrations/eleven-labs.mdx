@@ -1,0 +1,65 @@
+---
+title: ElevenLabs
+description: "Connect ElevenLabs to the instance to send synthesized voice messages"
+---
+
+## Description
+
+ElevenLabs is a voice synthesis service. It converts text to audio with a choice
+of voice, speed, timbre, and accent.
+
+With the integration, the instance sends voice notes generated from text, and the
+AI agent can reply with audio.
+
+## Preliminary requirements
+
+- An account at [ElevenLabs](https://elevenlabs.io). Registration is free.
+- An ElevenLabs API key. Generate the key at
+  [elevenlabs.io/app/settings/api-keys](https://elevenlabs.io/app/settings/api-keys).
+  The key needs access to **Text to Speech** and to **Voices** (at least read).
+
+## Register the key
+
+### Through the API
+
+Use the route
+[Update ElevenLabs API key](/api-reference/elevenlabs/atualizar-api-key-da-elevenlabs)
+to register the key and choose a default voice.
+
+### In the panel
+
+<Steps>
+  <Step title="Open the instance">
+    Go to [app.zapperhub.com/dash](https://app.zapperhub.com/dash) and click the instance.
+  </Step>
+  <Step title="Open the text-to-speech page">
+    Click **Text to speech** (*Texto para Fala*).
+  </Step>
+  <Step title="Save the key">
+    Fill in **ElevenLabs API key** (*Chave da API da ElevenLabs*) and click **Update** (*Atualizar*).
+  </Step>
+</Steps>
+
+See the page details in [Text to speech](/en/panel/text-to-speech).
+
+## Reply with audio through the AI agent
+
+With this configuration, the AI agent replies with audio when the contact sends
+the question as audio.
+
+<Steps>
+  <Step title="Open the instance settings">
+    In the instance, click **Settings** (*Configurações*).
+  </Step>
+  <Step title="Choose the default voice">
+    In the **Messages** (*Mensagens*) tab, select the voice in **Default ElevenLabs voice** (*Voz padrão ElevenLabs*).
+  </Step>
+  <Step title="Turn on the audio reply">
+    In the **Integration** (*Integração*) tab, turn on **Reply with audio** (*Responder com áudio*). Save.
+  </Step>
+</Steps>
+
+<Note>
+The agent replies with audio only when the question arrives as audio. A text
+question receives a text reply.
+</Note>
