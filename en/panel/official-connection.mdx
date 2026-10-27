@@ -43,6 +43,11 @@ The paths lead to the same result, with different requirements:
 At the end, the panel shows *Instância conectada* and *Conectado com sucesso*
 (connected).
 
+<Note>
+To connect a number of the WhatsApp Business app, follow the **Coexistence
+mode** procedure on this page.
+</Note>
+
 | Message | Cause | Action |
 |---|---|---|
 | *O login com Facebook não foi concluído.* | The flow was interrupted | Repeat the procedure |
@@ -143,10 +148,55 @@ verify token. Configure the URL in the Gupshup panel:
 
 ## Coexistence mode
 
-Some numbers connect in **Coexistence** (*Coexistência*): the number continues
-to work in the WhatsApp app on the phone and, at the same time, responds through
-the official API. The panel marks these connections with the **Coexistence**
-label.
+In **Coexistence** (*Coexistência*), the number continues to work in the
+WhatsApp Business app on the phone and, at the same time, responds through the
+official API. The panel marks these connections with the **Coexistence** label.
+
+The Meta flow does not have a separate option for WhatsApp Business. Meta turns
+on coexistence when it detects that the number you enter is on the app.
+
+### Requirements
+
+- The number is in use on the **WhatsApp Business** app, version 2.24.17 or later.
+- The number is not connected to the Cloud API through a different provider.
+- The phone with the app is near you, unlocked, and online.
+
+### Procedure
+
+<Steps>
+  <Step title="Start">
+    Click **Connect with Facebook** (*Conectar com Facebook*). To connect
+    through a different person, send the connection link.
+  </Step>
+  <Step title="Select the number option">
+    On the Meta phone number screen, select **Enter a new phone number**.
+  </Step>
+  <Step title="Enter the number">
+    Type the number of the WhatsApp Business app, with the country code. Meta
+    detects the app and shows the business profile of the number.
+  </Step>
+  <Step title="Confirm the profile">
+    Confirm the profile and select the business portfolio.
+  </Step>
+  <Step title="Confirm on the phone">
+    In the WhatsApp Business app, follow the Meta instructions to confirm the
+    connection.
+  </Step>
+  <Step title="Complete">
+    Complete the Meta flow.
+  </Step>
+</Steps>
+
+### Result
+
+The panel shows *Instância conectada* (instance connected) and the
+**Coexistence** label. The number continues to work in the WhatsApp Business
+app.
+
+<Note>
+If Meta asks for a code by SMS or call, it did not detect the number as
+WhatsApp Business. Cancel the flow and check the requirements.
+</Note>
 
 ## After the connection
 
