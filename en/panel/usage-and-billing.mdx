@@ -5,7 +5,7 @@ description: "Follow the free service message allowance, the volume by category,
 
 import PanelNote from '/snippets/en-panel-note.mdx';
 
-**Location**: **Instances** (*Instâncias*) > select the instance > **Usage and billing** (*Consumo e cobrança*).
+**Location**: **Instances** > select the instance > **Usage and billing**.
 
 <PanelNote />
 
@@ -38,16 +38,15 @@ status. Official Meta data arrives with a delay of some hours. See
 
 ## Payment method
 
-The first card shows the payment status and the button **Register/manage card at
-Meta** (*Cadastrar/gerenciar cartão na Meta*). The button opens the payment
+The first card shows the payment status and the button **Add/manage card on Meta**. The button opens the payment
 methods screen of the Meta Business Suite in a new tab. The card registration is
 done at Meta.
 
 | Status | Meaning |
 |---|---|
-| **Not verified** (*Não verificado*) | There was no payment verification for this account yet |
-| **Payment problem detected** (*Problema de pagamento detectado*) | Meta rejected messages because of a payment problem, or marked the number as blocked for billing. The button is highlighted, and a red banner appears at the top of the instance pages |
-| **No problem detected** (*Nenhum problema detectado*) | No sign of a payment problem |
+| **Not verified** | There was no payment verification for this account yet |
+| **Payment problem detected** | Meta rejected messages because of a payment problem, or marked the number as blocked for billing. The button is highlighted, and a red banner appears at the top of the instance pages |
+| **No problem detected** | No sign of a payment problem |
 
 ZapperHub infers the status from two signals: Meta error **131042** (*Business
 eligibility payment issue*) on sends and events, and the health state of the
@@ -88,20 +87,19 @@ Four cards show the volume of the month in each Meta pricing category
 (**Marketing**, **Utility**, **Authentication**, and **Service**) and the total.
 Two extra cards appear only with volume:
 
-- **Referral conversion** (*Conversão de indicação*): messages from conversations opened by ads that lead to WhatsApp. They do not consume the allowance.
-- **Other** (*Outras*): pricing categories that ZapperHub does not recognize.
+- **Referral conversion**: messages from conversations opened by ads that lead to WhatsApp. They do not consume the allowance.
+- **Other**: pricing categories that ZapperHub does not recognize.
 
 Each card also shows the cost, in the currency of the account at Meta:
 
 - The cost is summed only on days already checked with Meta.
-- With volume on unchecked days, the card shows **Cost to confirm** (*Custo a confirmar*).
-- **Cost unavailable** (*Custo indisponível*) appears when Meta does not report
+- With volume on unchecked days, the card shows **Cost to be confirmed**.
+- **Cost unavailable** appears when Meta does not report
   the cost to partner apps, which is the case for accounts connected through
   ZapperHub. The volume stays official. To see the charged amount, check
   **Billing and payments** in the Meta account.
 
-In a month with no delivery, the cards show zero and the screen reports *Nenhuma
-mensagem entregue neste mês* (no message delivered this month).
+In a month with no delivery, the cards show zero and the screen reports *No messages delivered this month*.
 
 ## Official Meta data
 
@@ -110,25 +108,24 @@ Meta data. On closed days, ZapperHub uses the Meta numbers, even when they diffe
 from the real-time count. A day is treated as official only some hours after it
 ends.
 
-The screen reports **Official Meta data until** (*Dados oficiais da Meta até*) a
+The screen reports **Official Meta data until** a
 date and time. After that, the numbers are the real-time estimate. The check also
 includes messages sent by the same number outside ZapperHub.
 
 If the check fails, the numbers do not disappear. The screen keeps the real-time
-count and the last official data. It shows *Não foi possível conferir com a Meta
-desde* (could not check with Meta since) with a date and the reason. ZapperHub
+count and the last official data. It shows *Couldn't check with Meta since* with a date and the reason. ZapperHub
 retries the check automatically.
 
 <Note>
 The check uses the instance token, which needs the `whatsapp_business_management`
 permission. On manually connected instances, the token can lack the permission.
 When this is the reason for the failure, or the token expired, the screen shows
-the **Reconnect instance** (*Reconectar instância*) button.
+the **Reconnect instance** button.
 </Note>
 
 ## Previous months
 
-The **Month** (*Mês*) selector, at the top of the screen, lists the months from
+The **Month** selector, at the top of the screen, lists the months from
 the start of collection to the current month, limited to the last 13 months. In a
 previous month, the screen shows the used allowance, the volume, and the cost by
 category, with no notice banners.

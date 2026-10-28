@@ -5,14 +5,14 @@ description: "Connect through the official Meta API: Facebook login, connection 
 
 import PanelNote from '/snippets/en-panel-note.mdx';
 
-**Location**: **Instances** (*Instâncias*) > select the instance > **Connection** (*Conexão*).
+**Location**: **Instances** > select the instance > **Connection**.
 
 <PanelNote />
 
 ## Description
 
 The official connection uses the Meta **WhatsApp Cloud API**. It is the way
-marked as **Recommended** (*Recomendado*) in the panel. The comparison with the
+marked as **Recommended** in the panel. The comparison with the
 unofficial way is in [WhatsApp connection](/en/definitions/connection).
 
 ## Connection paths
@@ -21,27 +21,26 @@ The paths lead to the same result, with different requirements:
 
 | Path | When to use | Requirement |
 |---|---|---|
-| **Connect with Facebook** (*Conectar com Facebook*) | Default. You have access to the Facebook of the business | The Facebook account |
-| **Facebook connection link** (*Link de conexão com Facebook*) | The person with Facebook does not manage the panel | None for the recipient of the link |
-| **Manual setup (Meta)** (*Configuração manual (Meta)*) | You already have your own app and tokens at Meta | System user token and Meta IDs |
-| **Manual setup (Gupshup)** (*Configuração manual (Gupshup)*) | You operate the number through Gupshup. Only on **v2** instances | App name and Gupshup API key |
+| **Connect with Facebook** | Default. You have access to the Facebook of the business | The Facebook account |
+| **Facebook connection link** | The person with Facebook does not manage the panel | None for the recipient of the link |
+| **Manual setup (Meta)** | You already have your own app and tokens at Meta | System user token and Meta IDs |
+| **Manual setup (Gupshup)** | You operate the number through Gupshup. Only on **v2** instances | App name and Gupshup API key |
 
 ## Connect with Facebook
 
 <Steps>
   <Step title="Start">
-    Click **Connect with Facebook** (*Conectar com Facebook*). The panel opens the official Meta flow.
+    Click **Connect with Facebook**. The panel opens the official Meta flow.
   </Step>
   <Step title="Authorize at Meta">
     Follow the Meta flow to authorize the connection of the number.
   </Step>
   <Step title="Wait">
-    The panel shows *Aguardando conexão com Facebook* (waiting for Facebook) and then *Conectando instância* (connecting instance).
+    The panel shows *Waiting for Facebook connection* and then *Connecting instance*.
   </Step>
 </Steps>
 
-At the end, the panel shows *Instância conectada* and *Conectado com sucesso*
-(connected).
+At the end, the panel shows *Instance connected* and *Connected successfully*.
 
 <Note>
 To connect a number of the WhatsApp Business app, follow the **Coexistence
@@ -50,21 +49,19 @@ mode** procedure on this page.
 
 | Message | Cause | Action |
 |---|---|---|
-| *O login com Facebook não foi concluído.* | The flow was interrupted | Repeat the procedure |
-| *Facebook SDK não carregado.* | The Meta SDK did not load | Refresh the page and try again |
+| *Facebook login was not completed.* | The flow was interrupted | Repeat the procedure |
+| *Facebook SDK not loaded.* | The Meta SDK did not load | Refresh the page and try again |
 
 If the Embedded Signup does not fill in everything, the panel asks for two
 identifiers:
 
 | Field | Required | Validation |
 |---|---|---|
-| **Phone number ID** (*ID do número de telefone*) | Yes | Numeric identifier of the number at Meta |
-| **WABA ID** (*ID da WABA*) | Yes | Identifier of the WhatsApp Business Account |
+| **Phone number ID** | Yes | Numeric identifier of the number at Meta |
+| **WABA ID** | Yes | Identifier of the WhatsApp Business Account |
 
 Both values are in the **Meta Business Suite**, in the number configuration of
-the business account. After you enter them, click **Exchange token and connect**
-(*Trocar token e conectar*). Success: *Conectado com sucesso*. Failure: *Erro ao
-trocar o token*.
+the business account. After you enter them, click **Exchange token and connect**. Success: *Connected successfully*. Failure: *Error exchanging token*.
 
 ## Facebook connection link
 
@@ -73,41 +70,36 @@ another person to connect through Meta without signing in to the panel.
 
 <Steps>
   <Step title="Generate the link">
-    Wait for *Gerando link de conexão...* (generating link). Click **Open connection link** (*Abrir link de conexão*) or copy the link.
+    Wait for *Generating connection link...*. Click **Open connection link** or copy the link.
   </Step>
   <Step title="Send the link">
     Send the link to the person with access to the Facebook of the business.
   </Step>
 </Steps>
 
-If the generation fails, the panel shows *Não foi possível gerar o link de
-conexão* and the **Try again** (*Tentar novamente*) button.
+If the generation fails, the panel shows *Could not generate the connection link* and the **Try again** button.
 
-The recipient opens the **WhatsApp Cloud API connection** (*Conexão WhatsApp
-Cloud API*) page, at the `meta-connection/[token]` route, with the **Connect
+The recipient opens the **WhatsApp Cloud API Connection** page, at the `meta-connection/[token]` route, with the **Connect
 with Facebook** button. The state appears as **Waiting**, **Connecting**, or
-**Connected**. On completion: *Conectado com sucesso!*
+**Connected**. On completion: *Connected successfully!*
 
-If the link is no longer valid, the page responds *Link de conexão inválido* or
-*Erro ao carregar link de conexão*. Generate a new link in the panel.
+If the link is no longer valid, the page responds *Invalid connection link* or
+*Error loading connection link*. Generate a new link in the panel.
 
 ## Manual setup (Meta)
 
-The dialog is named *WhatsApp Cloud API - Configuração manual (Meta)*.
+The dialog is named *WhatsApp Cloud API - Manual setup (Meta)*.
 
 | Field | Required | Validation |
 |---|---|---|
-| **System user token** (*Token do usuário do sistema*) | Yes | Access token generated at Meta |
-| **Phone number ID** (*ID do número de telefone*) | Yes | Numeric identifier of the number |
-| **Meta business account ID** (*ID da conta comercial da Meta*) | Yes | Identifier of the business account |
-| **Webhook forward URL** (*URL de encaminhamento do Webhook*) | No | URL to forward the events to |
+| **System user token** | Yes | Access token generated at Meta |
+| **Phone number ID** | Yes | Numeric identifier of the number |
+| **Meta business account ID** | Yes | Identifier of the business account |
+| **Webhook forward URL** | No | URL to forward the events to |
 
-Click **Connect Cloud API** (*Conectar Cloud API*). Success: *Cloud API conectada
-com sucesso.* Failure: *Erro ao conectar Cloud API. Tente novamente.*
+Click **Connect Cloud API**. Success: *Cloud API connected successfully.* Failure: *Error connecting Cloud API. Please try again.*
 
-Then point the Meta webhook to ZapperHub. The section **Meta webhook
-configuration** (*Configuração do Webhook Meta*) shows the **Callback URL**
-(*URL de Callback*) and the **Verify token** (*Token de Verificação*).
+Then point the Meta webhook to ZapperHub. The section **Meta Webhook configuration** shows the **Callback URL** and the **Verification Token**.
 
 <Steps>
   <Step title="Open the Facebook Developers Console" />
@@ -119,7 +111,7 @@ configuration** (*Configuração do Webhook Meta*) shows the **Callback URL**
   <Step title="In the event list, confirm the subscription to the message events" />
 </Steps>
 
-At the end, click **Finish** (*Concluir*).
+At the end, click **Finish**.
 
 ## Manual setup (Gupshup)
 
@@ -129,10 +121,10 @@ connection type becomes **Gupshup**.
 
 | Field | Required | Validation |
 |---|---|---|
-| **App name** (*Nome do app*) | Yes | The app name at Gupshup |
-| **Gupshup API Key** (*API Key do Gupshup*) | Yes | The key of the Gupshup account |
-| **Connected phone number** (*Número do telefone conectado*) | Yes | Digits only, with the country code |
-| **Webhook forward URL** (*URL de encaminhamento do Webhook*) | No | URL to forward the events to |
+| **App name** | Yes | The app name at Gupshup |
+| **Gupshup API Key** | Yes | The key of the Gupshup account |
+| **Connected phone number** | Yes | Digits only, with the country code |
+| **Webhook forward URL** | No | URL to forward the events to |
 
 On connection, the screen shows the **Callback URL**. Gupshup does not use a
 verify token. Configure the URL in the Gupshup panel:
@@ -148,7 +140,7 @@ verify token. Configure the URL in the Gupshup panel:
 
 ## Coexistence mode
 
-In **Coexistence** (*Coexistência*), the number continues to work in the
+In **Coexistence**, the number continues to work in the
 WhatsApp Business app on the phone and, at the same time, responds through the
 official API. The panel marks these connections with the **Coexistence** label.
 
@@ -165,7 +157,7 @@ on coexistence when it detects that the number you enter is on the app.
 
 <Steps>
   <Step title="Start">
-    Click **Connect with Facebook** (*Conectar com Facebook*). To connect
+    Click **Connect with Facebook**. To connect
     through a different person, send the connection link.
   </Step>
   <Step title="Select the number option">
@@ -189,7 +181,7 @@ on coexistence when it detects that the number you enter is on the app.
 
 ### Result
 
-The panel shows *Instância conectada* (instance connected) and the
+The panel shows *Instance connected* and the
 **Coexistence** label. The number continues to work in the WhatsApp Business
 app.
 
@@ -204,30 +196,27 @@ The screen shows the state of the number at Meta:
 
 | Information | Values |
 |---|---|
-| **Status at Meta** (*Status na Meta*) | **Pending activation** (*Pendente de ativação*) or **Ready for use** (*Pronto para uso*) |
-| **Connection with the Meta app** (*Conexão com o App da Meta*) | **Connected** (*Conectada*) or **Not connected** (*Não conectada*). The **Subscribe in the Meta app** (*Subscrever no App da Meta*) button fixes the second one |
-| **Verified name** (*Nome verificado*) | The name approved by Meta |
-| **New conversation limit (24h)** (*Limite de novas conversas (24h)*) | 250, 2,000, 10,000, 100,000 conversations, or **Unlimited conversations** (*Conversas ilimitadas*) |
-| **Number quality** (*Qualidade do número*) | **High quality**, **Medium quality**, **Low quality**, or **Not enough data** |
+| **Meta status** | **Pending activation** or **Ready for use** |
+| **Meta App connection** | **Connected** or **Not connected**. The **Subscribe to Meta App** button fixes the second one |
+| **Verified name** | The name approved by Meta |
+| **New conversations limit (24h)** | 250, 2,000, 10,000, 100,000 conversations, or **Unlimited conversations** |
+| **Quality rating** | **High quality**, **Medium quality**, **Low quality**, or **Not enough data** |
 
 ### Register the number
 
-Click **Register number** (*Registrar número*). Enter the **6-digit PIN** (*PIN
-de 6 dígitos*). The panel registers the PIN if it does not exist yet. Keep the
+Click **Register number**. Enter the **6-digit PIN**. The panel registers the PIN if it does not exist yet. Keep the
 PIN to register changes of the profile name. The registration takes a few
-seconds. Success: *Número registrado com sucesso.*
+seconds. Success: *Number registered successfully.*
 
 The same operation exists in the API. See
 [Register phone number](/api-reference/cloud-api/registrar-número-de-telefone).
 
 ### Business profile data
 
-**Edit profile data** (*Editar dados de perfil*) opens the profile form: **About**
-(*Sobre*), **Description** (*Descrição*), **Address** (*Endereço*), **Email**
-(*E-mail*), **Websites**, and **Category** (*Categoria*). In **Websites**, type
+**Edit profile data** opens the profile form: **About**, **Description**, **Address**, **Email**, **Websites**, and **Category**. In **Websites**, type
 the URL and press Enter or space to add.
 
-**Edit display name** (*Editar nome de exibição*) changes the business name shown
+**Edit display name** changes the business name shown
 to users.
 
 <Note>

@@ -11,8 +11,7 @@ import PanelNote from '/snippets/en-panel-note.mdx';
 
 ## Description
 
-The screen **Configure your Global API Key** (*Configurar sua Global API Key*,
-`dash/api-key`) manages the key of the account. It is different from the key of
+The screen **Configure your Global API Key** (`dash/api-key`) manages the key of the account. It is different from the key of
 each instance. Confusion between the two is the most common cause of a `401`
 error.
 
@@ -20,7 +19,7 @@ error.
 
 | | **Global key** | **Instance key** |
 |---|---|---|
-| **Name in the panel** | Global API Key | API key (*Chave da API*, X-Api-Key) |
+| **Name in the panel** | Global API Key | X-Api-Key |
 | **Location** | Side menu > Global API Key | In the instance row, in [Instances](/en/panel/instances) |
 | **Scope** | The whole account | One instance |
 | **API** | Instance API | Instance API routes (messages, chats, settings) |
@@ -36,23 +35,21 @@ The concept of the two keys is in [Authentication](/en/definitions/authenticatio
 
 ## Create the key
 
-With no key, the screen shows *Não há uma chave global criada* (no global key
-created) and the button **Create global key** (*Criar chave global*).
+With no key, the screen shows *No global key has been created* and the button **Create global key**.
 
 <Steps>
   <Step title="Create">
-    Click **Create global key** (*Criar chave global*). The panel opens the dialog *Nova Chave Global Criada* (new global key created).
+    Click **Create global key**. The panel opens the dialog *New Global Key Created*.
   </Step>
   <Step title="Copy the key">
-    Click the copy button. The panel confirms with *Chave copiada para a área de transferência!* (key copied).
+    Click the copy button. The panel confirms with *Key copied to clipboard!*.
   </Step>
   <Step title="Store the key">
-    Save the key where your application will read it. Then click **Got it, close** (*Entendi, fechar*).
+    Save the key where your application will read it. Then click **Got it, close**.
   </Step>
 </Steps>
 
-If the creation fails, the panel shows *Ocorreu um erro ao criar chave global*
-(error on key creation).
+If the creation fails, the panel shows *An error occurred while creating the global key*.
 
 <Warning>
 **The key is shown once.** After you close the dialog, neither you nor support
@@ -65,7 +62,7 @@ place.
 
 ## Rotate
 
-The **Rotate** (*Rotacionar*) button replaces the current key with a new one. Use
+The **Rotate** button replaces the current key with a new one. Use
 the rotation when you lost the key or suspect a leak.
 
 <Warning>
@@ -80,13 +77,13 @@ after. The downtime lasts from the rotation to the update.
 
 <Steps>
   <Step title="Start the rotation">
-    Click **Rotate** (*Rotacionar*). The panel opens *Confirmar rotação de chave* (confirm key rotation).
+    Click **Rotate**. The panel opens *Confirm key rotation*.
   </Step>
   <Step title="Confirm">
-    Click **Yes, rotate key** (*Sim, rotacionar chave*).
+    Click **Yes, rotate key**.
   </Step>
   <Step title="Copy the new key">
-    The new key appears in the dialog *Nova Chave Global Criada*. Copy and store the key. It is also shown once.
+    The new key appears in the dialog *New Global Key Created*. Copy and store the key. It is also shown once.
   </Step>
   <Step title="Update the applications">
     Replace the key in all applications that use the Instance API.
@@ -95,8 +92,8 @@ after. The downtime lasts from the rotation to the update.
 
 ## Delete
 
-The **Delete global key** (*Excluir chave global*) button opens the dialog
-*Confirmar exclusão* (confirm deletion).
+The **Delete global key** button opens the dialog
+*Confirm deletion*.
 
 <Warning>
 **The deletion cannot be undone.** The account is left with no global key. Every
@@ -108,8 +105,7 @@ To replace the key, use **Rotate**, which creates the replacement in the same
 step.
 </Warning>
 
-Click **Yes, delete** (*Sim, excluir*). Success: *Chave global excluída com
-sucesso*. Failure: *Ocorreu um erro ao excluir chave global*.
+Click **Yes, delete**. Success: *Global key deleted successfully*. Failure: *An error occurred while deleting the global key*.
 
 ## See also
 

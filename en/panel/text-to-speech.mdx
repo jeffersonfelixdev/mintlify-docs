@@ -5,14 +5,13 @@ description: "Register the ElevenLabs key on the instance and send synthesized v
 
 import PanelNote from '/snippets/en-panel-note.mdx';
 
-**Location**: **Instances** (*Instâncias*) > select the instance > **Text to speech** (*Texto para fala*).
+**Location**: **Instances** > select the instance > **Text to speech**.
 
 <PanelNote />
 
 ## Description
 
-The screen **Text to speech (ElevenLabs)** (*Texto para Fala (ElevenLabs)*,
-`dash/instances/[id]/text-to-speech`) links the instance to your ElevenLabs
+The screen **Text to Speech (ElevenLabs)** (`dash/instances/[id]/text-to-speech`) links the instance to your ElevenLabs
 account. With it, the instance converts text to voice and sends the message as
 audio.
 
@@ -32,10 +31,10 @@ list the voices, and the default voice has no options.
 
 | Field | Required | Validation |
 |---|---|---|
-| **ElevenLabs API key** (*Chave da API da ElevenLabs*) | Yes | Text. Error if empty: *Chave secreta é obrigatória* |
+| **ElevenLabs API Key** | Yes | Text. Error if empty: *Secret key is required* |
 
-Paste the key and click **Update** (*Atualizar*). The panel confirms with
-*Configurações atualizadas com sucesso.*
+Paste the key and click **Update**. The panel confirms with
+*Settings updated successfully.*
 
 ## Result
 
@@ -55,13 +54,13 @@ There are two levels. The more specific one wins:
 
 | Level | Where it is set | When it applies |
 |---|---|---|
-| **Default voice of the instance** | Instance settings > **Default ElevenLabs voice** (*Voz padrão ElevenLabs*) | When the send does not specify another voice |
+| **Default voice of the instance** | Instance settings > **Default ElevenLabs voice** | When the send does not specify another voice |
 | **Message voice** | At the send, through the API | Only on that send |
 
 The default voice is chosen in [Instance settings](/en/panel/instance-settings).
 The field offers options only after the key registration.
 
-The **Reply with audio** (*Responder com áudio*) option, also in the instance
+The **Respond with audio** option, also in the instance
 settings, makes the instance return audio to a contact who sends audio.
 
 ## Through the API

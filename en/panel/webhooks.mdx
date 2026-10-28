@@ -5,7 +5,7 @@ description: "Register, edit, and delete the webhooks of the instance in the pan
 
 import PanelNote from '/snippets/en-panel-note.mdx';
 
-**Location**: **Instances** (*Instâncias*) > select the instance > **Webhook**.
+**Location**: **Instances** > select the instance > **Webhook**.
 
 <PanelNote />
 
@@ -16,10 +16,10 @@ describes the registration in the panel. The content of each event is in
 [Webhooks](/en/integrations/webhooks).
 
 The screen is named **Webhooks** (`dash/instances/[id]/webhook`). With no
-registration, it shows *Nenhum webhook cadastrado* (no webhook registered).
+registration, it shows *No webhooks registered*.
 
-The list has the columns **Name** (*Nome*), **URL**, **Events** (*Eventos*), and
-**Actions** (*Ações*).
+The list has the columns **Name**, **URL**, **Events**, and
+**Actions**.
 
 ## Preliminary requirements
 
@@ -28,15 +28,15 @@ The list has the columns **Name** (*Nome*), **URL**, **Events** (*Eventos*), and
 
 ## Register
 
-Click **New Webhook** (*Novo Webhook*).
+Click **New Webhook**.
 
 | Field | Required | Validation |
 |---|---|---|
-| **Name** (*Nome*) | Yes | Text. Error if empty: *Nome é obrigatório* |
-| **Webhook URL** (*URL do Webhook*) | Yes | Valid URL. Errors: *URL é obrigatória*, *URL inválida* |
-| **Events** (*Eventos*) | Yes | At least one event. Error: *Selecione pelo menos um evento* |
+| **Name** | Yes | Text. Error if empty: *Name is required* |
+| **Webhook URL** | Yes | Valid URL. Errors: *URL is required*, *Invalid URL* |
+| **Events** | Yes | At least one event. Error: *Select at least one event* |
 
-Click **Create** (*Criar*). Success: *Webhook criado com sucesso.*
+Click **Create**. Success: *Webhook created successfully.*
 
 <Note>
 Each instance accepts at most 5 webhooks. With 5 webhooks, the **New Webhook**
@@ -78,9 +78,9 @@ The body of each event is in [Webhooks](/en/integrations/webhooks).
 
 ## Edit
 
-Click **Edit Webhook** (*Editar Webhook*). The form is the same as the
-registration, with the same validations. Click **Update** (*Atualizar*).
-Success: *Webhook atualizado com sucesso.*
+Click **Edit Webhook**. The form is the same as the
+registration, with the same validations. Click **Update**.
+Success: *Webhook updated successfully.*
 
 A new URL applies to the next events. Events already delivered, or in a delivery
 attempt, are not resent to the new address.
@@ -95,10 +95,8 @@ after that are not stored for later delivery.
 To change only the address, edit the webhook instead of deleting it.
 </Warning>
 
-Click **Delete** (*Excluir*). The dialog *Confirmar exclusão* asks for
-confirmation. Click **Yes, delete** (*Sim, excluir*). Success: *Webhook excluído
-com sucesso.* Failure: *Ocorreu um erro ao excluir o webhook. Tente novamente
-mais tarde.*
+Click **Delete**. The dialog *Confirm deletion* asks for
+confirmation. Click **Yes, delete**. Success: *Webhook deleted successfully.* Failure: *An error occurred while deleting the webhook. Please try again later.*
 
 ## Several webhooks on the same instance
 

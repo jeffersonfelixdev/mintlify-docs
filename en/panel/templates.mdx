@@ -5,20 +5,17 @@ description: "Create message templates, follow the approval, send them with vari
 
 import PanelNote from '/snippets/en-panel-note.mdx';
 
-**Location**: **Instances** (*Instâncias*) > select the instance > **Templates**.
+**Location**: **Instances** > select the instance > **Templates**.
 
 <PanelNote />
 
 ## Description
 
 Templates are template messages approved by Meta. They start conversations on the
-official API. The screen is named **Message templates** (*Templates de mensagem*,
-`dash/instances/[id]/templates`). The creation happens on its own screen
+official API. The screen is named **Message templates** (`dash/instances/[id]/templates`). The creation happens on its own screen
 (`dash/instances/[id]/new-template`).
 
-With no template, the screen shows *Nenhum template encontrado para esta
-instância* (no template found) and the **Sync templates** (*Sincronizar
-templates*) button.
+With no template, the screen shows *No templates found for this instance* and the **Sync templates** button.
 
 ## Preliminary requirements
 
@@ -27,13 +24,11 @@ templates*) button.
 ## Sync templates
 
 ZapperHub keeps the templates in a local database. The database can differ from
-Meta, for example after a template changes status. The **Sync templates**
-(*Sincronizar templates*) button fetches the current templates of the account
+Meta, for example after a template changes status. The **Sync templates** button fetches the current templates of the account
 from Meta and updates the local database.
 
 During the sync, the button is unavailable. At the end, the panel shows
-*Templates sincronizados.* and reloads the list. If Meta does not respond: *Erro
-ao sincronizar templates.*
+*Templates synced.* and reloads the list. If Meta does not respond: *Error syncing templates.*
 
 <Note>
 The same operation exists in the API:
@@ -45,46 +40,43 @@ The same operation exists in the API:
 
 | Attribute | Content |
 |---|---|
-| **Name** (*Nome*) | The identifier of the template |
-| **Language** (*Idioma*) | Portuguese (Brazil), English (US), Spanish, German, Italian, Turkish, French, Indonesian, Russian, among others |
-| **Status** | **Approved** (*Aprovado*), **Pending** (*Pendente*), **Rejected** (*Rejeitado*), **Limit reached** (*Limite atingido*), **Disabled** (*Desativado*), or **Paused** (*Pausado*) |
-| **Category** (*Categoria*) | **Utility** (*Utilitário*), **Authentication** (*Autenticação*), or **Marketing** |
+| **Name** | The identifier of the template |
+| **Language** | Portuguese (Brazil), English (US), Spanish, German, Italian, Turkish, French, Indonesian, Russian, among others |
+| **Status** | **Approved**, **Pending**, **Rejected**, **Limit reached**, **Disabled**, or **Paused** |
+| **Category** | **Utility**, **Authentication**, or **Marketing** |
 | **Preview** | The start of the message body |
 
-The list has the **List** (*Lista*) and **Cards** views. It loads in blocks.
-Click **Load more** (*Carregar mais*) for the next block.
+The list has the **List** and **Cards** views. It loads in blocks.
+Click **Load more** for the next block.
 
-Each template has three actions: **View details** (*Ver detalhes*), **Send
-message** (*Enviar mensagem*), and **Delete** (*Excluir*). **View details** shows
-the **Parameter format** (*Formato dos parâmetros*: **Positional** or **Named**)
-and the **Components** (*Componentes*).
+Each template has three actions: **View details**, **Send message**, and **Delete**. **View details** shows
+the **Parameter format** (**Positional** or **Named**)
+and the **Components**.
 
 ## Create a template
 
-Click **New template** (*Novo template*). The panel opens *Criar template de
-mensagem*.
+Click **New template**. The panel opens *Create message template*.
 
 | Field | Required | Validation |
 |---|---|---|
-| **Name** (*Nome*) | Yes | Identifier in the format `boas_vindas` |
-| **Category** (*Categoria*) | Yes | **Utility**, **Authentication**, or **Marketing** |
-| **Language** (*Idioma*) | Yes | One of the languages in the list |
-| **Body** (*Corpo*) | Yes | The message text. It accepts variables |
-| **Header** (*Cabeçalho*) | No | Text or media, according to the **Header format** (*Formato do cabeçalho*) |
-| **Footer** (*Rodapé*) | No | Short text |
-| **Buttons** (*Botões*) | No | Up to the Meta limit, with **Add button** (*Adicionar botão*) |
+| **Name** | Yes | Identifier in the format `boas_vindas` |
+| **Category** | Yes | **Utility**, **Authentication**, or **Marketing** |
+| **Language** | Yes | One of the languages in the list |
+| **Body** | Yes | The message text. It accepts variables |
+| **Header** | No | Text or media, according to the **Header format** |
+| **Footer** | No | Short text |
+| **Buttons** | No | Up to the Meta limit, with **Add button** |
 
 The **Header format** is **Text**, **Image**, **Video**, **Document**, or
 **Location**. In the media formats, the example field asks for the **URL or
 base64 of the media**.
 
-Each button has **Button text** (*Texto do botão*) and **Type** (*Tipo*): **URL**,
-**Phone** (*Telefone*), **Quick reply** (*Resposta rápida*), or **OTP**. In the
+Each button has **Button text** and **Type**: **URL**,
+**Phone**, **Quick reply**, or **OTP**. In the
 OTP type, there is also the **OTP type** (**Copy code** or **One tap**) and the
 **Autofill text**.
 
-On save: *Template criado. Ele ficará pendente de aprovação.* (template created,
-pending approval). On failure: *Erro ao criar template.*
+On save: *Template created. It will be pending approval.*. On failure: *Error creating template.*
 
 ## Variables: positional and named
 
@@ -114,22 +106,20 @@ Olá {{nome}}, seu pedido {{pedido}} foi enviado.
 At the send, the panel shows **Named variables (fill in each value)**, with one
 field per name. The fill order does not matter.
 
-In both cases, the creation asks for a **Variable example** (*Exemplo para
-variável*). Meta uses the example to evaluate the template.
+In both cases, the creation asks for a **Example for variable**. Meta uses the example to evaluate the template.
 
 ## Send a template
 
-Click **Send message** (*Enviar mensagem*). The panel opens *Enviar mensagem de
-template*, with a **Preview** (*Pré-visualização*).
+Click **Send message**. The panel opens *Send template message*, with a **Preview**.
 
 | Field | Required | Validation |
 |---|---|---|
-| **Phone number** (*Número do telefone*) | Yes | Number with the country code, such as `5511999999999` |
-| **Header media link** (*Link da mídia do cabeçalho*) | Yes, if the header is media | Valid URL |
-| **Variables** (*Variáveis*) | Yes, if the template has variables | One value per variable |
+| **Phone number** | Yes | Number with the country code, such as `5511999999999` |
+| **Header media link** | Yes, if the header is media | Valid URL |
+| **Positional variables** or **Named variables** | Yes, if the template has variables | One value per variable |
 
-During the send, the screen shows *Enviando...*. At the end: *Mensagem enviada.*
-or *Erro ao enviar mensagem.*
+During the send, the screen shows *Sending...*. At the end: *Message sent.*
+or *Error sending message.*
 
 ### Media in the header
 
@@ -144,8 +134,7 @@ accessible. See [File storage](/en/definitions/storage).
 ### Unapproved template
 
 The **Send message** button is unavailable while the template is not
-**Approved**. The panel shows *Template precisa estar aprovado para enviar
-mensagem* (template must be approved).
+**Approved**. The panel shows *Template must be approved to send messages*.
 
 The rule belongs to Meta: every template goes through review before it starts a
 conversation. A new template starts as **Pending**. Only after **Approved** can it
@@ -158,7 +147,7 @@ is to create a new, adjusted template.
 
 ## Delete a template
 
-The **Delete** (*Excluir*) button appears on each template. In the **List** view,
+The **Delete** button appears on each template. In the **List** view,
 with the label. In the **Cards** view, only with the trash icon.
 
 <Warning>
@@ -169,15 +158,14 @@ entirely. Scheduled sends that use the template are not checked or canceled.
 
 <Steps>
   <Step title="Start">
-    Click **Delete** (*Excluir*). The panel opens *Excluir template*.
+    Click **Delete**. The panel opens *Delete template*.
   </Step>
   <Step title="Confirm">
-    Click **Yes, delete** (*Sim, excluir*). **Cancel** (*Cancelar*) closes without deletion.
+    Click **Yes, delete**. **Cancel** closes without deletion.
   </Step>
 </Steps>
 
-While Meta responds, the button shows *Excluindo...*. At the end: *Template
-excluído.* and the list reloads. Failure: *Erro ao excluir template.*
+While Meta responds, the button shows *Deleting...*. At the end: *Template deleted.* and the list reloads. Failure: *Error deleting template.*
 
 ### Meta rules after the deletion
 
@@ -188,7 +176,7 @@ excluído.* and the list reloads. Failure: *Erro ao excluir template.*
 | The template is **Disabled** | It cannot be deleted |
 
 Because of the last rule, the **Delete** button is unavailable on **Disabled**
-templates. The panel shows *A Meta não permite excluir templates desativados*
+templates. The panel shows *Meta does not allow disabled templates to be deleted*
 (Meta does not allow deletion of disabled templates).
 
 <Note>

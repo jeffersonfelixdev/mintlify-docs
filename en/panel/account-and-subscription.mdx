@@ -5,9 +5,15 @@ description: "Create the account, confirm the email, sign in, recover the passwo
 
 import PanelNote from '/snippets/en-panel-note.mdx';
 
-**Location**: public screens (outside the panel) and **Settings** (*Configurações*), in the side menu.
+**Location**: public screens (outside the panel) and **Settings**, in the side menu.
 
 <PanelNote />
+
+<Note>
+The public screens are only in Portuguese, except the sign-in screen. For these
+screens, this page gives the English meaning, with the text as shown on the screen
+in parentheses and italics.
+</Note>
 
 ## Create the account
 
@@ -51,16 +57,15 @@ link.
 
 ## Sign in
 
-Screen **Sign in** (*Faça seu login*), at the `sign-in` route.
+Screen **Sign in to your account**, at the `sign-in` route.
 
 | Field | Required | Validation |
 |---|---|---|
-| Email (*E-mail*) | Yes | Valid email. Error: *Email inválido* |
-| Password (*Senha*) | Yes | — |
+| **Email** | Yes | Valid email. Error: *Invalid email* |
+| **Password** | Yes | — |
 
-The screen has two shortcuts: **Forgot your password? Click here** (*Esqueceu a
-senha? Clique aqui*) starts the recovery, and **No account? Sign up for free**
-(*Não tem uma conta? Cadastre-se grátis*) opens the registration.
+The screen has two shortcuts: **Forgot your password? Click here** starts the
+recovery, and **Don't have an account? Sign up for free** opens the registration.
 
 After you sign in, you go to the instance list. See
 [Panel overview](/en/panel/overview).
@@ -96,19 +101,18 @@ completed) and redirects to the main page.
 
 ## Registration data
 
-Screen **Account settings** (*Configurações da conta*), at side menu >
-**Settings** (*Configurações*), route `dash/settings`.
+Screen **Account settings**, at side menu > **Settings**, route `dash/settings`.
 
 | Field | Required | Validation |
 |---|---|---|
-| Name (*Nome*) | Yes | Error if empty: *Informe o nome* |
-| Phone (*Telefone*) | Yes | Error if empty: *Informe o telefone* |
-| Document type (*Tipo de documento*) | Yes | **CPF** or **CNPJ** (Brazilian tax ids). Error if empty: *Selecione o tipo de documento* |
-| Document number (*Número do documento*) | Yes | Error if empty: *Informe o número do documento* |
-| Password, optional (*Senha*) | No | If filled, at least 6 characters |
+| **Name** | Yes | Error if empty: *Enter your name* |
+| **Phone** | Yes | Error if empty: *Enter your phone number* |
+| **Document type** | Yes | **CPF** or **CNPJ** (Brazilian tax ids). Error if empty: *Select the document type* |
+| **Document number** | Yes | Error if empty: *Enter the document number* |
+| **Password (optional)** | No | If filled, at least 6 characters |
 
-Click **Save changes** (*Salvar alterações*). The result is *Dados atualizados com
-sucesso!* (data updated) or *Erro ao atualizar dados* (update error).
+Click **Save changes**. The result is *Data updated successfully!* or *Error
+updating data*.
 
 <Note>
 The password field of this screen is optional and accepts 6 characters. The rule
@@ -118,7 +122,7 @@ password.
 
 ## Subscription and customer portal
 
-The **My subscription** (*Minha assinatura*) item, in the side menu, opens the
+The **My subscription** item, in the side menu, opens the
 customer portal in a new tab. The portal has the invoices, the payment method,
 and the cancellation.
 
@@ -129,8 +133,8 @@ screen shows *Link inválido* (invalid link).
 ### Overdue subscription
 
 With an overdue subscription, the panel blocks the creation of instances. The new
-instance button is disabled, with the message *É preciso regularizar a assinatura
-para criar uma instância* (regularize the subscription to create an instance).
+instance button is disabled, with the message *You need to renew your
+subscription to create an instance*.
 
 Existing instances stay listed. The panel does not delete them. To create
 instances again, regularize the payment in the customer portal, in **My

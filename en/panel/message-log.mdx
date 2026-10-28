@@ -5,7 +5,7 @@ description: "Find a message, interpret its state, and investigate why it did no
 
 import PanelNote from '/snippets/en-panel-note.mdx';
 
-**Location**: **Instances** (*Instâncias*) > select the instance > **Messages** (*Mensagens*).
+**Location**: **Instances** > select the instance > **Messages**.
 
 <PanelNote />
 
@@ -15,49 +15,45 @@ This screen lists the messages sent and received by the instance. For each
 message, it shows what happened and when. Use the screen to investigate a message
 that did not arrive.
 
-With no result for the filters, the screen shows *Nenhuma mensagem encontrada*
-(no message found). If the query fails: *Não foi possível carregar as mensagens*
-(could not load messages).
+With no result for the filters, the screen shows *No messages found*. If the query fails: *Could not load messages*.
 
 ## Filters
 
 | Filter | Function |
 |---|---|
-| **Creation date** (*Data de criação*) | Period between **From** (*De*) and **To** (*Até*) |
-| **Sent/Received** (*Enviada/Recebida*) | **All** (*Todas*), **Sent only** (*Somente enviadas*), or **Received only** (*Somente recebidas*) |
-| **Origin** (*Origem*) | Where the message came from. The panel summarizes it as *(direction) via (origin)* |
-| **Search** (*Pesquisar*) | Text search in the content and the caption |
+| **Creation date** | Period between **From** and **To** |
+| **Sent/Received** | **All**, **Sent only**, or **Received only** |
+| **Origin** | Where the message came from. The panel summarizes it as *(direction) via (origin)* |
+| **Search** | Text search in the content and the caption |
 
-With inverted dates, the screen warns: *A data inicial não pode ser posterior à
-data final* (start date cannot be after end date).
+With inverted dates, the screen warns: *Start date cannot be after end date*.
 
-The list loads in blocks. Click **Load more** (*Carregar mais*).
+The list loads in blocks. Click **Load more**.
 
 ### Columns
 
-**Contact** (*Contato*), **Type** (*Tipo*), **Text / caption** (*Texto /
-legenda*), **Created at** (*Criada em*), and **Status** (*Situação*). The
-direction appears as **Sent** (*Enviada*) or **Received** (*Recebida*).
+**Contact**, **Type**, **Text / caption**, **Created at**, and **Status**. The
+direction appears as **Sent** or **Received**.
 
 ## Message types
 
 Text, Image, Audio, Video, Document, Sticker, Location, Contact, Button, List,
 Carousel, and Unknown.
 
-The **Unknown** (*Desconhecido*) type appears when the message does not fit any
+The **Unknown** type appears when the message does not fit any
 of the categories. Usually, it is a new WhatsApp format.
 
 ## Receipt states
 
-Click a row to open **Message details** (*Detalhes da mensagem*). The four states
+Click a row to open **Message details**. The four states
 appear there, each one with the date and time:
 
 | State | Meaning | Timestamp |
 |---|---|---|
-| **Sent** (*Enviada*) | ZapperHub delivered the message to WhatsApp | **Sent at** (*Enviada em*) |
-| **Delivered** (*Entregue*) | WhatsApp delivered the message to the recipient device | **Delivered at** (*Entregue em*) |
-| **Read** (*Lida*) | The recipient opened the chat and saw the message | **Read at** (*Lida em*) |
-| **Send error** (*Erro no envio*) | The message did not complete the path | No timestamp. See **Error code** (*Código de erro*) and **Error message** (*Mensagem de erro*) |
+| **Sent** | ZapperHub delivered the message to WhatsApp | **Sent at** |
+| **Delivered** | WhatsApp delivered the message to the recipient device | **Delivered at** |
+| **Read** | The recipient opened the chat and saw the message | **Read at** |
+| **Send error** | The message did not complete the path | No timestamp. See **Error code** and **Error message** |
 
 The states are cumulative, in this order. How to interpret:
 
@@ -76,26 +72,23 @@ templates: **Template name** and **Template type**. On Instagram: **Instagram ID
 
 ### Quick reply
 
-The details have the **Quick reply** (*Resposta rápida*) field and the **Send**
-(*Enviar*) button. The result is *Mensagem enviada com sucesso* (message sent) or
-*Não foi possível enviar a mensagem* (could not send).
+The details have the **Quick reply** field and the **Send** button. The result is *Message sent successfully* or
+*Could not send the message*.
 
 ## Delivery receipts in webhooks
 
 A message delivered to the recipient and an event delivered to your system are
-different things. The shortcut **View delivery receipts** (*Ver recibos de
-entrega*) opens **Delivery receipts in webhooks** (*Recibos de entrega nos
-webhooks*), which shows the second one:
+different things. The shortcut **View delivery receipts** opens **Webhook delivery receipts**, which shows the second one:
 
 | Field | Content |
 |---|---|
 | **ID** | The identifier of the receipt |
-| **Delivered at** (*Entregue em*) | When the event reached your endpoint |
-| **Delivery attempt at** (*Tentativa de entrega realizada em*) | When the delivery was attempted |
-| **Error** (*Erro*) | The error message, when the attempt failed |
+| **Delivered at** | When the event reached your endpoint |
+| **Delivery attempt made at** | When the delivery was attempted |
+| **Error** | The error message, when the attempt failed |
 
-With no results: *Nenhum recibo de entrega encontrado* (no receipt found). On
-failure: *Não foi possível carregar os recibos* (could not load receipts).
+With no results: *No delivery receipts found*. On
+failure: *Could not load receipts*.
 
 How to use: if the message shows as **Delivered**, but your system did not react,
 the problem is in the webhook delivery, not in WhatsApp. Compare **Delivery
@@ -105,21 +98,19 @@ in [Webhooks](/en/panel/webhooks).
 
 ## Processing queues
 
-The cards on the instance screen open the **Message report** (*Relatório de
-mensagens*), at the `dash/instances/[id]/messages/[status]` route. It is the
+The cards on the instance screen open the **Message report**, at the `dash/instances/[id]/messages/[status]` route. It is the
 same list, restricted to one processing state:
 
 | State | Name in the navigation |
 |---|---|
-| **Active** (*Ativos*) | **Messages in processing** (*Mensagens em processamento*) |
-| **Completed** (*Concluídos*) | **Processed messages** (*Mensagens processadas*) |
-| **Failed** (*Com falha*) | **Messages with error** (*Mensagens com erro*) |
-| **Waiting** (*Aguardando*) | **Queued messages** (*Mensagens na fila*) |
+| **Active** | **Messages in progress** |
+| **Completed** | **Processed messages** |
+| **Failed** | **Messages with error** |
+| **Waiting** | **Messages in queue** |
 
-The report shows the record count and the columns **TYPE** (*TIPO*), **JID**,
-**TEXT/CAPTION** (*TEXTO/LEGENDA*), and **DATE/TIME** (*DATA/HORA*). If the query
-fails: *Ocorreu um erro na requisição. Tente novamente.* (request error, try
-again).
+The report shows the record count and the columns **TYPE**, **JID**,
+**TEXT/CAPTION**, and **DATE/TIME**. If the query
+fails: *A request error occurred. Please try again.*.
 
 When you open an item, these appear: **Recipient**, **Contact**, **Group**,
 **Message/Caption**, **Created at**, **Processed at**, **Finished at**, **Error**,

@@ -5,19 +5,17 @@ description: "Each behavior option of the instance and the effect of turning it 
 
 import PanelNote from '/snippets/en-panel-note.mdx';
 
-**Location**: **Instances** (*Instâncias*) > select the instance > **Settings** (*Configurações*).
+**Location**: **Instances** > select the instance > **Settings**.
 
 <PanelNote />
 
 ## Description
 
-The screen **Instance settings** (*Configurações da Instância*,
-`dash/instances/[id]/settings`) controls the behavior of the instance on send
-and receive. It has two tabs: **Messages** (*Mensagens*) and **Integration**
-(*Integração*).
+The screen **Instance Settings** (`dash/instances/[id]/settings`) controls the behavior of the instance on send
+and receive. It has two tabs: **Messages** and **Integration**.
 
-Every change applies only after **Save settings** (*Salvar configurações*). The
-panel confirms with *Configurações atualizadas com sucesso.*
+Every change applies only after **Save settings**. The
+panel confirms with *Settings updated successfully.*
 
 The same options exist in the API. See
 [Get settings](/api-reference/configurações/obter-configurações) and
@@ -32,10 +30,10 @@ levels:
 
 | Level | Interval |
 |---|---|
-| **Very short** (*Muito curto*) | 0.5 to 2 seconds |
-| **Short** (*Curto*) | 2 to 3 seconds |
-| **Medium** (*Médio*) | 5 to 7 seconds |
-| **Long** (*Longo*) | 10 to 12 seconds |
+| **Shortest** | 0.5 to 2 seconds |
+| **Short** | 2 to 3 seconds |
+| **Medium** | 5 to 7 seconds |
+| **Long** | 10 to 12 seconds |
 
 At the shortest level, the queue moves faster. At the longer levels, the send
 looks more like the rhythm of a person, and a large queue takes longer to drain.
@@ -84,8 +82,7 @@ agent.
 |---|---|---|
 | **Debounce** | Yes | Greater than 0 and less than 20 seconds |
 
-Outside the range, the panel responds *O debounce deve ser maior que 0* or *O
-debounce deve ser menor que 20*.
+Outside the range, the panel responds *Debounce must be greater than 0* or *Debounce must be less than 20*.
 
 When the contact sends three messages in a row, the debounce makes the instance
 wait and send the three to the agent at once, as a single context. A low value
