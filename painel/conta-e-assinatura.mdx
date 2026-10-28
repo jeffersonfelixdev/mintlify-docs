@@ -65,7 +65,7 @@ Rota `reset-password`, aberta pelo link enviado por e-mail.
 | Campo | Obrigatório | Validação |
 |---|---|---|
 | Nova senha | Sim | Ao menos 8 caracteres, com maiúscula, minúscula, número e caractere especial |
-| Confirmação | Sim | Igual à nova senha. Erro: **As senhas devem ser iguais** |
+| Confirme sua senha | Sim | Igual à nova senha. Erro: **As senhas não coincidem** |
 
 Ao concluir, a tela mostra **Senha redefinida com sucesso**.
 
@@ -82,7 +82,7 @@ criou a sua conta e falta só definir a senha.
 | Campo | Obrigatório | Validação |
 |---|---|---|
 | Nova senha | Sim | Ao menos 8 caracteres, com maiúscula, minúscula, número e caractere especial |
-| Confirmação | Sim | Igual à nova senha. Erro: **As senhas devem ser iguais** |
+| Confirme sua senha | Sim | Igual à nova senha. Erro: **As senhas não coincidem** |
 
 Ao concluir, a tela mostra **Cadastro finalizado com sucesso** e redireciona para
 a página principal.
@@ -115,7 +115,7 @@ nova. No portal ficam as faturas, a forma de pagamento e o cancelamento.
 
 A rota `complete-payment-details/[customerId]` é usada em links enviados por
 e-mail. Ela abre o portal daquele cliente. Se o identificador não é válido, a
-tela mostra **Link inválido**.
+tela mostra **Erro: link inválido**.
 
 ### Assinatura em atraso
 

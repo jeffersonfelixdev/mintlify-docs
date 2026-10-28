@@ -9,34 +9,28 @@ import PanelNote from '/snippets/en-panel-note.mdx';
 
 <PanelNote />
 
-<Note>
-The public screens are only in Portuguese, except the sign-in screen. For these
-screens, this page gives the English meaning, with the text as shown on the screen
-in parentheses and italics.
-</Note>
-
 ## Create the account
 
-Screen **Create your account** (*Crie sua conta*), at the `sign-up` route.
+Screen **Create your account**, at the `sign-up` route.
 
 | Field | Required | Validation |
 |---|---|---|
-| Full name (*Nome completo*) | Yes | At least 2 characters |
-| Email | Yes | Valid email |
-| WhatsApp number (*Número do WhatsApp*) | Yes | Valid phone number |
-| Password (*Senha*) | Yes | At least 8 characters, with one uppercase letter, one lowercase letter, one digit, and one special character |
-| Confirm password (*Confirmar senha*) | Yes | Equal to the password |
-| Discount coupon (*Cupom de desconto*) | No | Appears when you check **I have a discount coupon** (*Tenho um cupom de desconto*) |
-| Terms acceptance | Yes | Check **I have read and accept the terms of use and the privacy policies** (*Li e aceito os termos de uso e as políticas de privacidade*) |
+| **Full name** | Yes | At least 2 characters |
+| **Email** | Yes | Valid email |
+| **WhatsApp number** | Yes | Valid phone number |
+| **Password** | Yes | At least 8 characters, with one uppercase letter, one lowercase letter, one digit, and one special character |
+| **Confirm password** | Yes | Equal to the password |
+| **Discount coupon** | No | Appears when you check **I have a discount coupon** |
+| Terms acceptance | Yes | Check **I have read and accept the terms of use and the privacy policy** |
 
 The screen requires the reCAPTCHA verification before the submit.
 
 | Error | Cause |
 |---|---|
-| *As senhas não coincidem* (passwords do not match) | The confirmation differs from the password |
-| *Você precisa aceitar os termos de uso e a política de privacidade* (you must accept the terms) | The acceptance was not checked |
+| *The passwords do not match* | The confirmation differs from the password |
+| *You must accept the terms of use and the privacy policy* | The acceptance was not checked |
 
-On completion, the screen shows *Conta criada com sucesso* (account created) and
+On completion, the screen shows *Account created successfully* and
 opens the email verification, with the address already filled in.
 
 ## Confirm the email
@@ -44,15 +38,12 @@ opens the email verification, with the address already filled in.
 There are two ways. Use the one you receive.
 
 **6-digit code**, at the `verify-email` route. Type the code received by email in
-the six fields. A wrong code responds *Código inválido* (invalid code). On
-success, the screen shows *Cadastro finalizado com sucesso!* (registration
-completed) and the **Login** button.
+the six fields. A wrong code responds *Invalid code*. On success, the screen shows
+*Registration completed successfully!* and the **Sign in** button.
 
 **Confirmation link**, at the `confirm-email` route. Open the link from the
-email. On success, the screen shows *Email confirmado com sucesso* (email
-confirmed) and redirects to the sign-in screen. If the link was already used or
-expired, the screen shows *Erro ao confirmar email* (error on email
-confirmation). In that case, restart the registration or ask support for a new
+email. On success, the screen shows *Email confirmed successfully* and redirects to the sign-in screen. If the link was already used or
+expired, the screen shows *Error confirming email*. In that case, restart the registration or ask support for a new
 link.
 
 ## Sign in
@@ -76,10 +67,10 @@ Route `reset-password`, opened through the link sent by email.
 
 | Field | Required | Validation |
 |---|---|---|
-| New password (*Nova senha*) | Yes | At least 8 characters, with uppercase, lowercase, digit, and special character |
-| Confirmation (*Confirmação*) | Yes | Equal to the new password. Error: *As senhas devem ser iguais* |
+| **New password** | Yes | At least 8 characters, with uppercase, lowercase, digit, and special character |
+| **Confirm your password** | Yes | Equal to the new password. Error: *The passwords do not match* |
 
-On completion, the screen shows *Senha redefinida com sucesso* (password reset).
+On completion, the screen shows *Password reset successfully*.
 
 <Warning>
 The previous password stops working immediately. Every session that depends on it
@@ -93,11 +84,10 @@ created your account and only the password is missing.
 
 | Field | Required | Validation |
 |---|---|---|
-| New password (*Nova senha*) | Yes | At least 8 characters, with uppercase, lowercase, digit, and special character |
-| Confirmation (*Confirmação*) | Yes | Equal to the new password. Error: *As senhas devem ser iguais* |
+| **New password** | Yes | At least 8 characters, with uppercase, lowercase, digit, and special character |
+| **Confirm your password** | Yes | Equal to the new password. Error: *The passwords do not match* |
 
-On completion, the screen shows *Cadastro finalizado com sucesso* (registration
-completed) and redirects to the main page.
+On completion, the screen shows *Registration completed successfully* and redirects to the main page.
 
 ## Registration data
 
@@ -128,7 +118,7 @@ and the cancellation.
 
 The `complete-payment-details/[customerId]` route is used in links sent by
 email. It opens the portal of that customer. If the identifier is not valid, the
-screen shows *Link inválido* (invalid link).
+screen shows *Error: invalid link*.
 
 ### Overdue subscription
 
@@ -149,8 +139,7 @@ for new registrations. Use `sign-up`.
 
 At the `old-sign-up` route, the account is created only after a completed
 payment. The screen requires the checkout session identifier in the URL. Without
-it, the screen responds *Pagamento não confirmado ou link inválido* (payment not
-confirmed or invalid link).
+it, the screen responds *Payment not confirmed or invalid link.*
 
 With a valid identifier, the **Create your account** screen asks only for the
 password, with the same rule as the current registration.
