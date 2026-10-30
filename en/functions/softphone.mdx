@@ -41,8 +41,8 @@ instances with an unofficial connection (`device`). On the official connection
 
 <Steps>
   <Step title="Your backend issues the agent credential">
-    A route of yours exchanges the `x-api-key` of the instance for a short-lived
-    credential, bound to an agent.
+    A route of yours, protected by the login of your system, exchanges the
+    `x-api-key` of the instance for a short-lived credential, bound to an agent.
   </Step>
   <Step title="The library opens the session">
     The component in the browser uses the credential to open the voice session with the instance.
@@ -94,6 +94,22 @@ support before you integrate.
 
 ## Step 1: issue the credential
 
+<Warning>
+**Protect the credential route with the login of your system.** The platform
+does not authenticate the agent. It accepts the `agentId` that your backend
+gives. Whoever calls your route gets a credential and calls from the number of
+the instance.
+
+- Issue the credential only to a user with an active session in your system.
+- Issue the credential only to the users that have permission to call.
+- Read the `agentId` and the `displayName` from the session of the user, never
+  from the request body. If the browser selects the `agentId`, an agent calls
+  with the identity of another agent, and the history shows the wrong authorship.
+
+The registered origin does not replace the login. Outside a browser, a program
+can send any value in the `Origin` header.
+</Warning>
+
 Call this route from your backend, with the `x-api-key` of the instance.
 
 ```http
@@ -124,6 +140,30 @@ Response:
 ```
 
 Return this body to the browser as received. The library uses the `endpoint`.
+
+Example of a route in your backend, with Express. Adapt it to the authentication
+of your system:
+
+```ts
+// requireLogin: the login middleware of YOUR system
+app.post('/api/softphone-token', requireLogin, async (req, res) => {
+  const user = req.user // from the session, never from the request body
+  if (!user.canCall) return res.sendStatus(403)
+
+  const r = await fetch(
+    `https://api.zapperhub.com/${INSTANCE_ID}/softphone/tokens`,
+    {
+      method: 'POST',
+      headers: {
+        'x-api-key': process.env.ZAPPERHUB_API_KEY,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ agentId: user.id, displayName: user.name }),
+    }
+  )
+  res.status(r.status).json(await r.json())
+})
+```
 
 <Note>
 **The credential is valid for 15 minutes.** The library renews the credential in
@@ -159,7 +199,7 @@ Without a bundler:
 const softphone = createSoftphone({
   instanceId: 'inst_123',
   getToken: async () => {
-    // the route of YOUR backend, from step 1
+    // the route of YOUR backend, from step 1, protected by the login
     const r = await fetch('/api/softphone-token', { method: 'POST' })
     return r.json() // { token, expiresAt, endpoint }
   },
@@ -332,6 +372,10 @@ GET /{instanceId}/calls?agentId=op-1183
 
 Calls originated by the API appear with `"conductedVia": "API"` and without the
 `agent` field.
+
+The authorship is the `agentId` that your backend gave when it issued the
+credential. It is reliable only if your route reads the agent from the session.
+See [step 1](#step-1-issue-the-credential).
 
 ## Compatibility
 

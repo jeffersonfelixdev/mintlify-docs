@@ -40,8 +40,8 @@ responde `422` com `code: UNSUPPORTED_FOR_INSTANCE_TYPE`.
 
 <Steps>
   <Step title="O seu backend emite a credencial do atendente">
-    Uma rota sua troca a `x-api-key` da instância por uma credencial de curta
-    duração, vinculada a um atendente.
+    Uma rota sua, protegida pelo login do seu sistema, troca a `x-api-key` da
+    instância por uma credencial de curta duração, vinculada a um atendente.
   </Step>
   <Step title="A biblioteca abre a sessão">
     O componente no navegador usa a credencial para abrir a sessão de voz com a instância.
@@ -93,6 +93,21 @@ o suporte antes de integrar.
 
 ## Passo 1: emitir a credencial
 
+<Warning>
+**Proteja a rota de credencial com o login do seu sistema.** A plataforma não
+autentica o atendente. Ela aceita o `agentId` que o seu backend informa. Quem
+chama a sua rota recebe uma credencial e liga pelo número da instância.
+
+- Emita a credencial só para um usuário com sessão ativa no seu sistema.
+- Emita a credencial só para os usuários que têm permissão para ligar.
+- Leia o `agentId` e o `displayName` da sessão do usuário, nunca do corpo da
+  requisição. Se o navegador escolhe o `agentId`, um atendente liga com a
+  identidade de outro, e o histórico mostra a autoria errada.
+
+A origem cadastrada não substitui o login. Fora do navegador, um programa envia
+qualquer valor no cabeçalho `Origin`.
+</Warning>
+
 Chame esta rota a partir do seu backend, com a `x-api-key` da instância.
 
 ```http
@@ -123,6 +138,29 @@ Resposta:
 ```
 
 Devolva esse corpo ao navegador como veio. A biblioteca usa o `endpoint`.
+
+Exemplo de rota no seu backend, com Express. Adapte à autenticação do seu sistema:
+
+```ts
+// requireLogin: o middleware de login do SEU sistema
+app.post('/api/softphone-token', requireLogin, async (req, res) => {
+  const user = req.user // da sessão, nunca do corpo da requisição
+  if (!user.canCall) return res.sendStatus(403)
+
+  const r = await fetch(
+    `https://api.zapperhub.com/${INSTANCE_ID}/softphone/tokens`,
+    {
+      method: 'POST',
+      headers: {
+        'x-api-key': process.env.ZAPPERHUB_API_KEY,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ agentId: user.id, displayName: user.name }),
+    }
+  )
+  res.status(r.status).json(await r.json())
+})
+```
 
 <Note>
 **A credencial vale 15 minutos.** A biblioteca renova a credencial em segundo
@@ -158,7 +196,7 @@ Sem bundler:
 const softphone = createSoftphone({
   instanceId: 'inst_123',
   getToken: async () => {
-    // a rota do SEU backend, do passo 1
+    // a rota do SEU backend, do passo 1, protegida pelo login
     const r = await fetch('/api/softphone-token', { method: 'POST' })
     return r.json() // { token, expiresAt, endpoint }
   },
@@ -331,6 +369,10 @@ GET /{instanceId}/calls?agentId=op-1183
 
 As chamadas originadas pela API aparecem com `"conductedVia": "API"` e sem o
 campo `agent`.
+
+A autoria é o `agentId` que o seu backend informou ao emitir a credencial. Ela
+é confiável só se a sua rota lê o atendente da sessão. Veja o
+[passo 1](#passo-1-emitir-a-credencial).
 
 ## Compatibilidade
 
