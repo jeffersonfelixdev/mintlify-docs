@@ -400,9 +400,9 @@ Por isso o `rowId` deve ser único em toda a mensagem.
 
 `POST /{instanceId}/messages/pix`
 
-A mensagem de cobrança PIX mostra ao contato o recebedor, o valor e um botão para
-copiar o código ou a chave. Use a cobrança PIX para pedir um pagamento, como uma
-fatura, um pedido ou uma parcela. A cobrança vale só no Brasil, em reais (BRL).
+A mensagem de cobrança PIX mostra ao contato um cartão de pagamento, com um botão
+para copiar a chave ou o código. Use a cobrança PIX para pedir um pagamento, como
+uma fatura, um pedido ou uma parcela. A cobrança vale só no Brasil, em reais (BRL).
 
 A rota é a mesma para instâncias oficiais e não oficiais. A API não gera o código
 PIX, não consulta o banco e não informa se o contato pagou. Gere o código no seu
@@ -416,6 +416,18 @@ banco ou no seu provedor de pagamento e envie o código pronto.
 | `static` | Chave PIX. O valor (`amount`) é opcional | Somente instância não oficial |
 
 A API recusa com `400` a modalidade `static` em instância oficial.
+
+### O que o contato vê
+
+Na conexão não oficial, o cartão muda conforme o tipo de cobrança:
+
+| Cobrança | O que aparece |
+| --- | --- |
+| `static` sem `amount` | O nome do recebedor, a chave PIX, o texto da mensagem e o botão **Copiar chave Pix** |
+| `static` com `amount`, ou `dynamic` | O valor, o título "Pagar com" com o ícone do PIX, o texto da mensagem e o botão **Copiar código Pix**. O nome do recebedor não aparece no cartão |
+
+Na conexão oficial, a Meta define a aparência do cartão. A versão do WhatsApp do contato
+também pode mudar o que aparece.
 
 Cobrança dinâmica:
 
@@ -456,7 +468,7 @@ Cobrança estática, somente em instância não oficial:
 | `code` | Em `dynamic` | Código PIX "copia e cola", com até 512 caracteres. Não é aceito em `static` |
 | `key` | Sim | Chave PIX do recebedor, no formato do `keyType` |
 | `keyType` | Sim | `CPF`, `CNPJ`, `EMAIL`, `PHONE` ou `EVP` (chave aleatória) |
-| `merchantName` | Sim | Nome do recebedor. De 1 a 60 caracteres |
+| `merchantName` | Sim | Nome do recebedor. De 1 a 60 caracteres. Veja [O que o contato vê](#o-que-o-contato-ve) |
 | `body` | Não | Texto da mensagem. De 1 a 1024 caracteres. Sem o campo, a mensagem usa `Pagamento via PIX` |
 | `footer` | Não | Rodapé. Até 60 caracteres |
 | `referenceId` | Não | Referência da cobrança no seu sistema. De 1 a 48 caracteres entre letras, números, `_`, `-` e `.`. Sem o campo, a API gera uma |

@@ -404,10 +404,9 @@ For this reason, the `rowId` must be unique in the whole message.
 
 `POST /{instanceId}/messages/pix`
 
-The PIX charge message shows the contact the receiver, the amount, and a button to
-copy the code or the key. Use the PIX charge to request a payment, such as an
-invoice, an order, or an installment. The charge is valid only in Brazil, in
-reais (BRL).
+The PIX charge message shows the contact a payment card, with a button to copy the
+key or the code. Use the PIX charge to request a payment, such as an invoice, an
+order, or an installment. The charge is valid only in Brazil, in reais (BRL).
 
 The route is the same for official and unofficial instances. The API does not
 generate the PIX code, does not query the bank, and does not tell you if the
@@ -422,6 +421,18 @@ finished code.
 | `static` | PIX key. The amount (`amount`) is optional | Unofficial instance only |
 
 The API rejects the `static` mode on an official instance with `400`.
+
+### What the contact sees
+
+On the unofficial connection, the card changes with the type of charge:
+
+| Charge | What shows |
+| --- | --- |
+| `static` without `amount` | The receiver name, the PIX key, the message text, and the **Copiar chave Pix** button |
+| `static` with `amount`, or `dynamic` | The amount, the "Pagar com" title with the PIX icon, the message text, and the **Copiar código Pix** button. The receiver name does not show on the card |
+
+On the official connection, Meta sets how the card looks. The WhatsApp version of the
+contact can also change what shows.
 
 Dynamic charge:
 
@@ -462,7 +473,7 @@ Static charge, on an unofficial instance only:
 | `code` | In `dynamic` | PIX "copy and paste" code, up to 512 characters. Not accepted in `static` |
 | `key` | Yes | PIX key of the receiver, in the format of the `keyType` |
 | `keyType` | Yes | `CPF`, `CNPJ`, `EMAIL`, `PHONE`, or `EVP` (random key) |
-| `merchantName` | Yes | Receiver name. From 1 to 60 characters |
+| `merchantName` | Yes | Receiver name. From 1 to 60 characters. See [What the contact sees](#what-the-contact-sees) |
 | `body` | No | Message text. From 1 to 1024 characters. Without the field, the message uses `Pagamento via PIX` |
 | `footer` | No | Footer. Up to 60 characters |
 | `referenceId` | No | Reference of the charge in your system. From 1 to 48 characters from letters, numbers, `_`, `-`, and `.`. Without the field, the API generates one |
