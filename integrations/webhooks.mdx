@@ -517,6 +517,57 @@ composto (`ig-reaction:<mid>:<remetente>:<timestamp>`). A retirada vem com
 - Uma segunda reação à mesma mensagem é um evento novo, com outro `key.id`.
 - Para reagir, use [`POST /{instanceId}/messages/react`](/functions/sending-messages#reagir-a-uma-mensagem).
 
+### Cobrança PIX enviada
+
+Publicado quando a cobrança PIX é enviada, em instância oficial (Cloud API) e não
+oficial. O bloco `message.pixMessage` tem os mesmos campos nos dois canais.
+
+```json
+{
+  "type": "messages.upsert",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "jobId": "pix_3f2a9c1e0b7d4e8f9a6b5c4d3e2f1a0b",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": true,
+    "id": "3AB16AB78CD9012E89A0",
+    "senderPn": "5512912345678@s.whatsapp.net"
+  },
+  "messageTimestamp": 1785312000,
+  "broadcast": false,
+  "message": {
+    "pixMessage": {
+      "mode": "dynamic",
+      "amount": 150.5,
+      "currency": "BRL",
+      "merchantName": "Loja Exemplo",
+      "keyType": "CNPJ",
+      "referenceId": "fatura-123",
+      "body": "Sua fatura de novembro",
+      "footer": "Vence em 10/11"
+    }
+  },
+  "trackId": "fatura-123",
+  "trackSource": "crm"
+}
+```
+
+| Campo de `pixMessage` | Descrição |
+| --- | --- |
+| `mode` | `dynamic` ou `static` |
+| `amount` | Valor em reais. Omitido na cobrança estática sem valor |
+| `currency` | Sempre `BRL` |
+| `merchantName` | Nome do recebedor |
+| `keyType` | Tipo da chave PIX |
+| `referenceId` | A referência que você enviou. Se você não enviou, a que a API gerou |
+| `body` | Texto da mensagem. Na cobrança por template, o texto enviado na requisição ou o texto padrão |
+| `footer` | Rodapé. Omitido quando não foi informado |
+| `template` | Objeto com `name` e `language`. Presente só na cobrança enviada por template |
+
+O evento não traz o código PIX nem a chave. Quando a requisição tem
+`quotedMessageId`, o evento traz também o campo `quote`, como nas outras mensagens.
+
 ### Outros tipos de mensagem recebidos
 
 Tipo: `messages.upsert`

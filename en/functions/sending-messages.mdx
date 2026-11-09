@@ -400,6 +400,193 @@ both channels. See
 [Option chosen in a list message](/en/integrations/webhooks#option-chosen-in-a-list-message).
 For this reason, the `rowId` must be unique in the whole message.
 
+## PIX charge
+
+`POST /{instanceId}/messages/pix`
+
+The PIX charge message shows the contact the receiver, the amount, and a button to
+copy the code or the key. Use the PIX charge to request a payment, such as an
+invoice, an order, or an installment. The charge is valid only in Brazil, in
+reais (BRL).
+
+The route is the same for official and unofficial instances. The API does not
+generate the PIX code, does not query the bank, and does not tell you if the
+contact paid. Generate the code in your bank or payment provider and send the
+finished code.
+
+### Modes
+
+| `mode` | What the message carries | Where it is accepted |
+| --- | --- | --- |
+| `dynamic` (default) | "Copy and paste" code (`code`) and amount (`amount`) | Official and unofficial instance |
+| `static` | PIX key. The amount (`amount`) is optional | Unofficial instance only |
+
+The API rejects the `static` mode on an official instance with `400`.
+
+Dynamic charge:
+
+```json
+{
+  "jid": "5512912345678",
+  "mode": "dynamic",
+  "amount": 150.5,
+  "code": "00020101021226...6304ABCD",
+  "key": "39580525000189",
+  "keyType": "CNPJ",
+  "merchantName": "Example Store",
+  "body": "Your November invoice",
+  "footer": "Due on 10/11",
+  "referenceId": "invoice-123"
+}
+```
+
+Static charge, on an unofficial instance only:
+
+```json
+{
+  "jid": "5512912345678",
+  "mode": "static",
+  "key": "payments@store.com.br",
+  "keyType": "EMAIL",
+  "merchantName": "Example Store"
+}
+```
+
+### Fields
+
+| Field | Required | Rule |
+| --- | --- | --- |
+| `jid` | Yes | Contact number. A group is not accepted |
+| `mode` | No | `dynamic` or `static`. Without the field, `dynamic` applies |
+| `amount` | In `dynamic` | Amount in reais, greater than zero, with up to 2 decimal places. Maximum 21474836.47 |
+| `code` | In `dynamic` | PIX "copy and paste" code, up to 512 characters. Not accepted in `static` |
+| `key` | Yes | PIX key of the receiver, in the format of the `keyType` |
+| `keyType` | Yes | `CPF`, `CNPJ`, `EMAIL`, `PHONE`, or `EVP` (random key) |
+| `merchantName` | Yes | Receiver name. From 1 to 60 characters |
+| `body` | No | Message text. From 1 to 1024 characters. Without the field, the message uses `Pagamento via PIX` |
+| `footer` | No | Footer. Up to 60 characters |
+| `referenceId` | No | Reference of the charge in your system. From 1 to 48 characters from letters, numbers, `_`, `-`, and `.`. Without the field, the API generates one |
+| `template` | No | Template to send outside the 24-hour window. Official instance only, `dynamic` mode |
+| `quotedMessageId` | No | Quote. Official instance only |
+| `trackId`, `trackSource` | No | Tracking, as in the other messages. `trackSource` defaults to `api` |
+
+The API does not truncate anything. A value outside the limit is rejected with
+`400`, and no message is scheduled. The text and the footer stay exactly as you
+sent them.
+
+### PIX key format
+
+| `keyType` | Accepted format |
+| --- | --- |
+| `CPF` | 11 digits, with valid check digits |
+| `CNPJ` | 14 characters, numeric or alphanumeric, with valid check digits |
+| `EMAIL` | E-mail address of up to 77 characters |
+| `PHONE` | Area code and number, with 10 or 11 digits. `+55` is optional. The API always sends `+55` and the number |
+| `EVP` | Random key in UUID format. The API converts it to lowercase |
+
+### PIX code
+
+The API checks the code before it schedules the message. It rejects with `400` the
+code that does not have the PIX structure, or whose CRC does not match. When the
+code carries the amount, the `amount` must be equal to it.
+
+### Reference and repetition
+
+The `referenceId` identifies the charge in your system and comes back in the
+events. If you send the same `referenceId` on the same instance within 10 minutes,
+the API returns the `jobId` of the first send and does not send another message.
+After 10 minutes, the same `referenceId` sends a new message. Use this period to
+repeat a request that failed because of the network, without duplicating the
+charge.
+
+<Note>
+In the order sent by the official instance, the order identifier is your
+`referenceId` followed by a period and a suffix that the API generates. The
+suffix is different for each message.
+</Note>
+
+### Charge outside the 24-hour window
+
+On the official instance, the charge message is sent only within 24 hours after
+the last message from the contact. Outside this period, give a `template`:
+
+```json
+{
+  "jid": "5512912345678",
+  "amount": 150.5,
+  "code": "00020101021226...6304ABCD",
+  "key": "39580525000189",
+  "keyType": "CNPJ",
+  "merchantName": "Example Store",
+  "template": {
+    "name": "pix_charge",
+    "language": "pt_BR",
+    "components": [
+      { "type": "body", "parameters": [{ "type": "text", "text": "Maria" }] }
+    ]
+  }
+}
+```
+
+The template must be approved, have an order button, and be synchronized in the
+instance. Create the template in WhatsApp Manager and synchronize the list of
+templates. In `components`, give only the `header` and `body` components that have
+variables. In a send with a template, the text and footer shown are those of the
+template. The `body` and `footer` of the request are not sent.
+
+Without `template`, the charge outside the window fails, and the `messages.error`
+event gives the reason.
+
+### Errors
+
+The API rejects with `400`, and no message is scheduled, in these cases:
+
+| Situation | Message |
+| --- | --- |
+| The recipient is a group | `Cobrança PIX não pode ser enviada para grupo` |
+| `gupshup` or `instagram` instance | `Este tipo de instância não suporta cobrança PIX` |
+| `mode: static` on an official instance | `A modalidade estática só é aceita em instância device` |
+| `template` on an unofficial instance | `Template só é aceito em instância cloud_api` |
+| `template` with `mode: static` | `Template só é aceito na modalidade dinâmica` |
+| Template does not exist in the instance | `Template não encontrado nesta instância` |
+| Template is not approved | `Template não está aprovado` |
+| Template has no order button | `Template não tem botão de pedido` |
+| `amount` different from the code amount | `O valor informado difere do valor do código PIX` |
+| Invalid code | `Código PIX inválido` |
+| Key that does not match the `keyType` | `Chave PIX incompatível com o tipo informado` |
+
+The field errors come in `validation`, with the `instancePath` of the field and the
+message. The messages are in Portuguese.
+
+### How to receive the result
+
+The `200` confirms that the message was scheduled, not that the contact received
+it. The result comes by webhook:
+
+- `messages.upsert`, with `message.pixMessage`, when the message is sent. See
+  [Sent PIX charge](/en/integrations/webhooks#sent-pix-charge).
+- `messages.error`, when the send fails. The API does not try again after a
+  rejection by the provider.
+
+The event does not contain the PIX code or the key.
+
+### Limits
+
+- On the official instance, the number must be enabled by Meta to receive payments
+  in Brazil. Without the enablement, Meta rejects the charge, and the
+  `messages.error` event gives the reason.
+- On the unofficial instance, the display of the PIX button depends on the
+  WhatsApp version of the contact. When the button does not show, the contact
+  sees only the text of the message, and the API does not add the code or the key
+  to it. To make sure of the payment, put the code or the key in the `body`.
+- In the WhatsApp Web of the contact, the charge with an amount shows the order
+  and directs the payment to the application on the phone.
+- The unofficial instance does not quote the charge. If you send `quotedMessageId`,
+  the message is sent without a quote, and the event shows `unsupported_type` in
+  `quote`.
+- The PIX button shows only for an individual contact. The charge is not accepted
+  in a group.
+
 ## Carousel
 
 `POST /{instanceId}/messages/carousel`
@@ -696,10 +883,11 @@ messages from other participants.
 | Contact | ✅ | ✅ | — |
 | Buttons | ✅ | ✅ | — |
 | Option list | ✅ | ✅ | — |
+| PIX charge | ✅ | ✅ | — |
 | Carousel | — | ✅ | — |
 | Template | — | ✅ | — |
 | React | ✅ | ✅ | ✅ |
 | Delete | ✅ | — | — |
 | Mark as read | ✅ | — | — |
-| Quote (`quotedMessageId`), except buttons and list on unofficial | ✅ | ✅ | ⚠️ |
+| Quote (`quotedMessageId`), except buttons, list, and PIX charge on unofficial | ✅ | ✅ | ⚠️ |
 | Human agent (`humanAgent`) | — | — | ✅ |

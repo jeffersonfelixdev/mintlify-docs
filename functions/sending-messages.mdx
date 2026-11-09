@@ -396,6 +396,186 @@ dois canais. Veja
 [Escolha de opção em mensagem de lista](/integrations/webhooks#escolha-de-opcao-em-mensagem-de-lista).
 Por isso o `rowId` deve ser único em toda a mensagem.
 
+## Cobrança PIX
+
+`POST /{instanceId}/messages/pix`
+
+A mensagem de cobrança PIX mostra ao contato o recebedor, o valor e um botão para
+copiar o código ou a chave. Use a cobrança PIX para pedir um pagamento, como uma
+fatura, um pedido ou uma parcela. A cobrança vale só no Brasil, em reais (BRL).
+
+A rota é a mesma para instâncias oficiais e não oficiais. A API não gera o código
+PIX, não consulta o banco e não informa se o contato pagou. Gere o código no seu
+banco ou no seu provedor de pagamento e envie o código pronto.
+
+### Modalidades
+
+| `mode` | O que a mensagem leva | Onde é aceita |
+| --- | --- | --- |
+| `dynamic` (padrão) | Código "copia e cola" (`code`) e valor (`amount`) | Instância oficial e não oficial |
+| `static` | Chave PIX. O valor (`amount`) é opcional | Somente instância não oficial |
+
+A API recusa com `400` a modalidade `static` em instância oficial.
+
+Cobrança dinâmica:
+
+```json
+{
+  "jid": "5512912345678",
+  "mode": "dynamic",
+  "amount": 150.5,
+  "code": "00020101021226...6304ABCD",
+  "key": "39580525000189",
+  "keyType": "CNPJ",
+  "merchantName": "Loja Exemplo",
+  "body": "Sua fatura de novembro",
+  "footer": "Vence em 10/11",
+  "referenceId": "fatura-123"
+}
+```
+
+Cobrança estática, somente em instância não oficial:
+
+```json
+{
+  "jid": "5512912345678",
+  "mode": "static",
+  "key": "pagamentos@loja.com.br",
+  "keyType": "EMAIL",
+  "merchantName": "Loja Exemplo"
+}
+```
+
+### Campos
+
+| Campo | Obrigatório | Regra |
+| --- | --- | --- |
+| `jid` | Sim | Número do contato. Grupo não é aceito |
+| `mode` | Não | `dynamic` ou `static`. Sem o campo, vale `dynamic` |
+| `amount` | Em `dynamic` | Valor em reais, maior que zero, com até 2 casas decimais. Máximo de 21474836.47 |
+| `code` | Em `dynamic` | Código PIX "copia e cola", com até 512 caracteres. Não é aceito em `static` |
+| `key` | Sim | Chave PIX do recebedor, no formato do `keyType` |
+| `keyType` | Sim | `CPF`, `CNPJ`, `EMAIL`, `PHONE` ou `EVP` (chave aleatória) |
+| `merchantName` | Sim | Nome do recebedor. De 1 a 60 caracteres |
+| `body` | Não | Texto da mensagem. De 1 a 1024 caracteres. Sem o campo, a mensagem usa `Pagamento via PIX` |
+| `footer` | Não | Rodapé. Até 60 caracteres |
+| `referenceId` | Não | Referência da cobrança no seu sistema. De 1 a 48 caracteres entre letras, números, `_`, `-` e `.`. Sem o campo, a API gera uma |
+| `template` | Não | Template para enviar fora da janela de 24 horas. Somente instância oficial, modalidade `dynamic` |
+| `quotedMessageId` | Não | Citação. Somente instância oficial |
+| `trackId`, `trackSource` | Não | Rastreio, como nas outras mensagens. `trackSource` assume `api` |
+
+A API não trunca nada. Um valor fora do limite é recusado com `400`, e nenhuma
+mensagem é agendada. O texto e o rodapé seguem exatamente como você os enviou.
+
+### Formato da chave PIX
+
+| `keyType` | Formato aceito |
+| --- | --- |
+| `CPF` | 11 dígitos, com dígitos verificadores válidos |
+| `CNPJ` | 14 caracteres, numéricos ou alfanuméricos, com dígitos verificadores válidos |
+| `EMAIL` | Endereço de e-mail com até 77 caracteres |
+| `PHONE` | DDD e número, com 10 ou 11 dígitos. `+55` é opcional. A API envia sempre `+55` e o número |
+| `EVP` | Chave aleatória no formato de UUID. A API converte para minúsculas |
+
+### Código PIX
+
+A API confere o código antes de agendar a mensagem. Ela recusa com `400` o código
+que não tem a estrutura do PIX ou cujo CRC não confere. Quando o código traz o
+valor, o `amount` precisa ser igual a ele.
+
+### Referência e repetição
+
+A `referenceId` identifica a cobrança no seu sistema e volta nos eventos. Se você
+envia a mesma `referenceId` na mesma instância em até 10 minutos, a API devolve o
+`jobId` do primeiro envio e não envia outra mensagem. Depois de 10 minutos, a
+mesma `referenceId` envia uma nova mensagem. Use esse prazo para repetir uma
+requisição que falhou por rede, sem duplicar a cobrança.
+
+<Note>
+No pedido enviado pela instância oficial, o identificador do pedido é a sua
+`referenceId` seguida de um ponto e de um sufixo gerado pela API. O sufixo é
+diferente a cada mensagem.
+</Note>
+
+### Cobrança fora da janela de 24 horas
+
+Na instância oficial, a mensagem de cobrança só sai dentro de 24 horas depois da
+última mensagem do contato. Fora desse prazo, informe um `template`:
+
+```json
+{
+  "jid": "5512912345678",
+  "amount": 150.5,
+  "code": "00020101021226...6304ABCD",
+  "key": "39580525000189",
+  "keyType": "CNPJ",
+  "merchantName": "Loja Exemplo",
+  "template": {
+    "name": "cobranca_pix",
+    "language": "pt_BR",
+    "components": [
+      { "type": "body", "parameters": [{ "type": "text", "text": "Maria" }] }
+    ]
+  }
+}
+```
+
+O template deve estar aprovado, ter um botão de pedido e estar sincronizado na
+instância. Crie o template no Gerenciador do WhatsApp e sincronize a lista de
+templates. Em `components`, informe só os componentes `header` e `body` que têm
+variáveis. No envio por template, o texto e o rodapé exibidos são os do template.
+O `body` e o `footer` da requisição não são enviados.
+
+Sem `template`, a cobrança fora da janela falha, e o evento `messages.error` traz
+o motivo.
+
+### Erros
+
+A API recusa com `400`, e nenhuma mensagem é agendada, nestes casos:
+
+| Situação | Mensagem |
+| --- | --- |
+| Destinatário é um grupo | `Cobrança PIX não pode ser enviada para grupo` |
+| Instância `gupshup` ou `instagram` | `Este tipo de instância não suporta cobrança PIX` |
+| `mode: static` em instância oficial | `A modalidade estática só é aceita em instância device` |
+| `template` em instância não oficial | `Template só é aceito em instância cloud_api` |
+| `template` com `mode: static` | `Template só é aceito na modalidade dinâmica` |
+| Template inexistente na instância | `Template não encontrado nesta instância` |
+| Template não aprovado | `Template não está aprovado` |
+| Template sem botão de pedido | `Template não tem botão de pedido` |
+| `amount` diferente do valor do código | `O valor informado difere do valor do código PIX` |
+| Código inválido | `Código PIX inválido` |
+| Chave que não corresponde ao `keyType` | `Chave PIX incompatível com o tipo informado` |
+
+Os erros de campo vêm em `validation`, com o `instancePath` do campo e a mensagem.
+
+### Como receber o resultado
+
+O `200` confirma que a mensagem foi agendada, e não que o contato a recebeu. O
+resultado chega por webhook:
+
+- `messages.upsert`, com `message.pixMessage`, quando a mensagem é enviada. Veja
+  [Cobrança PIX enviada](/integrations/webhooks#cobranca-pix-enviada).
+- `messages.error`, quando o envio falha. A recusa do provedor não gera nova
+  tentativa.
+
+O evento não traz o código nem a chave PIX.
+
+### Limites
+
+- Na instância oficial, o número precisa estar habilitado pela Meta para receber
+  pagamentos no Brasil. Sem a habilitação, a Meta recusa a cobrança, e o evento
+  `messages.error` traz o motivo.
+- Na instância não oficial, a exibição do botão PIX depende da versão do WhatsApp
+  do contato. Quando o botão não aparece, o contato vê somente o texto da
+  mensagem, e a API não acrescenta o código nem a chave a ele. Para garantir o
+  pagamento, inclua o código ou a chave no `body`.
+- No WhatsApp Web do contato, a cobrança com valor mostra o pedido e direciona o
+  pagamento para o aplicativo no celular.
+- A instância não oficial não cita a cobrança. Se você envia `quotedMessageId`, a
+  mensagem sai sem citação, e o evento indica `unsupported_type` em `quote`.
+- O botão PIX só aparece para contato individual. A cobrança não é aceita em grupo.
+
 ## Carrossel
 
 `POST /{instanceId}/messages/carousel`
@@ -685,10 +865,11 @@ administrador pode excluir mensagens de outros participantes.
 | Contato | ✅ | ✅ | — |
 | Botões | ✅ | ✅ | — |
 | Lista de opções | ✅ | ✅ | — |
+| Cobrança PIX | ✅ | ✅ | — |
 | Carrossel | — | ✅ | — |
 | Template | — | ✅ | — |
 | Reagir | ✅ | ✅ | ✅ |
 | Excluir | ✅ | — | — |
 | Marcar como lida | ✅ | — | — |
-| Citar (`quotedMessageId`), exceto botões e lista no não oficial | ✅ | ✅ | ⚠️ |
+| Citar (`quotedMessageId`), exceto botões, lista e cobrança PIX no não oficial | ✅ | ✅ | ⚠️ |
 | Atendimento humano (`humanAgent`) | — | — | ✅ |

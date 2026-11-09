@@ -518,6 +518,57 @@ composite (`ig-reaction:<mid>:<sender>:<timestamp>`). The removal comes with
 - A second reaction to the same message is a new event, with another `key.id`.
 - To react, use [`POST /{instanceId}/messages/react`](/en/functions/sending-messages#react-to-a-message).
 
+### Sent PIX charge
+
+Published when the PIX charge is sent, on official (Cloud API) and unofficial
+instances. The `message.pixMessage` block has the same fields on both channels.
+
+```json
+{
+  "type": "messages.upsert",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "jobId": "pix_3f2a9c1e0b7d4e8f9a6b5c4d3e2f1a0b",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": true,
+    "id": "3AB16AB78CD9012E89A0",
+    "senderPn": "5512912345678@s.whatsapp.net"
+  },
+  "messageTimestamp": 1785312000,
+  "broadcast": false,
+  "message": {
+    "pixMessage": {
+      "mode": "dynamic",
+      "amount": 150.5,
+      "currency": "BRL",
+      "merchantName": "Example Store",
+      "keyType": "CNPJ",
+      "referenceId": "invoice-123",
+      "body": "Your November invoice",
+      "footer": "Due on 10/11"
+    }
+  },
+  "trackId": "invoice-123",
+  "trackSource": "crm"
+}
+```
+
+| `pixMessage` field | Description |
+| --- | --- |
+| `mode` | `dynamic` or `static` |
+| `amount` | Amount in reais. Omitted in a static charge without an amount |
+| `currency` | Always `BRL` |
+| `merchantName` | Receiver name |
+| `keyType` | PIX key type |
+| `referenceId` | The reference you sent. If you did not send one, the one the API generated |
+| `body` | Message text. In a charge sent by template, the text given in the request or the default text |
+| `footer` | Footer. Omitted when it was not given |
+| `template` | Object with `name` and `language`. Present only in a charge sent by template |
+
+The event does not contain the PIX code or the key. When the request has
+`quotedMessageId`, the event also has the `quote` field, as in the other messages.
+
 ### Other received message types
 
 Type: `messages.upsert`
