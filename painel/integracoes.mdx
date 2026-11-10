@@ -79,10 +79,29 @@ A aba tem dois estados: **Nova integração Chatwoot**, sem integração, e
 | **Token de acesso** | Sim | O token de acesso da API do Chatwoot. Erro: **Informe o token de acesso** |
 | **Nome da caixa de entrada** | Sim | O nome exibido no Chatwoot. Erro: **Informe o nome da caixa de entrada** |
 | **Exibir nome do atendente nas mensagens** | Não | Liga ou desliga |
+| **Aviso de mensagem não entregue** | Não | **Mensagem recebida** (padrão) ou **Nota privada** |
 
 Com **Exibir nome do atendente nas mensagens** ligado, o nome do atendente do
 Chatwoot é incluído nas mensagens enviadas ao WhatsApp. O cliente vê quem fala
 com ele.
+
+### Aviso de mensagem não entregue
+
+Às vezes a Meta não entrega uma mensagem do contato. O conteúdo não chega ao
+Chatwoot. A ZapperHub então publica um aviso na conversa. O aviso informa o
+código do erro e pede que o atendente confira o WhatsApp no app ou no WhatsApp
+Web/Desktop.
+
+Escolha como o aviso aparece:
+
+| Opção | O que o atendente vê no Chatwoot |
+|---|---|
+| **Mensagem recebida** (padrão) | O aviso aparece como se o contato o tivesse enviado. Os recursos do Chatwoot que respondem a mensagens do contato, como automações e agentes de IA, podem reagir a ele. |
+| **Nota privada** | O aviso aparece como nota visível só para os atendentes. O Chatwoot não a trata como mensagem do contato. Agentes de IA não respondem a ela. |
+
+Use **Nota privada** se agentes de IA respondem às conversas no Chatwoot.
+
+A opção vale para as mensagens novas. Os avisos já publicados não mudam.
 
 Clique em **Criar integração**. Sucesso: **Integração Chatwoot criada com
 sucesso.** Falha: **Não foi possível criar a integração Chatwoot.**
@@ -100,7 +119,7 @@ pelo Chatwoot:
 
 Guarde os identificadores. Eles localizam a integração ao investigar um problema.
 
-Alterar a exibição do atendente responde **Preferência atualizada.** ou **Não
+Alterar uma opção responde **Preferência atualizada.** ou **Não
 foi possível atualizar a preferência.** Se a tela não carregar, ela mostra **Não
 foi possível carregar a integração Chatwoot.** e **Tentar novamente**.
 

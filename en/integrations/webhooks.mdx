@@ -628,6 +628,9 @@ message is discarded. A type that ZapperHub does not know arrives as
   [Contact identity](#contact-identity-phone-bsuid-and-username).
 - An `unsupported` message continues to generate the `messages.error` event with
   code 131051.
+- With the Chatwoot integration active, an `unsupported` message posts a notice
+  in the Chatwoot conversation. See
+  [Undelivered message notice](/en/panel/integrations#undelivered-message-notice).
 - `unknownMessage.raw` carries the original message from Meta. This way, you
   handle the new type without waiting for a ZapperHub update.
 

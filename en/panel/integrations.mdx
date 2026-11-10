@@ -79,10 +79,29 @@ after creation.
 | **Access token** | Yes | The Chatwoot API access token. Error: *Access token is required* |
 | **Inbox name** | Yes | The name shown in Chatwoot. Error: *Inbox name is required* |
 | **Show agent name in messages** | No | On or off |
+| **Undelivered message notice** | No | **Incoming message** (default) or **Private note** |
 
 With **Show agent name in messages** on, the name of the Chatwoot agent is
 included in the messages sent to WhatsApp. The customer sees who is talking to
 them.
+
+### Undelivered message notice
+
+Sometimes Meta does not deliver a message from the contact. The content does not
+reach Chatwoot. ZapperHub then posts a notice in the conversation. The notice
+gives the error code and tells the agent to check WhatsApp in the app or in
+WhatsApp Web/Desktop.
+
+Select how the notice appears:
+
+| Option | What the agent sees in Chatwoot |
+|---|---|
+| **Incoming message** (default) | The notice appears as if the contact sent it. The Chatwoot functions that reply to contact messages, such as automations and AI agents, can react to it. |
+| **Private note** | The notice appears as a note that only agents can see. Chatwoot does not treat it as a contact message. AI agents do not reply to it. |
+
+Select **Private note** if AI agents reply to conversations in Chatwoot.
+
+The option applies to new messages. Notices already posted do not change.
 
 Click **Create integration**. Success: *Chatwoot integration created successfully.* Failure: *Could not create the Chatwoot integration.*
 
@@ -100,7 +119,7 @@ Chatwoot:
 Keep the identifiers. They locate the integration when you investigate a
 problem.
 
-A change of the agent name display responds *Preference updated.* or *Could not update the preference.*. If the
+A change of an option responds *Preference updated.* or *Could not update the preference.*. If the
 screen does not load, it shows *Could not load the Chatwoot integration.*
 and the **Try again** button.
 
