@@ -1,6 +1,6 @@
 ---
 title: Configurações da instância
-description: "Cada opção de comportamento da instância e o efeito de ligá-la ou desligá-la"
+description: "Cada opção de comportamento da instância, o efeito de ligá-la ou desligá-la e o cadastro do storage próprio"
 ---
 
 **Onde fica**: **Instâncias** > selecione a instância > **Configurações**.
@@ -8,11 +8,12 @@ description: "Cada opção de comportamento da instância e o efeito de ligá-la
 ## Descrição
 
 A tela **Configurações da Instância** (`dash/instances/[id]/settings`) controla o
-comportamento da instância no envio e no recebimento. Ela tem duas abas:
-**Mensagens** e **Integração**.
+comportamento da instância no envio e no recebimento. Ela tem duas abas,
+**Mensagens** e **Integração**, e o card **Armazenamento**.
 
-Toda alteração só vale depois de **Salvar configurações**. O painel confirma com
-**Configurações atualizadas com sucesso.**
+Toda alteração nas abas só vale depois de **Salvar configurações**. O painel
+confirma com **Configurações atualizadas com sucesso.** O card **Armazenamento**
+tem um botão próprio. Veja [Card Armazenamento](#card-armazenamento).
 
 As mesmas opções existem na API. Veja
 [Obter configurações](/api-reference/configurações/obter-configurações) e
@@ -128,8 +129,98 @@ celular, pelo WhatsApp Web ou pelo Desktop.
   tempo com o cliente.
 - **Desligada**: o agente continua a responder depois da intervenção humana.
 
+## Card Armazenamento
+
+O card **Armazenamento** cadastra o storage próprio da instância. Com o cadastro,
+a ZapperHub grava a mídia recebida, a mídia enviada e as gravações de ligação num
+storage seu, compatível com a API do S3. Sem cadastro, os arquivos ficam no
+storage da ZapperHub, com duração de 7 dias. Veja
+[Storage próprio](/definitions/storage#storage-proprio).
+
+O selo ao lado do título informa o estado:
+
+| Selo | Significado |
+|---|---|
+| **Não configurado** | A instância não tem storage próprio |
+| **Ativo** | A ZapperHub grava os arquivos no seu storage |
+| **Com falha** | A última gravação no seu storage falhou. O card mostra a data e o motivo |
+
+### Pré-requisitos
+
+- Um bucket com uma chave de acesso que pode gravar e apagar objetos.
+- Um endereço `https` público para a API do storage.
+- Para a URL dos eventos abrir no navegador: leitura pública no bucket, ou um
+  domínio público de leitura, como uma CDN.
+
+### Campos
+
+| Campo | Obrigatório | Validação |
+|---|---|---|
+| **Endereço da API (endpoint)** | Sim | URL que começa com `https://`. Erro: **Informe uma URL que comece com https://** |
+| **Bucket** | Sim | Texto. Erro se vazio: **Campo obrigatório** |
+| **Região** | Sim | Texto. No Cloudflare R2, use `auto` |
+| **Prefixo (opcional)** | Não | Pasta dos arquivos. Erro: **O prefixo não pode começar com /** |
+| **URL pública (opcional)** | Não | URL que começa com `https://`. É a base das URLs dos eventos |
+| **Access Key ID** | Sim | Texto |
+| **Secret Access Key** | Sim | Texto |
+| **Usar o bucket no caminho da URL** | Não | Ligue se o provedor exige o formato `endereço/bucket/arquivo` |
+
+Sem a **URL pública**, a URL dos eventos usa o endereço da API e o bucket.
+
+### Cadastrar ou alterar o storage
+
+<Steps>
+  <Step title="Preencha os campos">
+    Informe o endereço, o bucket, a região e a chave de acesso.
+  </Step>
+  <Step title="Salve">
+    Clique em **Salvar armazenamento**. O botão mostra **Testando o storage...**
+    enquanto a ZapperHub grava e apaga um arquivo de teste.
+  </Step>
+  <Step title="Confira o estado">
+    O painel confirma com **Armazenamento salvo. O teste de gravação passou.** O
+    selo muda para **Ativo**.
+  </Step>
+</Steps>
+
+<Note>
+O painel não mostra as credenciais salvas. Para alterar o cadastro, informe o
+**Access Key ID** e o **Secret Access Key** de novo.
+</Note>
+
+Se o teste falha, o painel não salva o cadastro e mostra o motivo:
+
+| Mensagem | Causa |
+|---|---|
+| **Não foi possível gravar o arquivo de teste no seu storage** | As credenciais, o bucket ou a permissão de gravação estão incorretos |
+| **O arquivo de teste foi gravado, mas não foi possível apagá-lo** | A chave de acesso não tem permissão de exclusão |
+| **O endereço do storage precisa usar https e apontar para um endereço público.** | O endereço não usa `https` ou não é público |
+
+As duas primeiras mensagens trazem o código devolvido pelo seu storage.
+
+### Remover o storage
+
+<Steps>
+  <Step title="Inicie">
+    Clique em **Remover**. O painel abre **Remover o armazenamento próprio?**
+  </Step>
+  <Step title="Confirme">
+    Clique em **Remover**. **Cancelar** fecha sem remover.
+  </Step>
+</Steps>
+
+O painel confirma com **Armazenamento removido.** Os arquivos novos voltam para o
+storage da ZapperHub. A ZapperHub não apaga nada no seu storage.
+
+### Pela API
+
+As mesmas operações existem na API: `PUT`, `GET` e `DELETE` em
+`/{instanceId}/storage`. Veja
+[Storage próprio](/definitions/storage#storage-proprio).
+
 ## Veja também
 
+- [Armazenamento de arquivos](/definitions/storage): o storage próprio, a expiração e os campos dos eventos.
 - [Texto para fala](/painel/text-to-speech): a chave da ElevenLabs e as vozes.
 - [Integrações](/painel/integracoes): agentes de IA e Chatwoot.
 - [Agentes de IA](/integrations/ai-agents): como o agente funciona.

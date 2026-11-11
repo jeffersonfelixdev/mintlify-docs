@@ -1,6 +1,6 @@
 ---
 title: Instance settings
-description: "Each behavior option of the instance and the effect of turning it on or off"
+description: "Each behavior option of the instance, the effect of turning it on or off, and the registration of the own storage"
 ---
 
 import PanelNote from '/snippets/en-panel-note.mdx';
@@ -12,10 +12,11 @@ import PanelNote from '/snippets/en-panel-note.mdx';
 ## Description
 
 The screen **Instance Settings** (`dash/instances/[id]/settings`) controls the behavior of the instance on send
-and receive. It has two tabs: **Messages** and **Integration**.
+and receive. It has two tabs, **Messages** and **Integration**, and the card **Storage**.
 
-Every change applies only after **Save settings**. The
-panel confirms with *Settings updated successfully.*
+Every change in the tabs applies only after **Save settings**. The
+panel confirms with *Settings updated successfully.* The card **Storage** has
+its own button. See [Storage card](#storage-card).
 
 The same options exist in the API. See
 [Get settings](/api-reference/configurações/obter-configurações) and
@@ -130,8 +131,97 @@ phone, from WhatsApp Web, or from Desktop.
   at the same time.
 - **Off**: the agent continues to reply after the human intervention.
 
+## Storage card
+
+The card **Storage** registers the own storage of the instance. With the
+registration, ZapperHub stores the received media, the sent media, and the call
+recordings in a storage of yours, compatible with the S3 API. Without the
+registration, the files stay in the ZapperHub storage for 7 days. See
+[Own storage](/en/definitions/storage#own-storage).
+
+The badge adjacent to the title gives the state:
+
+| Badge | Meaning |
+|---|---|
+| **Not configured** | The instance does not have an own storage |
+| **Active** | ZapperHub stores the files in your storage |
+| **Failing** | The last write to your storage failed. The card shows the date and the cause |
+
+### Preliminary requirements
+
+- A bucket with an access key that can write and delete objects.
+- A public `https` address for the storage API.
+- For the event URL to open in a browser: public read on the bucket, or a public
+  read domain, such as a CDN.
+
+### Fields
+
+| Field | Required | Validation |
+|---|---|---|
+| **API endpoint** | Yes | URL that starts with `https://`. Error: **Enter a URL that starts with https://** |
+| **Bucket** | Yes | Text. Error if empty: **Required field** |
+| **Region** | Yes | Text. On Cloudflare R2, use `auto` |
+| **Prefix (optional)** | No | Folder of the files. Error: **The prefix cannot start with /** |
+| **Public URL (optional)** | No | URL that starts with `https://`. It is the base of the event URLs |
+| **Access Key ID** | Yes | Text |
+| **Secret Access Key** | Yes | Text |
+| **Use the bucket in the URL path** | No | Turn on if the provider requires the format `endpoint/bucket/file` |
+
+Without the **Public URL**, the event URL uses the API endpoint and the bucket.
+
+### Register or change the storage
+
+<Steps>
+  <Step title="Fill in the fields">
+    Enter the endpoint, the bucket, the region, and the access key.
+  </Step>
+  <Step title="Save">
+    Click **Save storage**. The button shows **Testing the storage...** while
+    ZapperHub writes and deletes a test file.
+  </Step>
+  <Step title="Examine the state">
+    The panel confirms with **Storage saved. The write test passed.** The badge
+    changes to **Active**.
+  </Step>
+</Steps>
+
+<Note>
+The panel does not show the saved credentials. To change the registration, enter
+the **Access Key ID** and the **Secret Access Key** again.
+</Note>
+
+If the test fails, the panel does not save the registration and shows the cause:
+
+| Message | Cause |
+|---|---|
+| **Could not write the test file to your storage** | The credentials, the bucket, or the write permission are incorrect |
+| **The test file was written, but it could not be deleted** | The access key does not have the delete permission |
+| **The storage endpoint must use https and point to a public address.** | The address does not use `https` or is not public |
+
+The first two messages include the code that your storage returns.
+
+### Remove the storage
+
+<Steps>
+  <Step title="Start">
+    Click **Remove**. The panel opens **Remove your own storage?**
+  </Step>
+  <Step title="Confirm">
+    Click **Remove**. **Cancel** closes without removal.
+  </Step>
+</Steps>
+
+The panel confirms with **Storage removed.** The new files go to the ZapperHub
+storage again. ZapperHub does not delete anything in your storage.
+
+### Through the API
+
+The same operations exist in the API: `PUT`, `GET`, and `DELETE` on
+`/{instanceId}/storage`. See [Own storage](/en/definitions/storage#own-storage).
+
 ## See also
 
+- [File storage](/en/definitions/storage): the own storage, the expiration, and the event fields.
 - [Text to speech](/en/panel/text-to-speech): the ElevenLabs key and the voices.
 - [Integrations](/en/panel/integrations): AI agents and Chatwoot.
 - [AI agents](/en/integrations/ai-agents): how the agent works.
