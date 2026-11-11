@@ -3,6 +3,203 @@ title: Changelog
 description: "Changes to the ZapperHub API and notices of behavior changes"
 ---
 
+<Update label="November 2026" description="Outgoing calls and call permission on the Cloud API" tags={["Cloud API", "Webhooks"]}>
+
+## Originate calls on the official connection
+
+Your application originates a call on an instance with an official connection
+(Cloud API) through an SDP exchange. The contact must first give the call
+permission. See
+[Procedure: originate on the official connection](/en/functions/calls#procedure-originate-on-the-official-connection).
+
+## New routes
+
+- `GET /{instanceId}/calls/permissions?jid=`: the call permission of the contact,
+  the service window, and the Meta limits. See
+  [Query the permission](/en/functions/calls#query-the-permission).
+- `POST /{instanceId}/calls/permissions/request`: requests the permission from
+  the contact, through a free-form message or a template. See
+  [Request the permission](/en/functions/calls#request-the-permission).
+
+## Changed route
+
+- `POST /{instanceId}/calls` accepts an instance with an official connection. The
+  body carries the `sdp` object with `type: "offer"`. The SDP answer from Meta
+  arrives in the `calls.update` event with `event: "connect"` and
+  `direction: "BUSINESS_INITIATED"`. See
+  [Originate on the official connection](/en/functions/calls#originate-on-the-official-connection).
+
+## New fields
+
+- `session` with `sdpType: "answer"` in `calls.update`, in the `connect` of the
+  outgoing call. See [`session` field](/en/integrations/webhooks#session-field-cloud-api).
+
+## New error codes
+
+`CALL_PERMISSION_TEMPLATE_REQUIRED`, `CALL_PERMISSION_TEMPLATE_INVALID`,
+`CALL_PERMISSION_REQUEST_LIMIT`, and `CALL_PERMISSION_ALREADY_GRANTED`. See
+[Error codes of the official connection](/en/functions/calls#error-codes-of-the-official-connection).
+
+</Update>
+
+<Update label="November 2026" description="Received calls on the Cloud API through the API" tags={["Cloud API", "Webhooks"]}>
+
+## Answer calls on the official connection
+
+Your application answers a received call on an instance with an official
+connection (Cloud API) through an SDP exchange. The media does not go through
+ZapperHub. See [Official connection (Cloud API)](/en/functions/calls#official-connection-cloud-api).
+
+## New route
+
+- `POST /{instanceId}/calls/{callId}/pre-accept`: reserves the received call with
+  the SDP answer. Optional. See [Pre-accept](/en/functions/calls#pre-accept).
+
+## Changed routes
+
+On the official connection, these routes no longer respond `422` with
+`code: UNSUPPORTED_FOR_INSTANCE_TYPE`:
+
+- `POST /{instanceId}/calls/{callId}/answer`: receives the `sdp` object. See
+  [Answer](/en/functions/calls#answer).
+- `POST /{instanceId}/calls/{callId}/reject` and `/hangup`. See
+  [Reject and end on the official connection](/en/functions/calls#reject-and-end-on-the-official-connection).
+- `GET /{instanceId}/calls` and `GET /{instanceId}/calls/{callId}`. See
+  [Query the history](/en/functions/calls#query-the-history).
+
+`POST /{instanceId}/calls/{callId}/audio` continues to respond `422` on the
+official connection.
+
+## New fields
+
+- `session` in `calls.update`, in the `connect` events of the official
+  connection: the SDP of the call. The original body from Meta, in `entry`, keeps
+  the `session` block. See [`session` field](/en/integrations/webhooks#session-field-cloud-api).
+- `conductedVia` gets the value `SIGNALING` in the history. See
+  [Call authorship](/en/functions/calls#call-authorship).
+- `contactBsuid` in the history: the BSUID of the contact, when Meta identifies
+  the contact only by it. In this case, `contact` is `null`.
+- `recording.reason` gets the value `NOT_AVAILABLE_ON_PATH`.
+
+## New error codes
+
+`INVALID_SDP`, `CALL_PERMISSION_REQUIRED`, `CALLING_DISABLED`, and
+`CALL_CONCURRENCY_LIMIT`. See
+[Error codes of the official connection](/en/functions/calls#error-codes-of-the-official-connection).
+
+</Update>
+
+<Update label="November 2026" description="Own storage of the instance" tags={["Cloud API", "DEVICE", "Webhooks"]}>
+
+## Own storage
+
+The instance can store the received media, the sent media, and the call
+recordings in a storage of yours, compatible with the S3 API. See
+[Own storage](/en/definitions/storage#own-storage).
+
+## New routes
+
+- `PUT /{instanceId}/storage`: registers or replaces the own storage, after it
+  writes and deletes a test file. See [Procedure](/en/definitions/storage#procedure).
+- `GET /{instanceId}/storage`: the registration, the state, and the last failure,
+  without the credentials. See [Own storage](/en/definitions/storage#own-storage).
+- `DELETE /{instanceId}/storage`: removes the registration. See
+  [Procedure](/en/definitions/storage#procedure).
+
+## New events (opt-in)
+
+- [`storage.failed`](/en/integrations/webhooks#own-storage-failure): a write to the
+  own storage failed. A maximum of one time per hour while the failure continues.
+- [`storage.recovered`](/en/integrations/webhooks#own-storage-failure): the own
+  storage writes again.
+
+## New fields
+
+- `mediaStorage` gets the value `custom` in `messages.upsert`. See
+  [Payload structure](/en/integrations/webhooks#payload-structure).
+- `mediaStorageWarning` in `messages.upsert`: the file was not stored in the own
+  storage. See [Payload structure](/en/integrations/webhooks#payload-structure).
+- `recording.storage` in `calls.update` and in the call query: `zapper` or `custom`.
+  With `custom`, `recording.url` is the URL of your storage. See
+  [Recording available](/en/integrations/webhooks#recording-available).
+
+Without an own storage registered, nothing changes.
+
+</Update>
+
+<Update label="November 2026" description="Media expiration and storage address" tags={["Webhooks", "Cloud API", "DEVICE"]}>
+
+{/* TODO(028/T064): confirm with the owner the shutdown date of storage.zapperapi.com (at least 30 days after the publication of this entry) before publishing. */}
+
+## Attention: the previous media address will be shut down
+
+New files use the address `https://storage.zapperhub.com`. The previous address,
+`https://storage.zapperapi.com`, will be shut down on **December 15, 2026**.
+
+- The URLs already issued on the previous address stay valid until the file expires.
+- If your application validates the domain of `mediaUrl`, accept `storage.zapperhub.com`.
+- If your application keeps URLs of the previous address, download the file
+  before the shutdown date.
+
+See [File storage](/en/definitions/storage).
+
+## New fields
+
+- `mediaStorage` and `mediaExpiresAt` in `messages.upsert`: where the file is
+  stored and when it expires. See
+  [Expiration date](/en/definitions/storage#expiration-date).
+- `recording.retentionExpiresAt` in `calls.update`: when the recording file
+  expires. See [Recording available](/en/integrations/webhooks#recording-available).
+
+The change is additive. No previous field changed.
+
+</Update>
+
+<Update label="November 2026" description="Template sync in the background" tags={["Cloud API", "Webhooks"]}>
+
+## Attention: two changes need an action
+
+### The template sync responds `202`
+
+`POST /{instanceId}/message-templates/sync` responds `202` immediately, with `id`,
+`status`, and `startedAt`. The response no longer has `created`, `updated`,
+`removed`, and `total`. The sync runs in the background, with a time limit of 5 minutes.
+
+To read the counts, do one of these actions:
+
+1. Get `GET /{instanceId}/message-templates/sync/{syncId}` until `status` is not `RUNNING`.
+2. Subscribe to the [`templates.sync`](/en/integrations/webhooks#template-sync) event.
+
+See [Sync templates](/en/panel/templates#sync-templates).
+
+### Incorrect connection type responds `422`
+
+The Cloud API routes respond `422` with the code `UNSUPPORTED_FOR_INSTANCE_TYPE`
+for an instance that does not have an official connection. Before, the response
+was `400`. An official connection instance without the Meta credentials continues
+to receive `400`.
+
+## New routes
+
+- `GET /{instanceId}/message-templates/sync/{syncId}`: the state of a sync. See
+  [Sync result through the API](/en/panel/templates#sync-result-through-the-api).
+- `GET /{instanceId}/message-templates/sync`: the most recent sync of the instance. See
+  [Sync result through the API](/en/panel/templates#sync-result-through-the-api).
+
+## New event (opt-in)
+
+- [`templates.sync`](/en/integrations/webhooks#template-sync): a template sync ended.
+  It goes only to subscribers that include `templates.sync` in `subscriptions`.
+
+## Other changes
+
+- The Cloud API routes respond `404` with the code `INSTANCE_NOT_FOUND` for an
+  `instanceId` that does not exist. See [Templates](/en/panel/templates#sync-templates).
+- The deletion of a template with `language` no longer syncs the full account.
+- A template created, edited, or deleted during a sync is not overwritten by it.
+
+</Update>
+
 <Update label="October 2026" description="Delivery and read receipts on the unofficial connection" tags={["DEVICE", "Webhooks"]}>
 
 ## Delivery and read receipts on the unofficial connection

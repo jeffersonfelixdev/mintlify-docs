@@ -27,14 +27,43 @@ ZapperHub keeps the templates in a local database. The database can differ from
 Meta, for example after a template changes status. The **Sync templates** button fetches the current templates of the account
 from Meta and updates the local database.
 
-During the sync, the button is unavailable. At the end, the panel shows
-*Templates synced.* and reloads the list. If Meta does not respond: *Error syncing templates.*
+The sync runs in the background, with a time limit of 5 minutes. The local
+database changes in one step at the end. If the sync fails, the local database
+stays as it was.
+
+During the sync, the button is unavailable and the list shows the current local
+database. At the end, the panel shows *Templates synced.* and reloads the list.
+If the sync fails: *Error syncing templates.*
 
 <Note>
 The same operation exists in the API:
 [Sync message templates](/api-reference/cloud-api/sincronizar-templates-de-mensagens-com-a-meta)
-(`POST /{instanceId}/message-templates/sync`).
+(`POST /{instanceId}/message-templates/sync`). The API responds `202` with the
+sync identifier. Get the result with
+`GET /{instanceId}/message-templates/sync/{syncId}`, or subscribe to the
+[`templates.sync`](/en/integrations/webhooks#template-sync) event.
 </Note>
+
+### Sync result through the API
+
+| Field | Content |
+| --- | --- |
+| `status` | `RUNNING` (in progress), `COMPLETED` (complete) or `FAILED` (ended with an error) |
+| `created`, `updated`, `removed`, `total` | Templates created, changed, and removed, and the instance total. Only in `COMPLETED` |
+| `error.code` | Cause of the failure. Only in `FAILED` |
+
+| `error.code` | Cause |
+| --- | --- |
+| `SYNC_TIMEOUT` | The sync went past the time limit of 5 minutes |
+| `PROVIDER_REJECTED` | Meta rejected the request, for example for a token without permission |
+| `PROVIDER_UNAVAILABLE` | Meta was unavailable or limited the calls |
+| `PROVIDER_ERROR` | Meta responded with an error without a translation |
+| `INTERNAL_ERROR` | ZapperHub failure. Request a new sync |
+
+- The instance has a maximum of one sync in progress. A repeated request returns
+  the sync that is running.
+- A template created, edited, or deleted during the sync is not overwritten by it.
+- The deletion of a template does not sync the full account.
 
 ## List
 

@@ -25,15 +25,43 @@ A ZapperHub guarda os templates em uma base local. A base pode ficar diferente d
 Meta, por exemplo depois que um template muda de status. O botão **Sincronizar
 templates** busca os templates atuais da conta na Meta e atualiza a base local.
 
-Durante a sincronização, o botão fica indisponível. Ao final, o painel mostra
-**Templates sincronizados.** e recarrega a lista. Se a Meta não responder: **Erro
-ao sincronizar templates.**
+A sincronização roda em segundo plano, com prazo de 5 minutos. A base local muda
+de uma só vez no fim. Se a sincronização falhar, a base local fica como estava.
+
+Durante a sincronização, o botão fica indisponível e a lista mostra a base local
+atual. Ao final, o painel mostra **Templates sincronizados.** e recarrega a lista.
+Se a sincronização falhar: **Erro ao sincronizar templates.**
 
 <Note>
 A mesma operação existe na API:
 [Sincronizar templates de mensagens](/api-reference/cloud-api/sincronizar-templates-de-mensagens-com-a-meta)
-(`POST /{instanceId}/message-templates/sync`).
+(`POST /{instanceId}/message-templates/sync`). A API responde `202` com o
+identificador da sincronização. Consulte o resultado em
+`GET /{instanceId}/message-templates/sync/{syncId}`, ou assine o evento
+[`templates.sync`](/integrations/webhooks#sincronizacao-de-templates).
 </Note>
+
+### Resultado da sincronização pela API
+
+| Campo | Conteúdo |
+| --- | --- |
+| `status` | `RUNNING` (em andamento), `COMPLETED` (concluída) ou `FAILED` (terminou com erro) |
+| `created`, `updated`, `removed`, `total` | Templates criados, alterados e removidos, e o total da instância. Só em `COMPLETED` |
+| `error.code` | Motivo da falha. Só em `FAILED` |
+
+| `error.code` | Causa |
+| --- | --- |
+| `SYNC_TIMEOUT` | A sincronização passou do prazo de 5 minutos |
+| `PROVIDER_REJECTED` | A Meta recusou a consulta, por exemplo por token sem permissão |
+| `PROVIDER_UNAVAILABLE` | A Meta ficou indisponível ou limitou as chamadas |
+| `PROVIDER_ERROR` | A Meta respondeu um erro sem tradução |
+| `INTERNAL_ERROR` | Falha da ZapperHub. Peça uma nova sincronização |
+
+- A instância tem no máximo uma sincronização em andamento. Um pedido repetido
+  devolve a sincronização que está rodando.
+- Um template criado, editado ou excluído durante a sincronização não é
+  sobrescrito por ela.
+- A exclusão de um template não sincroniza a conta inteira.
 
 ## Lista
 

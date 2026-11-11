@@ -3,6 +3,200 @@ title: Novidades
 description: "Mudanças na API da ZapperHub e avisos de mudança de comportamento"
 ---
 
+<Update label="Novembro de 2026" description="Chamadas feitas e permissão de ligação na Cloud API" tags={["Cloud API", "Webhooks"]}>
+
+## Originar chamadas na conexão oficial
+
+A sua aplicação origina uma chamada em instância de conexão oficial (Cloud API)
+por troca de SDP. O contato deve conceder antes a permissão de ligação. Veja
+[Procedimento: originar em conexão oficial](/functions/calls#procedimento-originar-em-conexao-oficial).
+
+## Rotas novas
+
+- `GET /{instanceId}/calls/permissions?jid=`: a permissão de ligação do contato,
+  a janela de atendimento e os limites da Meta. Veja
+  [Consultar a permissão](/functions/calls#consultar-a-permissao).
+- `POST /{instanceId}/calls/permissions/request`: pede a permissão ao contato,
+  por mensagem livre ou por template. Veja
+  [Pedir a permissão](/functions/calls#pedir-a-permissao).
+
+## Rota alterada
+
+- `POST /{instanceId}/calls` aceita instância de conexão oficial. O corpo traz o
+  objeto `sdp` com `type: "offer"`. A resposta SDP da Meta chega no evento
+  `calls.update` com `event: "connect"` e `direction: "BUSINESS_INITIATED"`. Veja
+  [Originar em conexão oficial](/functions/calls#originar-em-conexao-oficial).
+
+## Campos novos
+
+- `session` com `sdpType: "answer"` em `calls.update`, no `connect` da chamada
+  feita. Veja [Campo `session`](/integrations/webhooks#campo-session-cloud-api).
+
+## Códigos de erro novos
+
+`CALL_PERMISSION_TEMPLATE_REQUIRED`, `CALL_PERMISSION_TEMPLATE_INVALID`,
+`CALL_PERMISSION_REQUEST_LIMIT` e `CALL_PERMISSION_ALREADY_GRANTED`. Veja
+[Códigos de erro da conexão oficial](/functions/calls#codigos-de-erro-da-conexao-oficial).
+
+</Update>
+
+<Update label="Novembro de 2026" description="Chamadas recebidas na Cloud API pela API" tags={["Cloud API", "Webhooks"]}>
+
+## Atender chamadas na conexão oficial
+
+A sua aplicação atende uma chamada recebida em instância de conexão oficial
+(Cloud API) por troca de SDP. A mídia não passa pela ZapperHub. Veja
+[Conexão oficial (Cloud API)](/functions/calls#conexao-oficial-cloud-api).
+
+## Rota nova
+
+- `POST /{instanceId}/calls/{callId}/pre-accept`: reserva a chamada recebida com a
+  resposta SDP. Opcional. Veja [Pré-atender](/functions/calls#pre-atender).
+
+## Rotas alteradas
+
+Em conexão oficial, estas rotas não respondem mais `422` com
+`code: UNSUPPORTED_FOR_INSTANCE_TYPE`:
+
+- `POST /{instanceId}/calls/{callId}/answer`: recebe o objeto `sdp`. Veja
+  [Atender](/functions/calls#atender).
+- `POST /{instanceId}/calls/{callId}/reject` e `/hangup`. Veja
+  [Recusar e encerrar em conexão oficial](/functions/calls#recusar-e-encerrar-em-conexao-oficial).
+- `GET /{instanceId}/calls` e `GET /{instanceId}/calls/{callId}`. Veja
+  [Consultar o histórico](/functions/calls#consultar-o-historico).
+
+`POST /{instanceId}/calls/{callId}/audio` continua a responder `422` em conexão
+oficial.
+
+## Campos novos
+
+- `session` em `calls.update`, nos eventos `connect` da conexão oficial: o SDP da
+  chamada. O corpo original da Meta, em `entry`, mantém o bloco `session`. Veja
+  [Campo `session`](/integrations/webhooks#campo-session-cloud-api).
+- `conductedVia` ganha o valor `SIGNALING` no histórico. Veja
+  [Autoria da chamada](/functions/calls#autoria-da-chamada).
+- `contactBsuid` no histórico: o BSUID do contato, quando a Meta identifica o
+  contato só por ele. Nesse caso, `contact` é `null`.
+- `recording.reason` ganha o valor `NOT_AVAILABLE_ON_PATH`.
+
+## Códigos de erro novos
+
+`INVALID_SDP`, `CALL_PERMISSION_REQUIRED`, `CALLING_DISABLED` e
+`CALL_CONCURRENCY_LIMIT`. Veja
+[Códigos de erro da conexão oficial](/functions/calls#codigos-de-erro-da-conexao-oficial).
+
+</Update>
+
+<Update label="Novembro de 2026" description="Storage próprio da instância" tags={["Cloud API", "DEVICE", "Webhooks"]}>
+
+## Storage próprio
+
+A instância pode gravar a mídia recebida, a mídia enviada e as gravações de
+ligação num storage seu, compatível com a API do S3. Veja
+[Storage próprio](/definitions/storage#storage-proprio).
+
+## Rotas novas
+
+- `PUT /{instanceId}/storage`: cadastra ou substitui o storage próprio, depois de
+  gravar e apagar um arquivo de teste. Veja [Procedimento](/definitions/storage#procedimento).
+- `GET /{instanceId}/storage`: o cadastro, o estado e a última falha, sem as credenciais.
+  Veja [Storage próprio](/definitions/storage#storage-proprio).
+- `DELETE /{instanceId}/storage`: remove o cadastro. Veja
+  [Procedimento](/definitions/storage#procedimento).
+
+## Eventos novos (opt-in)
+
+- [`storage.failed`](/integrations/webhooks#storage-proprio-com-falha): uma gravação
+  no storage próprio falhou. No máximo uma vez por hora enquanto a falha continua.
+- [`storage.recovered`](/integrations/webhooks#storage-proprio-com-falha): o storage
+  próprio voltou a gravar.
+
+## Campos novos
+
+- `mediaStorage` ganha o valor `custom` em `messages.upsert`. Veja
+  [Estrutura do payload](/integrations/webhooks#estrutura-do-payload).
+- `mediaStorageWarning` em `messages.upsert`: o arquivo não foi gravado no storage
+  próprio. Veja [Estrutura do payload](/integrations/webhooks#estrutura-do-payload).
+- `recording.storage` em `calls.update` e na consulta de ligações: `zapper` ou `custom`.
+  Com `custom`, `recording.url` é a URL do seu storage. Veja
+  [Gravação disponível](/integrations/webhooks#gravacao-disponivel).
+
+Sem storage próprio cadastrado, nada muda.
+
+</Update>
+
+<Update label="Novembro de 2026" description="Expiração da mídia e endereço do storage" tags={["Webhooks", "Cloud API", "DEVICE"]}>
+
+{/* TODO(028/T064): confirmar com o responsável a data de desligamento de storage.zapperapi.com (pelo menos 30 dias depois da publicação desta entrada) antes de publicar. */}
+
+## Atenção: o endereço antigo da mídia será desligado
+
+Os arquivos novos usam o endereço `https://storage.zapperhub.com`. O endereço
+anterior, `https://storage.zapperapi.com`, será desligado em **15 de dezembro de 2026**.
+
+- As URLs já emitidas no endereço anterior continuam válidas até o arquivo expirar.
+- Se a sua aplicação valida o domínio da `mediaUrl`, aceite `storage.zapperhub.com`.
+- Se a sua aplicação guarda URLs do endereço anterior, faça o download do arquivo
+  antes da data de desligamento.
+
+Veja [Armazenamento de arquivos](/definitions/storage).
+
+## Campos novos
+
+- `mediaStorage` e `mediaExpiresAt` em `messages.upsert`: onde o arquivo foi
+  gravado e quando ele expira. Veja
+  [Data de expiração](/definitions/storage#data-de-expiracao).
+- `recording.retentionExpiresAt` em `calls.update`: quando o arquivo da gravação
+  expira. Veja [Gravação disponível](/integrations/webhooks#gravacao-disponivel).
+
+A mudança é aditiva. Nenhum campo anterior mudou.
+
+</Update>
+
+<Update label="Novembro de 2026" description="Sincronização de templates em segundo plano" tags={["Cloud API", "Webhooks"]}>
+
+## Atenção: duas mudanças exigem ação
+
+### A sincronização de templates responde `202`
+
+`POST /{instanceId}/message-templates/sync` responde `202` na hora, com `id`,
+`status` e `startedAt`. A resposta não traz mais `created`, `updated`, `removed`
+e `total`. A sincronização roda em segundo plano, com prazo de 5 minutos.
+
+Para ler as contagens, faça uma destas ações:
+
+1. Consulte `GET /{instanceId}/message-templates/sync/{syncId}` até `status` sair de `RUNNING`.
+2. Assine o evento [`templates.sync`](/integrations/webhooks#sincronizacao-de-templates).
+
+Veja [Sincronizar templates](/painel/templates#sincronizar-templates).
+
+### Tipo de conexão errado responde `422`
+
+As rotas de Cloud API respondem `422` com o código `UNSUPPORTED_FOR_INSTANCE_TYPE`
+para uma instância que não é de conexão oficial. Antes, a resposta era `400`. Uma
+instância de conexão oficial sem as credenciais da Meta continua a receber `400`.
+
+## Rotas novas
+
+- `GET /{instanceId}/message-templates/sync/{syncId}`: estado de uma sincronização. Veja
+  [Resultado da sincronização pela API](/painel/templates#resultado-da-sincronizacao-pela-api).
+- `GET /{instanceId}/message-templates/sync`: a sincronização mais recente da instância. Veja
+  [Resultado da sincronização pela API](/painel/templates#resultado-da-sincronizacao-pela-api).
+
+## Evento novo (opt-in)
+
+- [`templates.sync`](/integrations/webhooks#sincronizacao-de-templates): uma sincronização de
+  templates terminou. Só chega a quem incluir `templates.sync` em `subscriptions`.
+
+## Outras mudanças
+
+- As rotas de Cloud API respondem `404` com o código `INSTANCE_NOT_FOUND` para um
+  `instanceId` que não existe. Veja [Templates](/painel/templates#sincronizar-templates).
+- A exclusão de um template com `language` não sincroniza mais a conta inteira.
+- Um template criado, editado ou excluído durante uma sincronização não é sobrescrito por ela.
+
+</Update>
+
 <Update label="Outubro de 2026" description="Entrega e leitura na conexão não oficial" tags={["DEVICE", "Webhooks"]}>
 
 ## Entrega e leitura de mensagens na conexão não oficial

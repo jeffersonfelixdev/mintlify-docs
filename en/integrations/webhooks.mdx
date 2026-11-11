@@ -22,6 +22,9 @@ application receives the data at the moment of the event.
 | `connection.update` | The instance connection opened or closed |
 | `group-participants.update` | Participants joined, left, were promoted, or were demoted in a group. Unofficial connection only |
 | `calls.update` | A voice or video call was received, answered, or ended. Official and unofficial connections |
+| `templates.sync` | A template sync ended. Official connection only. Opt-in subscription |
+| `storage.failed` | A write to the own storage failed. Opt-in subscription |
+| `storage.recovered` | The own storage writes again after a failure. Opt-in subscription |
 | `comments.upsert` | The account received a comment on a post. Instagram instances only |
 | `token.expired` | The Instagram token expired or was revoked. It requires a new authorization |
 | `token.refresh.failed` | An attempt to renew the Instagram token failed |
@@ -133,6 +136,9 @@ changes with the type.
 | `pushName` | Display name of the sender |
 | `message` | The content, in the format of the message type |
 | `mediaUrl` | URL of the processed file, in media messages |
+| `mediaStorage` | Where the file is stored: `zapper` (ZapperHub storage) or `custom` ([own storage](/en/definitions/storage#own-storage)). Present with `mediaUrl`, except for media sent through the API that stayed in a URL of yours |
+| `mediaStorageWarning` | The own storage is registered and the file was not stored in it. `code` is `CUSTOM_STORAGE_FAILED` |
+| `mediaExpiresAt` | When the file expires in the ZapperHub storage, in ISO 8601. See [File storage](/en/definitions/storage) |
 | `jobId` | Id of the job in the queue. Present in messages sent through the API |
 | `trackId` / `trackSource` | The values given at the send. In received messages, `trackSource` is `whatsapp` |
 
@@ -248,7 +254,9 @@ Type: `messages.upsert`
       "messageSecret": "LRfsdg3rg21fdg3eY="
     }
   },
-  "mediaUrl": "https://storage.zapperapi.com/media/551245678900/5512912345678/1744399258603-548723645df463782eacd43.oga"
+  "mediaUrl": "https://storage.zapperhub.com/media/551245678900/5512912345678/1744399258603-548723645df463782eacd43.oga",
+  "mediaStorage": "zapper",
+  "mediaExpiresAt": "2025-04-18T19:20:58.603Z"
 }
 ```
 
@@ -296,7 +304,9 @@ Type: `messages.upsert`
       "messageSecret": "OHJdikejwoxi+ferDsd="
     }
   },
-  "mediaUrl": "https://storage.zapperapi.com/media/551245678900/5512912345678/1744400179958-ad37655efdc1489a987d6f698c9e87.pdf"
+  "mediaUrl": "https://storage.zapperhub.com/media/551245678900/5512912345678/1744400179958-ad37655efdc1489a987d6f698c9e87.pdf",
+  "mediaStorage": "zapper",
+  "mediaExpiresAt": "2025-04-18T19:36:19.958Z"
 }
 ```
 
@@ -344,7 +354,9 @@ Type: `messages.upsert`
       "messageSecret": "g3gre+gr34gdfgsgs="
     }
   },
-  "mediaUrl": "https://storage.zapperapi.com/media/551245678900/5512912345678/1744400577105-12c2b82fdebc64a249a2182e9eb57b170.jpeg"
+  "mediaUrl": "https://storage.zapperhub.com/media/551245678900/5512912345678/1744400577105-12c2b82fdebc64a249a2182e9eb57b170.jpeg",
+  "mediaStorage": "zapper",
+  "mediaExpiresAt": "2025-04-18T19:42:57.105Z"
 }
 ```
 
@@ -389,7 +401,9 @@ Type: `messages.upsert`
       "messageSecret": "fwe3rtw+werga="
     }
   },
-  "mediaUrl": "https://storage.zapperapi.com/media/551246787585/5512912345678/1744401275832-ad71abe8547533259a3274d4af8711c3.mp4"
+  "mediaUrl": "https://storage.zapperhub.com/media/551246787585/5512912345678/1744401275832-ad71abe8547533259a3274d4af8711c3.mp4",
+  "mediaStorage": "zapper",
+  "mediaExpiresAt": "2025-04-18T19:54:35.832Z"
 }
 ```
 
@@ -620,9 +634,9 @@ message is discarded. A type that ZapperHub does not know arrives as
 
 - `flowResponseMessage.responseJson` is the object returned by the Flow. If Meta
   delivers a text that is not valid JSON, it goes as text.
-- `callPermissionReplyMessage.expiresAt` is the expiration of the permission, in
-  ISO 8601. It comes only on a temporary permission. `permanent` is `true` when
-  the contact accepted permanently.
+- `callPermissionReplyMessage.expiresAt` is the end of the permission, in
+  ISO 8601. It comes only on a temporary accept. The temporary permission lasts
+  7 days. `permanent` is `true` when the contact accepted permanently.
 - `systemMessage` reports the fact. ZapperHub also updates the contact link on a
   number or BSUID change. See
   [Contact identity](#contact-identity-phone-bsuid-and-username).
@@ -633,6 +647,45 @@ message is discarded. A type that ZapperHub does not know arrives as
   [Undelivered message notice](/en/panel/integrations#undelivered-message-notice).
 - `unknownMessage.raw` carries the original message from Meta. This way, you
   handle the new type without waiting for a ZapperHub update.
+
+**Reply to the call permission request**
+
+```json
+{
+  "type": "messages.upsert",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5511999990000@s.whatsapp.net",
+  "key": {
+    "remoteJid": "5511999990000@s.whatsapp.net",
+    "fromMe": false,
+    "id": "wamid.HBgNNTUxMTk5OTk5MDAwMBUD...",
+    "senderPn": "5511999990000@s.whatsapp.net"
+  },
+  "messageTimestamp": 1794405600,
+  "pushName": "John Doe",
+  "broadcast": false,
+  "message": {
+    "callPermissionReplyMessage": {
+      "response": "accept",
+      "permanent": false,
+      "expiresAt": "2026-11-17T14:00:00.000Z",
+      "source": "user_action",
+      "contextInfo": {
+        "stanzaId": "wamid.HBgNNTUxMTk5OTk5MDAwMBUC...",
+        "participant": "5511999990000@s.whatsapp.net"
+      }
+    }
+  },
+  "trackSource": "whatsapp"
+}
+```
+
+- `response` is `accept` or `reject`.
+- `source` is `user_action` (the contact replied) or `automatic` (automatic
+  reply from Meta).
+- `contextInfo.stanzaId` is the `messageId` of the request.
+- To request the permission, see
+  [Call permission](/en/functions/calls#call-permission).
 
 ### Contact identity: phone, BSUID, and username
 
@@ -711,6 +764,97 @@ same WABA.
 - The same repeated choice does not generate a second event.
 - With `opted_out`, the API rejects marketing templates to the contact with `MARKETING_OPT_OUT`. Utility and authentication continue.
 - The subscription is opt-in. Include `contacts.preference` in `subscriptions`.
+
+### Template sync
+
+Type: `templates.sync`
+
+ZapperHub publishes this event when a
+[template sync](/en/panel/templates#sync-templates) ends.
+
+```json
+{
+  "type": "templates.sync",
+  "instanceId": "inst_01hxyz1234567890",
+  "syncId": "mts_clx1a2b3c4d5e6f7g8h9",
+  "status": "COMPLETED",
+  "created": 3,
+  "updated": 1,
+  "removed": 0,
+  "total": 42,
+  "startedAt": "2026-11-10T14:00:00.000Z",
+  "finishedAt": "2026-11-10T14:00:07.000Z",
+  "timestamp": 1794405607
+}
+```
+
+With an error:
+
+```json
+{
+  "type": "templates.sync",
+  "instanceId": "inst_01hxyz1234567890",
+  "syncId": "mts_clx1a2b3c4d5e6f7g8h9",
+  "status": "FAILED",
+  "startedAt": "2026-11-10T14:00:00.000Z",
+  "finishedAt": "2026-11-10T14:05:00.000Z",
+  "error": {
+    "code": "SYNC_TIMEOUT",
+    "message": "A sincronização excedeu o prazo de 5 minutos."
+  },
+  "timestamp": 1794405900
+}
+```
+
+- `status` is `COMPLETED` or `FAILED`.
+- With `COMPLETED`, the event has `created`, `updated`, `removed`, and `total`.
+- With `FAILED`, the event has `error`. The codes are in
+  [Templates](/en/panel/templates#sync-result-through-the-api).
+- `error.message` is in Portuguese.
+- The subscription is opt-in. Include `templates.sync` in `subscriptions`.
+
+### Own storage failure
+
+Types: `storage.failed` and `storage.recovered`
+
+ZapperHub publishes `storage.failed` when a write to the
+[own storage](/en/definitions/storage#own-storage) fails. While the failure
+continues, the event goes out a maximum of one time per hour.
+
+```json
+{
+  "type": "storage.failed",
+  "instanceId": "inst_01hxyz1234567890",
+  "reason": "ACCESS_DENIED",
+  "failedAt": "2026-11-10T14:00:00.000Z",
+  "timestamp": 1794405600
+}
+```
+
+ZapperHub publishes `storage.recovered` at the first completed write after a failure.
+
+```json
+{
+  "type": "storage.recovered",
+  "instanceId": "inst_01hxyz1234567890",
+  "failedAt": "2026-11-10T14:00:00.000Z",
+  "recoveredAt": "2026-11-10T14:20:00.000Z",
+  "timestamp": 1794406800
+}
+```
+
+| `reason` | Cause |
+| --- | --- |
+| `ACCESS_DENIED` | The access key does not have permission or is not valid |
+| `NOT_FOUND` | The bucket does not exist |
+| `TIMEOUT` | The write took more than 4 seconds |
+| `UNREACHABLE` | The address did not respond or is not public |
+| `TOO_LARGE` | The storage rejected the file size |
+| `UNKNOWN` | Another storage error |
+
+- During the failure, each media event has `mediaStorageWarning`, with or without
+  the subscription to these events.
+- Both subscriptions are opt-in. Include `storage.failed` and `storage.recovered` in `subscriptions`.
 
 ### Edited or deleted message
 
@@ -1008,6 +1152,85 @@ The `event` field is the discriminator. `key.id` is always equal to `callId`.
 }
 ```
 
+#### `session` field (Cloud API)
+
+On the official connection, the `connect` events carry the `session` field, with
+the SDP of the call. Your application uses the SDP to negotiate the media with
+Meta. See [Official connection (Cloud API)](/en/functions/calls#official-connection-cloud-api).
+
+| Situation | `event` | `direction` | `session.sdpType` |
+| --- | --- | --- | --- |
+| Received call | `connect` | `USER_INITIATED` | `offer` |
+| Outgoing call, answer from Meta | `connect` | `BUSINESS_INITIATED` | `answer` |
+
+| Field | Content |
+| --- | --- |
+| `session.sdpType` | `offer` or `answer` |
+| `session.sdp` | The SDP text from Meta |
+
+```json
+{
+  "type": "calls.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5511999990000@s.whatsapp.net",
+  "key": {
+    "remoteJid": "5511999990000@s.whatsapp.net",
+    "fromMe": false,
+    "id": "wacid.ABGG...",
+    "addressingMode": "pn",
+    "senderPn": "5511999990000@s.whatsapp.net"
+  },
+  "callId": "wacid.ABGG...",
+  "event": "connect",
+  "direction": "USER_INITIATED",
+  "session": {
+    "sdpType": "offer",
+    "sdp": "v=0\r\no=- 7669997803033704573 2 IN IP4 127.0.0.1\r\n..."
+  },
+  "timestamp": 1794405600,
+  "trackSource": "whatsapp",
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "102290129340398",
+      "changes": [
+        {
+          "field": "calls",
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": { "display_phone_number": "5511999990001" },
+            "calls": [
+              {
+                "id": "wacid.ABGG...",
+                "from": "5511999990000",
+                "to": "5511999990001",
+                "event": "connect",
+                "direction": "USER_INITIATED",
+                "timestamp": "1794405600",
+                "session": {
+                  "sdp_type": "offer",
+                  "sdp": "v=0\r\no=- 7669997803033704573 2 IN IP4 127.0.0.1\r\n..."
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+- The original body from Meta, in `entry`, keeps the `session` block.
+- On a call originated by your application, the `connect` carries the SDP answer
+  from Meta. Apply the `session.sdp` as the remote description. See
+  [Originate on the official connection](/en/functions/calls#originate-on-the-official-connection).
+- The `status` and `terminate` events do not carry `session`.
+- Meta does not guarantee the order of the events. A `terminate` can arrive
+  before the `connect`. Meta can also deliver the same event more than one time.
+  Correlate the events by `callId`. See
+  [Event order](/en/functions/calls#event-order).
+
 #### Example: instance with an unofficial connection (`device`)
 
 ```json
@@ -1094,13 +1317,16 @@ appear.
 
 | `event` | Official connection (Cloud API) | Unofficial connection (`device`) |
 | ------- | --------------------------- | ---------------------------- |
-| `connect` | User call reaching the number. No `status` | Call reaching the number. No `status` |
+| `connect` | User call reaching the number (`USER_INITIATED`), or answer from Meta to an outgoing call (`BUSINESS_INITIATED`). Carries `session`. No `status` | Call reaching the number. No `status` |
 | `status` | Call progress: `RINGING`, `ACCEPTED`, or `REJECTED` | Call answered: `ACCEPTED` |
 | `terminate` | End: `COMPLETED` or `FAILED` | End: `REJECTED`, `MISSED`, `ACCEPTED`, `COMPLETED`, `FAILED`, or omitted |
 | `error` | Failure reported by Meta | Does not occur |
 
-`MISSED` (a call that rang until it expired) exists only on the unofficial
-connection. The official connection does not publish this outcome.
+`MISSED` (a call that rang until it expired) exists only in the event of the
+unofficial connection. The official connection does not publish this outcome in
+the event. In the history, a received call that was not answered on the official
+connection has `outcome: "MISSED"`. See
+[Outcomes on the official connection](/en/functions/calls#outcomes-on-the-official-connection).
 
 On the unofficial connection, an absent `status` in a `terminate` means that the
 platform does not anticipate the reason. Use `reason`, which always comes.
@@ -1109,7 +1335,7 @@ platform does not anticipate the reason. Use `reason`, which always comes.
 
 | | Official connection (Cloud API) | Unofficial connection (`device`) |
 | --- | --- | --- |
-| Exclusive fields | `startTime`, `endTime`, `duration`, `bizOpaqueCallbackData`, `username` | `reason`, `groupId`, `key.senderLid` / `key.participantLid` |
+| Exclusive fields | `session`, `startTime`, `endTime`, `duration`, `bizOpaqueCallbackData`, `username` | `reason`, `groupId`, `key.senderLid` / `key.participantLid` |
 | `key.addressingMode` | Always `pn` | `pn` or `lid`, according to the contact |
 | Group call | Not applicable | `groupId` and `key.participantPn` |
 | Raw occurrence | In the `object` and `entry` fields | In `rawEvent` |
@@ -1192,6 +1418,7 @@ processing. Correlate the two by `callId`.
     "status": "AVAILABLE",
     "url": "https://storage.zapperhub.com/...&X-Amz-Expires=3600",
     "expiresAt": "2026-09-04T19:23:47.000Z",
+    "retentionExpiresAt": "2026-09-11T18:23:47.000Z",
     "durationSeconds": 216,
     "truncated": false
   }
@@ -1204,8 +1431,10 @@ download requires no authentication and no destination of your own.
 | Field | Description |
 | --- | --- |
 | `recording.status` | `AVAILABLE` or `UNAVAILABLE` |
+| `recording.storage` | `zapper` (ZapperHub storage) or `custom` ([own storage](/en/definitions/storage#own-storage)). With `custom`, `recording.url` is the URL of your storage, without `recording.expiresAt` and without `recording.retentionExpiresAt` |
 | `recording.url` | Download address, valid for 1 hour |
 | `recording.expiresAt` | When this address expires |
+| `recording.retentionExpiresAt` | When the recording file expires in the ZapperHub storage. After that, the recording is unavailable |
 | `recording.durationSeconds` | Duration of the recorded audio |
 | `recording.truncated` | `true` when the recording was cut at the 1-hour limit |
 

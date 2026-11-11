@@ -1,6 +1,6 @@
 ---
 title: Calls
-description: "Originate, answer, play audio, record, and end voice calls through the API"
+description: "Originate, answer, play audio, record, and end voice calls through the API, on official and unofficial connections"
 ---
 
 ## Description
@@ -10,6 +10,10 @@ application originates the call, answers a received call, plays an audio file to
 the contact, records the conversation, and ends the call. All through the API,
 with no human operator.
 
+On the official connection (Cloud API), your application originates and answers
+calls through an SDP exchange. The media does not go through ZapperHub. See
+[Official connection (Cloud API)](#official-connection-cloud-api).
+
 <Note>
 **Live conversation.** The routes on this page conduct the call through the API:
 the application calls and plays a file. For an agent to talk in real time through
@@ -18,17 +22,21 @@ call, with the same events and the same history.
 </Note>
 
 <Warning>
-**Available only on the unofficial connection.** The routes on this page apply
-only to instances with an unofficial connection (`device`). On the official
-connection (Cloud API), every route responds `422` with
-`code: UNSUPPORTED_FOR_INSTANCE_TYPE`. The official connection continues to
-receive `calls.update` events.
+**Two paths.** On the unofficial connection (`device`), ZapperHub conducts the
+media of the call. The sections from [Originate](#originate-a-call) to
+[Record](#record-the-conversation) describe this path. On the official connection
+(Cloud API), your application conducts the media and exchanges SDP with Meta to
+originate and to answer. This path is in [Official connection (Cloud API)](#official-connection-cloud-api).
+The history, the outcomes, and the authorship apply to the two paths.
 </Warning>
 
 ## Preliminary requirements
 
 - An instance with an unofficial connection, with the status **Connected**.
 - A webhook with the `calls.update` subscription. See [Webhooks](/en/integrations/webhooks).
+
+The preliminary requirements of the official connection are in
+[Preliminary requirements of the official connection](#preliminary-requirements-of-the-official-connection).
 
 <Note>
 **Subscribe to `calls.update`.** The route responses describe the moment of the
@@ -39,6 +47,10 @@ alternative is to query the [history](#query-the-history) by `callId`.
 </Note>
 
 ## Limits
+
+This table applies to the unofficial connection (`device`). The limits of the
+official connection are in
+[Limits of the official connection](#limits-of-the-official-connection).
 
 | Limit | Value |
 | --- | --- |
@@ -53,6 +65,10 @@ alternative is to query the [history](#query-the-history) by `callId`.
 | Record retention | 90 days after the end of the call |
 
 ## Originate a call
+
+This section applies to the unofficial connection (`device`). For the official
+connection, see
+[Originate on the official connection](#originate-on-the-official-connection).
 
 ```http
 POST /{instanceId}/calls
@@ -98,6 +114,10 @@ continues to work on these numbers. To answer calls, use a number outside
 coexistence.
 </Warning>
 
+This section applies to the unofficial connection (`device`). For the official
+connection, see
+[Answer on the official connection](#procedure-answer-on-the-official-connection).
+
 Use the `callId` from the `calls.update` event with `event: "connect"`.
 
 ```http
@@ -123,6 +143,10 @@ POST /{instanceId}/calls/{callId}/audio
 ```json
 { "audio": "https://exemplo.com.br/aviso-de-entrega.mp3" }
 ```
+
+On the official connection, this route responds `422` with
+`code: UNSUPPORTED_FOR_INSTANCE_TYPE`. Your application sends the audio through
+its own media connection.
 
 The route accepts the same forms as the audio message: `http`/`https` URL,
 base64, or data URL, in the formats mp3, mp4, wav, and ogg. The platform converts
@@ -166,6 +190,9 @@ The instance becomes free for a new call immediately.
 A repeated end of an already ended call responds `409` with
 `code: CALL_NOT_AVAILABLE`, with no effect.
 
+On the official connection, the rules of `hangup` and `reject` are in
+[Reject and end on the official connection](#reject-and-end-on-the-official-connection).
+
 ## Record the conversation
 
 Request the recording when you originate or answer, with `"record": true`. The
@@ -198,6 +225,488 @@ of the conversation.
 After 1 hour, the recording ends, and the call continues. The delivered file
 carries the first hour, with `truncated: true`.
 
+On the official connection, recording is not available. See [Answer](#answer).
+
+## Official connection (Cloud API)
+
+On the official connection, ZapperHub transmits the call signaling between your
+application and Meta. The media does not go through ZapperHub. Your application
+negotiates the media with Meta through SDP (WebRTC), sends the audio, and
+receives the audio.
+
+The history records these calls with `conductedVia: "SIGNALING"`.
+
+### Preliminary requirements of the official connection
+
+- An instance with an official connection (`cloud_api`), with the status
+  **Connected**.
+- A webhook with the `calls.update` subscription. The subscription enables calls
+  on the number. See [Call](/en/integrations/webhooks#call).
+- A number that qualifies for the Meta Calling API. A number in coexistence does
+  not qualify.
+- A WebRTC media endpoint that meets the
+  [media requirements](#media-requirements).
+- To originate, the call permission of the contact. See
+  [Call permission](#call-permission).
+
+### Procedure: answer on the official connection
+
+<Steps>
+  <Step title="Receive the offer">
+    Receive the `calls.update` event with `event: "connect"` and
+    `direction: "USER_INITIATED"`. Read the `callId` and the `session.sdp`. The
+    `session.sdpType` is `offer`.
+  </Step>
+  <Step title="Create the SDP answer">
+    Apply the offer to your media endpoint. Create the SDP answer. Wait until
+    the ICE candidate gathering is complete. Send the answer with all the
+    candidates. The route does not receive candidates after the answer.
+  </Step>
+  <Step title="Pre-accept (optional)">
+    Send the SDP answer to
+    [`POST /{instanceId}/calls/{callId}/pre-accept`](#pre-accept). The
+    pre-accept reserves the call.
+  </Step>
+  <Step title="Answer">
+    Send the SDP answer to
+    [`POST /{instanceId}/calls/{callId}/answer`](#answer). After a pre-accept,
+    send the same SDP.
+  </Step>
+  <Step title="Start the media">
+    Start the ICE checks. Do the DTLS handshake as the client. Send the first
+    audio packet. Do this in less than 20 seconds.
+  </Step>
+  <Step title="End">
+    Send [`POST /{instanceId}/calls/{callId}/hangup`](#reject-and-end-on-the-official-connection).
+  </Step>
+</Steps>
+
+The arrival event carries the offer in the `session` field:
+
+```json
+{
+  "type": "calls.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "callId": "wacid.ABGG...",
+  "event": "connect",
+  "direction": "USER_INITIATED",
+  "session": {
+    "sdpType": "offer",
+    "sdp": "v=0\r\no=- 7669997803033704573 2 IN IP4 127.0.0.1\r\n..."
+  },
+  "timestamp": 1794405600,
+  "trackSource": "whatsapp"
+}
+```
+
+The complete event is in [Call](/en/integrations/webhooks#call).
+
+### Answer time limit
+
+Answer the call in approximately 30 to 60 seconds after the `connect` event.
+After this time limit, Meta ends the call. The history records the call with
+`outcome: "MISSED"`.
+
+### The `sdp` object
+
+The originate, pre-accept, and answer routes receive the SDP in this object:
+
+```json
+{ "type": "answer", "sdp": "v=0\r\no=- ...\r\n" }
+```
+
+| Field | Rule |
+| --- | --- |
+| `type` | `offer` or `answer`. To originate, use `offer`. To pre-accept and answer, use `answer` |
+| `sdp` | The complete SDP text, with the ICE candidates. Up to 64 KB |
+
+ZapperHub examines the SDP before it sends the command to Meta. The SDP must
+have:
+
+- exactly one `m=audio` section;
+- the `opus/48000` codec;
+- the lines `a=fingerprint`, `a=ice-ufrag`, `a=ice-pwd`, and `a=setup`.
+
+An SDP outside these rules responds `422` with `code: INVALID_SDP`. Nothing goes
+to Meta.
+
+### Media requirements
+
+<Warning>
+**Condition of use.** Meta sets these requirements in the Calling API. Media
+outside them does not establish the call, or drops the call.
+</Warning>
+
+| Item | Requirement |
+| --- | --- |
+| Codec | Opus, 48 kHz, `ptime` of 20 ms |
+| Streams | One audio stream only |
+| Encryption | DTLS-SRTP |
+| ICE | Meta is ICE-lite, with a public IP. Meta does not supply STUN or TURN |
+| ICE checks | The business side starts the checks |
+| DTLS role | The business side is the DTLS client: `a=setup:active` |
+| First packet | The business side sends the first packet |
+| No media at the start | 20 seconds without media drop the call |
+| No media during the call | 30 seconds without media drop the call |
+
+<Note>
+**Examine `a=setup:active` in the answer.** A browser that receives an offer with
+`a=setup:actpass` creates the answer with `a=setup:active`. If the answer has a
+different value, adjust your media endpoint before you answer.
+</Note>
+
+### Pre-accept
+
+```http
+POST /{instanceId}/calls/{callId}/pre-accept
+```
+
+```json
+{
+  "sdp": { "type": "answer", "sdp": "v=0\r\no=- ...\r\n" }
+}
+```
+
+```json
+{ "callId": "wacid.ABGG...", "state": "RINGING" }
+```
+
+- The pre-accept is optional. It reserves the call for your SDP answer.
+- After the pre-accept, send the same SDP in the answer.
+- On an instance with an unofficial connection, the route responds `422` with
+  `code: UNSUPPORTED_FOR_INSTANCE_TYPE`.
+
+### Answer
+
+```http
+POST /{instanceId}/calls/{callId}/answer
+```
+
+```json
+{
+  "sdp": { "type": "answer", "sdp": "v=0\r\no=- ...\r\n" },
+  "record": false
+}
+```
+
+```json
+{
+  "callId": "wacid.ABGG...",
+  "state": "ACTIVE",
+  "direction": "USER_INITIATED",
+  "recording": { "requested": false, "granted": false }
+}
+```
+
+- ZapperHub accepts only the first answer. The next answers respond `409` with
+  `code: CALL_NOT_AVAILABLE`.
+- After a pre-accept, a different SDP responds `409` with
+  `code: CALL_NOT_AVAILABLE`.
+- `record: true` is accepted. Recording is not available on this path. The
+  response carries `recording.granted: false`:
+
+```json
+{
+  "recording": {
+    "requested": true,
+    "granted": false,
+    "reason": "NOT_AVAILABLE_ON_PATH"
+  }
+}
+```
+
+### Reject and end on the official connection
+
+```http
+POST /{instanceId}/calls/{callId}/reject
+POST /{instanceId}/calls/{callId}/hangup
+```
+
+The two routes have no body.
+
+| Route | Applies to | Outcome |
+| --- | --- | --- |
+| `reject` | A received call, while it rings | `REJECTED` |
+| `hangup` | An active call, or an outgoing call while it rings | `TERMINATED_BY_BUSINESS` |
+
+```json
+{ "callId": "wacid.ABGG...", "state": "ENDED", "outcome": "REJECTED" }
+```
+
+### Call permission
+
+To originate a call on the official connection, the contact must give the call
+permission. Meta sets the permission and the limits. The two routes in this
+section apply only to the official connection. On an instance with an unofficial
+connection, they respond `422` with `code: UNSUPPORTED_FOR_INSTANCE_TYPE`.
+
+#### Query the permission
+
+```http
+GET /{instanceId}/calls/permissions?jid=5511999990000
+```
+
+```json
+{
+  "callingEnabled": true,
+  "serviceWindowOpen": false,
+  "permission": { "status": "temporary", "expiresAt": "2026-11-17T14:00:00.000Z" },
+  "canCall": true,
+  "canRequestPermission": true,
+  "limits": {
+    "call": [ { "period": "PT24H", "max": 100, "used": 2 } ],
+    "permissionRequest": [
+      { "period": "PT24H", "max": 1, "used": 0 },
+      { "period": "P7D", "max": 2, "used": 1 }
+    ]
+  }
+}
+```
+
+| Field | Content |
+| --- | --- |
+| `callingEnabled` | Calls are enabled on the number, in the Meta settings. A change shows in a maximum of 60 seconds |
+| `serviceWindowOpen` | The contact sent a message to this instance in the last 24 hours |
+| `permission.status` | `none`, `temporary`, or `permanent` |
+| `permission.expiresAt` | End of the temporary permission, in ISO 8601. Present only with `temporary` |
+| `canCall` | Meta permits a call to the contact now |
+| `canRequestPermission` | Meta permits a permission request to the contact now |
+| `limits.call[]` | Call limits for the contact: `period` (ISO 8601), `max`, and `used` |
+| `limits.permissionRequest[]` | Permission request limits for the contact, in the same format |
+| `limits.*[].resetsAt` | When the limit goes back to zero. Present only when the limit was reached |
+
+#### Request the permission
+
+```http
+POST /{instanceId}/calls/permissions/request
+```
+
+```json
+{
+  "jid": "5511999990000",
+  "body": "We want to call you about your order.",
+  "template": {
+    "name": "pedido_ligacao",
+    "language": "pt_BR",
+    "components": [
+      { "type": "body", "parameters": [ { "type": "text", "text": "Ana" } ] }
+    ]
+  }
+}
+```
+
+```json
+{ "messageId": "wamid.HBgNNTUxMTk5OTk5MDAwMBUC..." }
+```
+
+| Field | Rule |
+| --- | --- |
+| `jid` | Mandatory. The contact |
+| `body` | Optional. Text of the free-form request, up to 1024 characters. Ignored when `template` is present |
+| `template` | Optional. `name` and `language` are mandatory. `components` follows the Meta format and is optional |
+
+The service window (`serviceWindowOpen`) sets the form of the request:
+
+| Window | `template` | Behavior |
+| --- | --- | --- |
+| Open | Absent | ZapperHub sends the request as a free-form interactive message |
+| Open | Present | ZapperHub sends the request through the template |
+| Closed | Present | ZapperHub sends the request through the template |
+| Closed | Absent | `422` with `code: CALL_PERMISSION_TEMPLATE_REQUIRED`. Nothing is sent |
+
+The request template must:
+
+- have the status `APPROVED`;
+- have the top-level component of type `call_permission_request`;
+- be of the category `MARKETING` or `UTILITY`.
+
+A template outside these rules responds `422` with
+`code: CALL_PERMISSION_TEMPLATE_INVALID`. Nothing is sent. ZapperHub examines the
+template in the local copy of the instance. After you create or approve a
+template at Meta, [sync the templates](/en/panel/templates#sync-templates).
+
+<Note>
+**Meta limits per contact.** Meta accepts 1 request in 24 hours and 2 requests in
+7 days for the same contact. Above this, the route responds `422` with
+`code: CALL_PERMISSION_REQUEST_LIMIT`. If the contact already gave the permanent
+permission, the route responds `422` with `code: CALL_PERMISSION_ALREADY_GRANTED`.
+</Note>
+
+#### Reply of the contact
+
+The reply of the contact arrives in the `messages.upsert` event, in
+`message.callPermissionReplyMessage`:
+
+```json
+{
+  "callPermissionReplyMessage": {
+    "response": "accept",
+    "permanent": false,
+    "expiresAt": "2026-11-17T14:00:00.000Z",
+    "source": "user_action",
+    "contextInfo": {
+      "stanzaId": "wamid.HBgNNTUxMTk5OTk5MDAwMBUC...",
+      "participant": "5511999990000@s.whatsapp.net"
+    }
+  }
+}
+```
+
+- `response` is `accept` or `reject`.
+- `expiresAt` comes only on a temporary accept.
+- `contextInfo.stanzaId` is the `messageId` of the request.
+- See the complete event in
+  [Other received message types](/en/integrations/webhooks#other-received-message-types).
+
+<Warning>
+**The temporary permission lasts 7 days.** No event is sent when it expires.
+Query the permission before you originate the call.
+</Warning>
+
+### Procedure: originate on the official connection
+
+<Steps>
+  <Step title="Query the permission">
+    Send [`GET /{instanceId}/calls/permissions`](#query-the-permission) with the
+    `jid` of the contact. If `permission.status` is `temporary` or `permanent`,
+    go to step 4.
+  </Step>
+  <Step title="Request the permission">
+    Send [`POST /{instanceId}/calls/permissions/request`](#request-the-permission).
+    With the window open, send the request without a template. With the window
+    closed, send the request with `template`.
+  </Step>
+  <Step title="Wait for the accept">
+    Wait for the `messages.upsert` event with `callPermissionReplyMessage` and
+    `response: "accept"`.
+  </Step>
+  <Step title="Create the SDP offer">
+    Create the SDP offer in your media endpoint. Wait until the ICE candidate
+    gathering is complete. Send the offer with all the candidates.
+  </Step>
+  <Step title="Originate the call">
+    Send the offer to [`POST /{instanceId}/calls`](#originate-on-the-official-connection).
+    Keep the `callId`.
+  </Step>
+  <Step title="Apply the answer from Meta">
+    Receive the `calls.update` event with `event: "connect"` and
+    `direction: "BUSINESS_INITIATED"`. Apply the `session.sdp` as the remote
+    description. The `session.sdpType` is `answer`.
+  </Step>
+  <Step title="End">
+    Send [`POST /{instanceId}/calls/{callId}/hangup`](#reject-and-end-on-the-official-connection).
+  </Step>
+</Steps>
+
+### Originate on the official connection
+
+```http
+POST /{instanceId}/calls
+```
+
+```json
+{
+  "jid": "5511999990000",
+  "sdp": { "type": "offer", "sdp": "v=0\r\no=- ...\r\n" },
+  "record": false
+}
+```
+
+```json
+{
+  "callId": "wacid.ABGG...",
+  "state": "RINGING",
+  "direction": "BUSINESS_INITIATED",
+  "recording": { "requested": false, "granted": false }
+}
+```
+
+- `sdp` is mandatory, with `type: "offer"`. The rules of the
+  [`sdp` object](#the-sdp-object) also apply here. An SDP outside the rules
+  responds `422` with `code: INVALID_SDP`. Nothing goes to Meta.
+- `record: true` is accepted. Recording is not available on this path. The
+  response carries `recording.reason: "NOT_AVAILABLE_ON_PATH"`.
+- Without the permission of the contact, Meta refuses the call. The route
+  responds `422` with `code: CALL_PERMISSION_REQUIRED`.
+- The SDP answer from Meta arrives in the `calls.update` event with
+  `event: "connect"`, `direction: "BUSINESS_INITIATED"`, and
+  `session.sdpType: "answer"`.
+- The call becomes `ACTIVE` with the `status` event of value `ACCEPTED`.
+- A call that is not answered ends with `outcome: "UNAVAILABLE"`.
+- To end the call while it rings, send `hangup`.
+
+The other errors are in
+[Error codes of the official connection](#error-codes-of-the-official-connection).
+
+### Event order
+
+Meta does not guarantee the order of the events. Meta can also deliver the same
+event more than one time. A `terminate` can arrive before the `connect`.
+
+The call history only moves forward: `RINGING` → `ACTIVE` → `ENDED`. A late
+event does not move the call back to a previous state.
+
+- Correlate the events by `callId`.
+- Treat a repeated delivery as already processed.
+- After a `terminate`, ignore a `connect` of the same call.
+
+### Outcomes on the official connection
+
+| Situation | `outcome` in the history |
+| --- | --- |
+| Received call, not answered | `MISSED` |
+| Outgoing call, not answered | `UNAVAILABLE` |
+| Rejected call | `REJECTED` |
+| Failed call | `FAILED` |
+| Call answered and completed | `COMPLETED` |
+| Call ended by the `hangup` route | `TERMINATED_BY_BUSINESS` |
+
+The `status` of the `terminate` event repeats the value from Meta. See
+[`event` values by origin](/en/integrations/webhooks#event-values-by-origin).
+
+### Limits of the official connection
+
+| Limit | Value |
+| --- | --- |
+| Answer time limit | Approximately 30 to 60 seconds after the `connect` event |
+| SDP size | 64 KB |
+| Video | Not available. The SDP accepts one `m=audio` section only |
+| Recording | Not available. `reason: "NOT_AVAILABLE_ON_PATH"` |
+| Audio playback through the API | Not available. The `audio` route responds `422` |
+| Simultaneous calls | The Meta limit. Above it, `CALL_CONCURRENCY_LIMIT` |
+| Temporary permission | 7 days. No event is sent when it expires |
+| Permission requests | 1 in 24 hours and 2 in 7 days, per contact |
+
+### Error codes of the official connection
+
+Every error carries `code`. The `localizedMessage` field carries the explanation
+in Portuguese.
+
+| Response | `code` | When |
+| --- | --- | --- |
+| `422` | `INVALID_SDP` | The SDP is absent, outside the rules, or rejected by Meta |
+| `422` | `CALL_PERMISSION_REQUIRED` | The contact did not give the call permission |
+| `422` | `CALL_PERMISSION_TEMPLATE_REQUIRED` | Permission request with the window closed and without `template` |
+| `422` | `CALL_PERMISSION_TEMPLATE_INVALID` | The template is not approved or does not have the `call_permission_request` component |
+| `422` | `CALL_PERMISSION_REQUEST_LIMIT` | The contact reached the limit of permission requests |
+| `422` | `CALL_PERMISSION_ALREADY_GRANTED` | The contact already gave the permanent permission |
+| `422` | `CALLING_DISABLED` | Calls are disabled on the number |
+| `422` | `CALLING_API_UNAVAILABLE` | The number does not qualify for the Calling API |
+| `422` | `CALL_CONCURRENCY_LIMIT` | The number reached the limit of simultaneous calls |
+| `409` | `CALL_IN_PROGRESS` | A call with the contact is already in progress |
+| `422` | `INVALID_CALL_TARGET` | The contact cannot receive calls |
+| `429` | `RATE_LIMITED` | The number reached the call limit. The `Retry-After` header gives the wait time |
+| `409` | `CALL_NOT_AVAILABLE` | Another answer was already accepted, the SDP is different from the pre-accept, or the call no longer rings |
+| `404` | `CALL_NOT_FOUND` | No call with this identifier on this instance |
+| `422` | `UNSUPPORTED_FOR_INSTANCE_TYPE` | The route does not exist for this connection type |
+| `503` | `PROVIDER_UNAVAILABLE` | Meta did not respond |
+
+<Warning>
+**ZapperHub does not repeat the commands sent to Meta.** After a `503` with
+`code: PROVIDER_UNAVAILABLE`, your application decides whether to send the
+command again. Obey the [answer time limit](#answer-time-limit).
+</Warning>
+
 ## Query the history
 
 ```http
@@ -214,6 +723,27 @@ filters. A call in progress appears with `state: "ACTIVE"` and `endedAt: null`.
 Use the history also to get a new download address of the recording when the
 previous one expired.
 
+On the official connection, Meta can identify the contact only by a BSUID (for
+example, a contact with a username). In this case, `contact` is `null`, and
+`contactBsuid` carries the BSUID:
+
+```json
+{
+  "callId": "wacid.ABGG...",
+  "contact": null,
+  "contactBsuid": "BR.13491208655302741918",
+  "direction": "USER_INITIATED",
+  "state": "ENDED",
+  "outcome": "COMPLETED",
+  "startedAt": "2026-11-11T14:00:00.000Z",
+  "establishedAt": "2026-11-11T14:00:12.000Z",
+  "endedAt": "2026-11-11T14:03:40.000Z",
+  "durationSeconds": 208,
+  "conductedVia": "SIGNALING",
+  "recording": { "requested": false }
+}
+```
+
 After the 7 days, the record stays available and says that the recording no
 longer exists:
 
@@ -229,8 +759,9 @@ longer exists:
 
 ## Outcomes
 
-The `outcome` field of the record and the `status` of the end event use the same
-values:
+On the unofficial connection, the `outcome` field of the record and the `status`
+of the end event use the same values. For the official connection, see
+[Outcomes on the official connection](#outcomes-on-the-official-connection).
 
 | Value | Meaning |
 | --- | --- |
@@ -247,7 +778,7 @@ Every call records how it was conducted and by whom:
 
 | Field | Content |
 | --- | --- |
-| `conductedVia` | `API` for the automated path on this page. `SOFTPHONE` for a conversation conducted by an agent |
+| `conductedVia` | `API` for the automated path of the unofficial connection. `SOFTPHONE` for a conversation conducted by an agent. `SIGNALING` for an official connection call conducted by your application through an SDP exchange |
 | `agent` | `{ id, displayName? }` of the agent. Absent, not null, on calls originated by the API |
 
 The absence of `agent` is information: a call through the API had no agent.

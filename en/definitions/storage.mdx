@@ -1,6 +1,6 @@
 ---
 title: File storage
-description: "How long ZapperHub keeps received files"
+description: "How long ZapperHub keeps the files and how to use an own storage"
 ---
 
 ## Description
@@ -20,3 +20,118 @@ carries the download URL in the `mediaUrl` field.
 **File loss after 7 days.** If your application needs the file for longer,
 download the file and store it on your side within the period.
 </Warning>
+
+## Expiration date
+
+Each event with a file in the ZapperHub storage tells when the file expires.
+
+| Event | Field |
+| --- | --- |
+| `messages.upsert` with media | `mediaExpiresAt` |
+| `calls.update` with a recording | `recording.retentionExpiresAt` |
+
+- `mediaStorage` tells where the file is stored. The value `zapper` identifies
+  the ZapperHub storage.
+- `mediaExpiresAt` and `recording.retentionExpiresAt` are in ISO 8601, in UTC.
+- Media sent through the API from a URL of yours does not have these fields.
+  ZapperHub does not keep this media.
+- Use the date to schedule the download before the deletion.
+
+```json
+{
+  "type": "messages.upsert",
+  "mediaUrl": "https://storage.zapperhub.com/media/inst_01hxyz1234567890/1794405600000-ab12.jpg",
+  "mediaStorage": "zapper",
+  "mediaExpiresAt": "2026-11-17T14:00:00.000Z"
+}
+```
+
+## Call recordings
+
+ZapperHub keeps the file of each call recording for **7 days**. The download
+address in the event is valid for 1 hour (`recording.expiresAt`). To get a new
+address within the 7 days, get the call through the API.
+
+## Own storage
+
+The instance can store the files in a storage of yours, compatible with the S3
+API: AWS S3, Cloudflare R2, or MinIO. With the own storage, ZapperHub stores in it:
+
+- the received media;
+- the media sent through the API, after the message delivery;
+- the media sent from the phone or from the app;
+- the call recordings.
+
+The files in the own storage do not expire in ZapperHub. The retention is the one
+that you configure in your bucket.
+
+### Preliminary requirements
+
+- A bucket with an access key that can write and delete objects.
+- A public `https` address for the storage API.
+- For the event URL to open in a browser: public read on the bucket, or a public
+  read domain, such as a CDN.
+
+### Procedure
+
+1. Send `PUT /{instanceId}/storage` with the address, the bucket, the region, and the access key.
+
+   ```json
+   {
+     "endpoint": "https://s3.us-east-1.amazonaws.com",
+     "bucket": "crm-media",
+     "region": "us-east-1",
+     "prefix": "zapper/",
+     "publicUrl": "https://media.example.com",
+     "forcePathStyle": false,
+     "accessKeyId": "AKIA...",
+     "secretAccessKey": "..."
+   }
+   ```
+
+2. Wait for the response. ZapperHub writes and deletes a test file, with a time
+   limit of 10 seconds.
+3. Get the state with `GET /{instanceId}/storage`.
+
+To remove the registration, send `DELETE /{instanceId}/storage`. The next files go
+to the ZapperHub storage again. ZapperHub does not delete anything in your storage.
+
+### Result
+
+| Situation | Where the file is | Fields in the event |
+| --- | --- | --- |
+| The write ends in 4 seconds or less | In your storage | `mediaStorage: "custom"` |
+| The write fails or takes more than 4 seconds | In the ZapperHub storage, for 7 days | `mediaStorage: "zapper"`, `mediaExpiresAt`, and `mediaStorageWarning` |
+| Up to 60 seconds after a failure | In the ZapperHub storage, with no new attempt | The same as the previous row |
+
+- The first write after the 60 seconds tries your storage again.
+- The files written to ZapperHub during the failure stay in ZapperHub.
+- A file that does not get to your storage in 4 seconds stays in ZapperHub.
+
+#### Media sent through the API
+
+The copy occurs after the message delivery. The send does not wait for the copy
+and does not fail because of it.
+
+| Situation | URL in the event of the sent message |
+| --- | --- |
+| The copy ends | The URL of your storage, with `mediaStorage: "custom"` |
+| The origin URL is already in your storage | The same URL, with no copy, with `mediaStorage: "custom"` |
+| The copy fails, with the origin in the ZapperHub storage | The origin URL, with `mediaStorage: "zapper"`, `mediaExpiresAt`, and `mediaStorageWarning` |
+| The copy fails, with the origin in a URL of yours | The origin URL, with `mediaStorageWarning` |
+
+#### Registration errors
+
+| Code | HTTP | Cause |
+| --- | --- | --- |
+| `STORAGE_ENDPOINT_NOT_ALLOWED` | 422 | The address does not use `https` or is not public |
+| `STORAGE_VALIDATION_FAILED` | 422 | The write or the deletion of the test file failed. `data.step` gives the step (`write` or `delete`), and `data.providerCode`, the storage code |
+| `PROVIDER_UNAVAILABLE` | 503 | The unofficial connection of the instance did not accept the configuration. Nothing was stored. Send the request again |
+| `STORAGE_NOT_CONFIGURED` | 404 | The instance does not have an own storage (`GET` and `DELETE`) |
+
+<Note>
+The credentials are encrypted and are never returned. `GET /{instanceId}/storage`
+gives `status` (`ACTIVE` or `FAILING`), `lastFailureAt`, and `lastFailureReason`.
+To receive a failure notice, subscribe to `storage.failed` and `storage.recovered`.
+See [Own storage failure](/en/integrations/webhooks#own-storage-failure).
+</Note>

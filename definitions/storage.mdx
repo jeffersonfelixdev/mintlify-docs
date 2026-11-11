@@ -1,6 +1,6 @@
 ---
 title: Armazenamento de arquivos
-description: "Por quanto tempo a ZapperHub guarda os arquivos recebidos"
+description: "Por quanto tempo a ZapperHub guarda os arquivos e como usar um storage próprio"
 ---
 
 ## Descrição
@@ -20,3 +20,119 @@ traz a URL de download no campo `mediaUrl`.
 **Perda do arquivo após 7 dias.** Se a sua aplicação precisa do arquivo por mais
 tempo, faça o download e guarde o arquivo no seu lado dentro do prazo.
 </Warning>
+
+## Data de expiração
+
+Cada evento com um arquivo no storage da ZapperHub informa quando o arquivo expira.
+
+| Evento | Campo |
+| --- | --- |
+| `messages.upsert` com mídia | `mediaExpiresAt` |
+| `calls.update` com gravação | `recording.retentionExpiresAt` |
+
+- `mediaStorage` informa onde o arquivo foi gravado. O valor `zapper` indica o
+  storage da ZapperHub.
+- `mediaExpiresAt` e `recording.retentionExpiresAt` estão em ISO 8601, em UTC.
+- A mídia enviada pela API a partir de uma URL sua não tem esses campos. A
+  ZapperHub não guarda essa mídia.
+- Use a data para programar o download antes da exclusão.
+
+```json
+{
+  "type": "messages.upsert",
+  "mediaUrl": "https://storage.zapperhub.com/media/inst_01hxyz1234567890/1794405600000-ab12.jpg",
+  "mediaStorage": "zapper",
+  "mediaExpiresAt": "2026-11-17T14:00:00.000Z"
+}
+```
+
+## Gravações de ligação
+
+A ZapperHub guarda o arquivo de cada gravação de ligação por **7 dias**. O
+endereço de download do evento é válido por 1 hora (`recording.expiresAt`). Para
+obter um endereço novo dentro dos 7 dias, consulte a ligação na API.
+
+## Storage próprio
+
+A instância pode gravar os arquivos num storage seu, compatível com a API do S3:
+AWS S3, Cloudflare R2 ou MinIO. Com o storage próprio, a ZapperHub grava nele:
+
+- a mídia recebida;
+- a mídia enviada pela API, depois da entrega da mensagem;
+- a mídia enviada pelo aparelho ou pelo aplicativo;
+- as gravações de ligação.
+
+Os arquivos no storage próprio não expiram na ZapperHub. A retenção é a que você
+configura no seu bucket.
+
+### Pré-requisitos
+
+- Um bucket com uma chave de acesso que pode gravar e apagar objetos.
+- Um endereço `https` público para a API do storage.
+- Para a URL dos eventos abrir no navegador: leitura pública no bucket, ou um
+  domínio público de leitura, como uma CDN.
+
+### Procedimento
+
+1. Envie `PUT /{instanceId}/storage` com o endereço, o bucket, a região e a chave de acesso.
+
+   ```json
+   {
+     "endpoint": "https://s3.us-east-1.amazonaws.com",
+     "bucket": "crm-media",
+     "region": "us-east-1",
+     "prefix": "zapper/",
+     "publicUrl": "https://media.exemplo.com",
+     "forcePathStyle": false,
+     "accessKeyId": "AKIA...",
+     "secretAccessKey": "..."
+   }
+   ```
+
+2. Espere a resposta. A ZapperHub grava e apaga um arquivo de teste, com prazo de
+   10 segundos.
+3. Confira o estado com `GET /{instanceId}/storage`.
+
+Para remover o cadastro, envie `DELETE /{instanceId}/storage`. Os arquivos
+seguintes voltam para o storage da ZapperHub. A ZapperHub não apaga nada no seu
+storage.
+
+### Resultado
+
+| Situação | Onde fica o arquivo | Campos no evento |
+| --- | --- | --- |
+| A gravação termina em até 4 segundos | No seu storage | `mediaStorage: "custom"` |
+| A gravação falha ou passa de 4 segundos | No storage da ZapperHub, por 7 dias | `mediaStorage: "zapper"`, `mediaExpiresAt` e `mediaStorageWarning` |
+| Até 60 segundos depois de uma falha | No storage da ZapperHub, sem nova tentativa | Os mesmos da linha anterior |
+
+- A primeira gravação depois dos 60 segundos tenta o seu storage de novo.
+- Os arquivos gravados na ZapperHub durante a falha ficam na ZapperHub.
+- Um arquivo que não chega ao seu storage em 4 segundos fica na ZapperHub.
+
+#### Mídia enviada pela API
+
+A cópia acontece depois da entrega da mensagem. O envio não espera pela cópia e
+não falha por causa dela.
+
+| Situação | URL no evento da mensagem enviada |
+| --- | --- |
+| A cópia termina | A URL do seu storage, com `mediaStorage: "custom"` |
+| A URL de origem já está no seu storage | A mesma URL, sem cópia, com `mediaStorage: "custom"` |
+| A cópia falha, com origem no storage da ZapperHub | A URL de origem, com `mediaStorage: "zapper"`, `mediaExpiresAt` e `mediaStorageWarning` |
+| A cópia falha, com origem numa URL sua | A URL de origem, com `mediaStorageWarning` |
+
+#### Erros do cadastro
+
+| Código | HTTP | Causa |
+| --- | --- | --- |
+| `STORAGE_ENDPOINT_NOT_ALLOWED` | 422 | O endereço não usa `https` ou não é público |
+| `STORAGE_VALIDATION_FAILED` | 422 | A gravação ou a exclusão do arquivo de teste falhou. `data.step` informa a etapa (`write` ou `delete`), e `data.providerCode`, o código do storage |
+| `PROVIDER_UNAVAILABLE` | 503 | A conexão não oficial da instância não aceitou a configuração. Nada foi gravado. Repita o pedido |
+| `STORAGE_NOT_CONFIGURED` | 404 | A instância não tem storage próprio (`GET` e `DELETE`) |
+
+<Note>
+As credenciais ficam cifradas e nunca são devolvidas. `GET /{instanceId}/storage`
+informa `status` (`ACTIVE` ou `FAILING`), `lastFailureAt` e `lastFailureReason`.
+Para receber um aviso de falha, assine `storage.failed` e `storage.recovered`. Veja
+[Storage próprio com falha](/integrations/webhooks#storage-proprio-com-falha).
+</Note>
