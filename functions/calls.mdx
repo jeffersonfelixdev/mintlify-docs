@@ -16,8 +16,8 @@ troca de SDP. A mídia não passa pela ZapperHub. Veja
 <Note>
 **Conversa ao vivo.** As rotas desta página conduzem a chamada por API: a
 aplicação liga e reproduz um arquivo. Para um atendente conversar em tempo real
-pelo headset, use o [Softphone](/functions/softphone). As duas formas conduzem a
-mesma chamada, com os mesmos eventos e o mesmo histórico.
+pelo headset, use o [Softphone](/functions/softphone), nas duas conexões. As
+duas formas conduzem a mesma chamada, com os mesmos eventos e o mesmo histórico.
 </Note>
 
 <Warning>
@@ -228,6 +228,10 @@ aplicação e a Meta. A mídia não passa pela ZapperHub. A sua aplicação nego
 mídia com a Meta por SDP (WebRTC), envia o áudio e recebe o áudio.
 
 O histórico registra essas chamadas com `conductedVia: "SIGNALING"`.
+
+Para um atendente conversar pelo headset em conexão oficial, use o
+[Softphone](/functions/softphone). Nesse caso, a mídia passa pela ZapperHub, a
+gravação é possível e o histórico registra `conductedVia: "SOFTPHONE"`.
 
 ### Pré-requisitos da conexão oficial
 
@@ -661,7 +665,7 @@ O `status` do evento `terminate` repete o valor da Meta. Veja
 | Prazo de atendimento | Cerca de 30 a 60 segundos após o evento `connect` |
 | Tamanho do SDP | 64 KB |
 | Vídeo | Não disponível. O SDP aceita uma só seção `m=audio` |
-| Gravação | Não disponível. `reason: "NOT_AVAILABLE_ON_PATH"` |
+| Gravação | Não disponível pela troca de SDP. `reason: "NOT_AVAILABLE_ON_PATH"`. Disponível pelo [Softphone](/functions/softphone#gravacao) |
 | Reprodução de áudio pela API | Não disponível. A rota `audio` responde `422` |
 | Chamadas simultâneas | O limite da Meta. Acima dele, `CALL_CONCURRENCY_LIMIT` |
 | Permissão temporária | 7 dias. Nenhum evento é enviado quando ela expira |
@@ -682,6 +686,7 @@ Todo erro traz `code`. O campo `localizedMessage` traz a explicação em portugu
 | `422` | `CALLING_DISABLED` | As chamadas estão desativadas no número |
 | `422` | `CALLING_API_UNAVAILABLE` | O número não se qualifica para a Calling API |
 | `422` | `CALL_CONCURRENCY_LIMIT` | O número atingiu o limite de chamadas simultâneas |
+| `422` | `CALL_PAYMENT_ISSUE` | A conta do WhatsApp Business tem uma pendência de pagamento na Meta. Regularize a forma de pagamento da conta |
 | `409` | `CALL_IN_PROGRESS` | Já existe uma chamada em andamento com o contato |
 | `422` | `INVALID_CALL_TARGET` | O contato não pode receber chamadas |
 | `429` | `RATE_LIMITED` | O número atingiu o limite de chamadas. O cabeçalho `Retry-After` informa a espera |
@@ -767,7 +772,7 @@ Toda chamada registra como foi conduzida e por quem:
 
 | Campo | Conteúdo |
 | --- | --- |
-| `conductedVia` | `API` para o caminho automatizado da conexão não oficial. `SOFTPHONE` para uma conversa conduzida por um atendente. `SIGNALING` para uma chamada de conexão oficial conduzida pela sua aplicação por troca de SDP |
+| `conductedVia` | `API` para o caminho automatizado da conexão não oficial. `SOFTPHONE` para uma conversa conduzida por um atendente, nas duas conexões. `SIGNALING` para uma chamada de conexão oficial conduzida pela sua aplicação por troca de SDP |
 | `agent` | `{ id, displayName? }` do atendente. Ausente, e não nulo, nas chamadas originadas pela API |
 
 A ausência de `agent` é informação: uma chamada por API não teve atendente.

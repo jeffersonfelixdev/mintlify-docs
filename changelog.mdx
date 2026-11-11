@@ -3,6 +3,54 @@ title: Novidades
 description: "Mudanças na API da ZapperHub e avisos de mudança de comportamento"
 ---
 
+<Update label="Novembro de 2026" description="Gravação e histórico das chamadas da Cloud API" tags={["Cloud API", "Webhooks"]}>
+
+## Gravação pelo softphone na conexão oficial
+
+Em conexão oficial (Cloud API), o [Softphone](/functions/softphone#gravacao) grava a
+conversa com `record: true`. A cota diária, o limite de duração, a retenção e o
+storage próprio são os mesmos da conexão não oficial.
+
+## Campos
+
+- `conductedVia: "SOFTPHONE"` no histórico das chamadas da conexão oficial
+  conduzidas pelo softphone, com o campo `agent`. Veja
+  [Autoria da chamada](/functions/calls#autoria-da-chamada).
+- A chamada conduzida pela sua aplicação por troca de SDP continua sem gravação,
+  com `recording.reason: "NOT_AVAILABLE_ON_PATH"`. Veja
+  [Limites da conexão oficial](/functions/calls#limites-da-conexao-oficial).
+
+</Update>
+
+<Update label="Novembro de 2026" description="Softphone na conexão oficial (Cloud API)" tags={["Cloud API"]}>
+
+## Softphone na conexão oficial
+
+O [Softphone](/functions/softphone) funciona em instâncias de conexão oficial
+(Cloud API), com o mesmo código de integração da conexão não oficial.
+
+- A emissão da credencial usa a mesma rota e devolve o mesmo formato.
+- Cada atendente tem a própria linha. A instância conduz até 50 chamadas
+  simultâneas pelo softphone. Veja
+  [Vários atendentes na mesma instância](/functions/softphone#varios-atendentes-na-mesma-instancia).
+- Uma chamada recebida toca só nos atendentes livres.
+- Para ligar, o contato precisa ter concedido a permissão de ligação. Veja
+  [Permissão de ligação](/functions/calls#permissao-de-ligacao).
+
+## Rotas alteradas
+
+`POST /{instanceId}/softphone/tokens` e as rotas `softphone/calls` aceitam
+instância de conexão oficial. Antes, elas respondiam `422` com
+`code: UNSUPPORTED_FOR_INSTANCE_TYPE`.
+
+## Códigos de erro
+
+Em conexão oficial, o softphone responde `CALL_PERMISSION_REQUIRED` e
+`CALL_CONCURRENCY_LIMIT`. Veja
+[Erros e ação recomendada](/functions/softphone#erros-e-acao-recomendada).
+
+</Update>
+
 <Update label="Novembro de 2026" description="Chamadas feitas e permissão de ligação na Cloud API" tags={["Cloud API", "Webhooks"]}>
 
 ## Originar chamadas na conexão oficial
@@ -35,7 +83,8 @@ por troca de SDP. O contato deve conceder antes a permissão de ligação. Veja
 ## Códigos de erro novos
 
 `CALL_PERMISSION_TEMPLATE_REQUIRED`, `CALL_PERMISSION_TEMPLATE_INVALID`,
-`CALL_PERMISSION_REQUEST_LIMIT` e `CALL_PERMISSION_ALREADY_GRANTED`. Veja
+`CALL_PERMISSION_REQUEST_LIMIT`, `CALL_PERMISSION_ALREADY_GRANTED` e
+`CALL_PAYMENT_ISSUE`. Veja
 [Códigos de erro da conexão oficial](/functions/calls#codigos-de-erro-da-conexao-oficial).
 
 </Update>

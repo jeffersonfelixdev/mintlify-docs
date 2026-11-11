@@ -15,19 +15,22 @@ microphone and hears the contact through the headset, in real time.
 You include a library in your page. The platform handles microphone, playback,
 transport, and reconnection.
 
-<Warning>
-**Available only on the unofficial connection.** The softphone applies only to
-instances with an unofficial connection (`device`). On the official connection
-(Cloud API), every operation responds `422` with
-`code: UNSUPPORTED_FOR_INSTANCE_TYPE`.
-</Warning>
+<Note>
+**Unofficial connection and official connection.** The softphone operates on
+instances with an unofficial connection (`device`) and with an official connection
+(Cloud API), with the same integration code. The difference is in the line: see
+[Several agents on the same instance](#several-agents-on-the-same-instance). On
+the official connection, the contact must give the call permission before you call
+the contact. See [Call permission](/en/functions/calls#call-permission).
+</Note>
 
 ## Limits
 
 | Limit | Value |
 | --- | --- |
-| Simultaneous calls | One per instance, including a call that is still ringing |
-| Connected agents | Several per instance, on the same line |
+| Simultaneous calls, unofficial connection | One per instance, including a call that is still ringing |
+| Simultaneous calls, official connection | One per agent. A maximum of 50 per instance |
+| Connected agents | Several per instance |
 | Browser context | HTTPS required. The browser requires HTTPS to use the microphone |
 | Video | Not available |
 | Group call | Not available |
@@ -286,11 +289,28 @@ softphone.on('call', (call) => {
 
 ## Several agents on the same instance
 
+### Unofficial connection
+
 The instance conducts one call at a time. All connected agents use this line.
 
 - A received call rings for all agents. The first one that accepts conducts the call. The others receive `incoming:cleared` with `ANSWERED_ELSEWHERE`.
 - When someone occupies the line, the others receive `line` with `busy: true` and the name of who is talking.
 - With two requests at the same time, exactly one is accepted. The other receives `409 CALL_IN_PROGRESS`.
+
+### Official connection (Cloud API)
+
+Each agent has a separate line. The instance conducts several calls at the same
+time, one per agent, up to 50.
+
+- A received call rings only for the free agents. An agent in a call does not receive `incoming`.
+- The first agent that accepts conducts the call. The others receive `incoming:cleared` with `ANSWERED_ELSEWHERE`.
+- `line` gives the line of the agent: `busy: true` only when the agent is in a call.
+- An agent in a call that requests another call receives `409 CALL_IN_PROGRESS`.
+- Above 50 simultaneous calls on the instance, the request receives `422 CALL_CONCURRENCY_LIMIT`.
+- To call, the contact must have given the call permission. Without it, the request receives `422 CALL_PERMISSION_REQUIRED`.
+
+A call answered through the API, with an SDP exchange, also stops the ringing in the
+components, with `ANSWERED_ELSEWHERE`.
 
 <Note>
 `ANSWERED_ELSEWHERE` and `CALL_IN_PROGRESS` are the normal operation with several
@@ -313,7 +333,9 @@ Closing the browser tab follows the same rule.
 
 Pass `record: true` when you originate or answer. The rules (daily quota,
 duration limit, delivery by event, signed link, and retention) are the same as in
-[Calls](/en/functions/calls).
+[Calls](/en/functions/calls), on the two connections. On the official connection,
+recording exists only through the softphone: a call that your application conducts
+through an SDP exchange is not recorded.
 
 ```ts
 const call = await softphone.call('5511999999999', { record: true })
@@ -344,14 +366,19 @@ according to the applicable data protection law (LGPD in Brazil).
 | `PROVIDER_UNAVAILABLE` | The origin of your system is not registered on the instance | Ask support for the registration, with the exact origin. See [Preliminary requirements](#preliminary-requirements) |
 | `AGENT_TOKEN_INVALID` | Credential expired, tampered, unknown, or presented by a page from another origin | Issue a new credential from the backend. If it persists, check that the registered origin is equal to the page origin, with no trailing slash |
 | `AGENT_TOKEN_SCOPE` | Credential used outside the call scope | Integration defect. The credential serves only the softphone |
-| `CALL_IN_PROGRESS` | The instance already conducts a call | Show the line as busy. `detail` carries the `callId` in progress |
+| `CALL_IN_PROGRESS` | Unofficial connection: the instance already conducts a call. Official connection: the agent is already in a call | Show the line as busy. On the unofficial connection, `detail` carries the `callId` in progress |
+| `CALL_PERMISSION_REQUIRED` | Official connection: the contact did not give the call permission | Request the permission. See [Request the permission](/en/functions/calls#request-the-permission) |
+| `CALL_CONCURRENCY_LIMIT` | Official connection: the instance reached 50 simultaneous calls | Try again when a call ends |
 | `CALL_NOT_AVAILABLE` | The call was already answered by another agent, or already ended | Show as information, not as a failure |
 | `INVALID_CALL_TARGET` | The number has no WhatsApp account | Confirm the number with the agent |
 | `INSTANCE_NOT_CONNECTED` | The instance lost the WhatsApp session | Reconnect the instance in the panel |
-| `UNSUPPORTED_FOR_INSTANCE_TYPE` | Instance with an official connection | The softphone does not exist for the Cloud API |
+| `UNSUPPORTED_FOR_INSTANCE_TYPE` | Instance of a type without voice calls | The softphone exists only for the unofficial connection and the official connection (Cloud API) |
 | `DEVICE_LOST` | The selected device was disconnected | The call continues on the default device. Refresh the device list in the page |
 | `MEDIA_NEGOTIATION_FAILED` | The audio could not be established | Check the agent connection and try to reconnect |
 | `SESSION_CLOSED` | Command sent with the session closed | Call `connect()` first, or wait for the automatic reconnection |
+
+On the official connection, the other Meta errors are in
+[Error codes of the official connection](/en/functions/calls#error-codes-of-the-official-connection).
 
 ## History and authorship
 
@@ -371,7 +398,10 @@ GET /{instanceId}/calls?agentId=op-1183
 ```
 
 Calls originated by the API appear with `"conductedVia": "API"` and without the
-`agent` field.
+`agent` field. On the official connection, calls that your application conducts
+through an SDP exchange appear with `"conductedVia": "SIGNALING"`, and calls
+conducted through the softphone appear with `"conductedVia": "SOFTPHONE"` and the
+agent.
 
 The authorship is the `agentId` that your backend gave when it issued the
 credential. It is reliable only if your route reads the agent from the session.

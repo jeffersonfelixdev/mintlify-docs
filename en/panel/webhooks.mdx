@@ -38,11 +38,6 @@ Click **New Webhook**.
 
 Click **Create**. Success: *Webhook created successfully.*
 
-<Note>
-Each instance accepts at most 5 webhooks. With 5 webhooks, the **New Webhook**
-button is disabled. Delete or reuse one of the existing ones.
-</Note>
-
 ### Available events
 
 | Event | When it is published |
@@ -100,7 +95,7 @@ confirmation. Click **Yes, delete**. Success: *Webhook deleted successfully.* Fa
 
 ## Several webhooks on the same instance
 
-An instance can have up to 5 webhooks. They work independently:
+An instance can have several webhooks. They work independently:
 
 - Each webhook receives its own copy of the event. Three webhooks with `messages.upsert` generate three deliveries per message.
 - Each webhook receives only the events it subscribed to.

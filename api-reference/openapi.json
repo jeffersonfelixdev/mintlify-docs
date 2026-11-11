@@ -3,7 +3,7 @@
   "info": {
     "title": "ZapperHub Reference API",
     "description": "Documentação Oficial da ZapperHub",
-    "version": "3.22.0"
+    "version": "3.23.0"
   },
   "components": {
     "securitySchemes": {
@@ -25482,7 +25482,7 @@
         "tags": [
           "Softphone"
         ],
-        "description": "Origina uma chamada de voz conduzida ao vivo pelo atendente. Chamada pelo componente embutido, com a credencial de curta duração do atendente no cabeçalho `Authorization: Bearer`. A instância conduz no máximo uma chamada por vez.",
+        "description": "Origina uma chamada de voz conduzida ao vivo pelo atendente. Chamada pelo componente embutido, com a credencial de curta duração do atendente no cabeçalho `Authorization: Bearer`. Na conexão não oficial, a instância conduz no máximo uma chamada por vez. Na conexão oficial (Cloud API), cada atendente conduz uma chamada, e o contato precisa ter concedido a permissão de ligação.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -25820,7 +25820,7 @@
             }
           },
           "409": {
-            "description": "A instância já conduz uma chamada. O erro informa qual.",
+            "description": "A instância já conduz uma chamada (conexão não oficial), ou o atendente já está em uma chamada (conexão oficial).",
             "content": {
               "application/json": {
                 "schema": {
@@ -25919,13 +25919,13 @@
                     }
                   },
                   "additionalProperties": {},
-                  "description": "A instância já conduz uma chamada. O erro informa qual."
+                  "description": "A instância já conduz uma chamada (conexão não oficial), ou o atendente já está em uma chamada (conexão oficial)."
                 }
               }
             }
           },
           "422": {
-            "description": "Destinatário sem conta de WhatsApp, instância sem sessão ativa, ou instância de tipo que não suporta chamadas.",
+            "description": "Destinatário sem conta de WhatsApp, instância sem sessão ativa, instância de tipo que não suporta chamadas, contato sem permissão de ligação (`CALL_PERMISSION_REQUIRED`) ou limite de chamadas simultâneas (`CALL_CONCURRENCY_LIMIT`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -26024,7 +26024,7 @@
                     }
                   },
                   "additionalProperties": {},
-                  "description": "Destinatário sem conta de WhatsApp, instância sem sessão ativa, ou instância de tipo que não suporta chamadas."
+                  "description": "Destinatário sem conta de WhatsApp, instância sem sessão ativa, instância de tipo que não suporta chamadas, contato sem permissão de ligação (`CALL_PERMISSION_REQUIRED`) ou limite de chamadas simultâneas (`CALL_CONCURRENCY_LIMIT`)."
                 }
               }
             }
@@ -26130,6 +26130,111 @@
                   },
                   "additionalProperties": {},
                   "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável."
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "O áudio da chamada não pôde ser estabelecido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "O áudio da chamada não pôde ser estabelecido."
                 }
               }
             }
@@ -27593,6 +27698,111 @@
                   },
                   "additionalProperties": {},
                   "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável."
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "O áudio da chamada não pôde ser estabelecido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "O áudio da chamada não pôde ser estabelecido."
                 }
               }
             }
@@ -35828,7 +36038,7 @@
           },
           {
             "schema": {
-              "default": "2026-11-11T14:49:52.615Z"
+              "default": "2026-11-11T19:10:11.558Z"
             },
             "in": "query",
             "name": "endDate",

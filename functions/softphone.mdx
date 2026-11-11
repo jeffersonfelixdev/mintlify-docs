@@ -15,18 +15,22 @@ ouve o contato pelo fone, em tempo real.
 Você inclui uma biblioteca na sua tela. A plataforma cuida de microfone,
 reprodução, transporte e reconexão.
 
-<Warning>
-**Disponível só em conexão não oficial.** O softphone vale só para instâncias de
-conexão não oficial (`device`). Em conexão oficial (Cloud API), qualquer operação
-responde `422` com `code: UNSUPPORTED_FOR_INSTANCE_TYPE`.
-</Warning>
+<Note>
+**Conexão não oficial e conexão oficial.** O softphone funciona em instâncias de
+conexão não oficial (`device`) e de conexão oficial (Cloud API), com o mesmo
+código de integração. A diferença está na linha: veja
+[Vários atendentes na mesma instância](#varios-atendentes-na-mesma-instancia).
+Em conexão oficial, o contato precisa conceder a permissão de ligação antes de
+você ligar para ele. Veja [Permissão de ligação](/functions/calls#permissao-de-ligacao).
+</Note>
 
 ## Limites
 
 | Limite | Valor |
 | --- | --- |
-| Chamadas simultâneas | Uma por instância, inclusive a que ainda toca |
-| Atendentes conectados | Vários por instância, na mesma linha |
+| Chamadas simultâneas, conexão não oficial | Uma por instância, inclusive a que ainda toca |
+| Chamadas simultâneas, conexão oficial | Uma por atendente. Até 50 por instância |
+| Atendentes conectados | Vários por instância |
 | Contexto do navegador | HTTPS obrigatório. O navegador exige HTTPS para usar o microfone |
 | Vídeo | Não disponível |
 | Chamada em grupo | Não disponível |
@@ -283,12 +287,29 @@ softphone.on('call', (chamada) => {
 
 ## Vários atendentes na mesma instância
 
+### Conexão não oficial
+
 A instância conduz uma chamada por vez. Todos os atendentes conectados usam essa
 linha.
 
 - Uma chamada recebida toca em todos. O primeiro que aceita conduz. Os outros recebem `incoming:cleared` com `ANSWERED_ELSEWHERE`.
 - Quando alguém ocupa a linha, os outros recebem `line` com `busy: true` e o nome de quem fala.
 - Em dois pedidos ao mesmo tempo, exatamente um é aceito. O outro recebe `409 CALL_IN_PROGRESS`.
+
+### Conexão oficial (Cloud API)
+
+Cada atendente tem a própria linha. A instância conduz várias chamadas ao mesmo
+tempo, uma por atendente, até 50.
+
+- Uma chamada recebida toca só nos atendentes livres. Quem está em uma chamada não recebe `incoming`.
+- O primeiro que aceita conduz. Os outros recebem `incoming:cleared` com `ANSWERED_ELSEWHERE`.
+- `line` informa a linha do próprio atendente: `busy: true` só quando ele está em uma chamada.
+- Um atendente em chamada que pede outra recebe `409 CALL_IN_PROGRESS`.
+- Acima de 50 chamadas simultâneas na instância, o pedido recebe `422 CALL_CONCURRENCY_LIMIT`.
+- Para ligar, o contato precisa ter concedido a permissão de ligação. Sem ela, o pedido recebe `422 CALL_PERMISSION_REQUIRED`.
+
+Uma chamada atendida pela API, com troca de SDP, também faz os componentes
+pararem de tocar, com `ANSWERED_ELSEWHERE`.
 
 <Note>
 `ANSWERED_ELSEWHERE` e `CALL_IN_PROGRESS` são o funcionamento normal com vários
@@ -311,7 +332,9 @@ Fechar a aba do navegador segue a mesma regra.
 
 Passe `record: true` ao originar ou ao atender. As regras (cota diária, limite de
 duração, entrega por evento, link assinado e retenção) são as mesmas de
-[Chamadas](/functions/calls).
+[Chamadas](/functions/calls), nas duas conexões. Em conexão oficial, a gravação
+existe só pelo softphone: a chamada conduzida pela sua aplicação, com troca de
+SDP, não é gravada.
 
 ```ts
 const chamada = await softphone.call('5511999999999', { record: true })
@@ -341,14 +364,19 @@ conforme a LGPD.
 | `PROVIDER_UNAVAILABLE` | A origem do seu sistema não está cadastrada na instância | Peça o cadastro ao suporte, com a origem exata. Veja [Pré-requisitos](#pre-requisitos) |
 | `AGENT_TOKEN_INVALID` | Credencial expirada, adulterada, desconhecida, ou apresentada por uma página de outra origem | Emita uma credencial nova pelo backend. Se persistir, confira se a origem cadastrada é igual à da página, sem barra final |
 | `AGENT_TOKEN_SCOPE` | Credencial usada fora do escopo de chamadas | Defeito de integração. A credencial só serve ao softphone |
-| `CALL_IN_PROGRESS` | A instância já conduz uma chamada | Mostre a linha como ocupada. `detail` traz o `callId` em andamento |
+| `CALL_IN_PROGRESS` | Conexão não oficial: a instância já conduz uma chamada. Conexão oficial: o atendente já está em uma chamada | Mostre a linha como ocupada. Em conexão não oficial, `detail` traz o `callId` em andamento |
+| `CALL_PERMISSION_REQUIRED` | Conexão oficial: o contato não concedeu a permissão de ligação | Peça a permissão. Veja [Pedir a permissão](/functions/calls#pedir-a-permissao) |
+| `CALL_CONCURRENCY_LIMIT` | Conexão oficial: a instância atingiu 50 chamadas simultâneas | Tente de novo quando uma chamada terminar |
 | `CALL_NOT_AVAILABLE` | A chamada já foi atendida por outro, ou já terminou | Mostre como informação, não como falha |
 | `INVALID_CALL_TARGET` | O número não tem conta de WhatsApp | Confirme o número com o atendente |
 | `INSTANCE_NOT_CONNECTED` | A instância perdeu a sessão do WhatsApp | Reconecte a instância no painel |
-| `UNSUPPORTED_FOR_INSTANCE_TYPE` | Instância de conexão oficial | O softphone não existe para a Cloud API |
+| `UNSUPPORTED_FOR_INSTANCE_TYPE` | Instância de um tipo sem chamadas de voz | O softphone existe só para a conexão não oficial e a conexão oficial (Cloud API) |
 | `DEVICE_LOST` | O dispositivo selecionado foi desconectado | A chamada continua no dispositivo padrão. Atualize a lista de dispositivos na tela |
 | `MEDIA_NEGOTIATION_FAILED` | O áudio não pôde ser estabelecido | Verifique a conexão do atendente e tente reconectar |
 | `SESSION_CLOSED` | Comando enviado com a sessão fechada | Chame `connect()` antes, ou aguarde a reconexão automática |
+
+Em conexão oficial, os demais erros da Meta estão em
+[Códigos de erro da conexão oficial](/functions/calls#codigos-de-erro-da-conexao-oficial).
 
 ## Histórico e autoria
 
@@ -368,7 +396,9 @@ GET /{instanceId}/calls?agentId=op-1183
 ```
 
 As chamadas originadas pela API aparecem com `"conductedVia": "API"` e sem o
-campo `agent`.
+campo `agent`. Em conexão oficial, as chamadas conduzidas pela sua aplicação por
+troca de SDP aparecem com `"conductedVia": "SIGNALING"`, e as conduzidas pelo
+softphone, com `"conductedVia": "SOFTPHONE"` e o atendente.
 
 A autoria é o `agentId` que o seu backend informou ao emitir a credencial. Ela
 é confiável só se a sua rota lê o atendente da sessão. Veja o

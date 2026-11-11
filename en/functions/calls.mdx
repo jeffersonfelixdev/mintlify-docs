@@ -17,8 +17,8 @@ calls through an SDP exchange. The media does not go through ZapperHub. See
 <Note>
 **Live conversation.** The routes on this page conduct the call through the API:
 the application calls and plays a file. For an agent to talk in real time through
-a headset, use the [Softphone](/en/functions/softphone). Both ways conduct the same
-call, with the same events and the same history.
+a headset, use the [Softphone](/en/functions/softphone), on the two connections.
+Both ways conduct the same call, with the same events and the same history.
 </Note>
 
 <Warning>
@@ -235,6 +235,11 @@ negotiates the media with Meta through SDP (WebRTC), sends the audio, and
 receives the audio.
 
 The history records these calls with `conductedVia: "SIGNALING"`.
+
+For an agent to talk through a headset on the official connection, use the
+[Softphone](/en/functions/softphone). In this case, the media goes through
+ZapperHub, recording is possible, and the history records
+`conductedVia: "SOFTPHONE"`.
 
 ### Preliminary requirements of the official connection
 
@@ -671,7 +676,7 @@ The `status` of the `terminate` event repeats the value from Meta. See
 | Answer time limit | Approximately 30 to 60 seconds after the `connect` event |
 | SDP size | 64 KB |
 | Video | Not available. The SDP accepts one `m=audio` section only |
-| Recording | Not available. `reason: "NOT_AVAILABLE_ON_PATH"` |
+| Recording | Not available through the SDP exchange. `reason: "NOT_AVAILABLE_ON_PATH"`. Available through the [Softphone](/en/functions/softphone#recording) |
 | Audio playback through the API | Not available. The `audio` route responds `422` |
 | Simultaneous calls | The Meta limit. Above it, `CALL_CONCURRENCY_LIMIT` |
 | Temporary permission | 7 days. No event is sent when it expires |
@@ -693,6 +698,7 @@ in Portuguese.
 | `422` | `CALLING_DISABLED` | Calls are disabled on the number |
 | `422` | `CALLING_API_UNAVAILABLE` | The number does not qualify for the Calling API |
 | `422` | `CALL_CONCURRENCY_LIMIT` | The number reached the limit of simultaneous calls |
+| `422` | `CALL_PAYMENT_ISSUE` | The WhatsApp Business account has a payment problem at Meta. Correct the payment method of the account |
 | `409` | `CALL_IN_PROGRESS` | A call with the contact is already in progress |
 | `422` | `INVALID_CALL_TARGET` | The contact cannot receive calls |
 | `429` | `RATE_LIMITED` | The number reached the call limit. The `Retry-After` header gives the wait time |
@@ -778,7 +784,7 @@ Every call records how it was conducted and by whom:
 
 | Field | Content |
 | --- | --- |
-| `conductedVia` | `API` for the automated path of the unofficial connection. `SOFTPHONE` for a conversation conducted by an agent. `SIGNALING` for an official connection call conducted by your application through an SDP exchange |
+| `conductedVia` | `API` for the automated path of the unofficial connection. `SOFTPHONE` for a conversation conducted by an agent, on the two connections. `SIGNALING` for an official connection call conducted by your application through an SDP exchange |
 | `agent` | `{ id, displayName? }` of the agent. Absent, not null, on calls originated by the API |
 
 The absence of `agent` is information: a call through the API had no agent.

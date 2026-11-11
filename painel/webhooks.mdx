@@ -33,11 +33,6 @@ Clique em **Novo Webhook**.
 
 Clique em **Criar**. Sucesso: **Webhook criado com sucesso.**
 
-<Note>
-Cada instância aceita no máximo 5 webhooks. Com 5 webhooks, o botão **Novo
-Webhook** fica desabilitado. Exclua ou reaproveite um dos existentes.
-</Note>
-
 ### Eventos disponíveis
 
 | Evento | Quando é publicado |
@@ -95,7 +90,7 @@ Clique em **Sim, excluir**. Sucesso: **Webhook excluído com sucesso.** Falha:
 
 ## Vários webhooks na mesma instância
 
-Uma instância pode ter até 5 webhooks. Eles funcionam de forma independente:
+Uma instância pode ter vários webhooks. Eles funcionam de forma independente:
 
 - Cada webhook recebe a própria cópia do evento. Três webhooks com `messages.upsert` geram três entregas por mensagem.
 - Cada webhook recebe só os eventos que assinou.

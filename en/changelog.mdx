@@ -3,6 +3,55 @@ title: Changelog
 description: "Changes to the ZapperHub API and notices of behavior changes"
 ---
 
+<Update label="November 2026" description="Recording and history of Cloud API calls" tags={["Cloud API", "Webhooks"]}>
+
+## Recording through the softphone on the official connection
+
+On the official connection (Cloud API), the [Softphone](/en/functions/softphone#recording)
+records the conversation with `record: true`. The daily quota, the duration limit,
+the retention, and the own storage are the same as on the unofficial connection.
+
+## Fields
+
+- `conductedVia: "SOFTPHONE"` in the history of official connection calls
+  conducted through the softphone, with the `agent` field. See
+  [Call authorship](/en/functions/calls#call-authorship).
+- A call that your application conducts through an SDP exchange continues without
+  recording, with `recording.reason: "NOT_AVAILABLE_ON_PATH"`. See
+  [Limits of the official connection](/en/functions/calls#limits-of-the-official-connection).
+
+</Update>
+
+<Update label="November 2026" description="Softphone on the official connection (Cloud API)" tags={["Cloud API"]}>
+
+## Softphone on the official connection
+
+The [Softphone](/en/functions/softphone) operates on instances with an official
+connection (Cloud API), with the same integration code as on the unofficial
+connection.
+
+- The credential issue uses the same route and returns the same format.
+- Each agent has a separate line. The instance conducts up to 50 simultaneous
+  calls through the softphone. See
+  [Several agents on the same instance](/en/functions/softphone#several-agents-on-the-same-instance).
+- A received call rings only for the free agents.
+- To call, the contact must have given the call permission. See
+  [Call permission](/en/functions/calls#call-permission).
+
+## Changed routes
+
+`POST /{instanceId}/softphone/tokens` and the `softphone/calls` routes accept an
+instance with an official connection. Before, they responded `422` with
+`code: UNSUPPORTED_FOR_INSTANCE_TYPE`.
+
+## Error codes
+
+On the official connection, the softphone responds `CALL_PERMISSION_REQUIRED` and
+`CALL_CONCURRENCY_LIMIT`. See
+[Errors and recommended action](/en/functions/softphone#errors-and-recommended-action).
+
+</Update>
+
 <Update label="November 2026" description="Outgoing calls and call permission on the Cloud API" tags={["Cloud API", "Webhooks"]}>
 
 ## Originate calls on the official connection
@@ -37,7 +86,8 @@ permission. See
 ## New error codes
 
 `CALL_PERMISSION_TEMPLATE_REQUIRED`, `CALL_PERMISSION_TEMPLATE_INVALID`,
-`CALL_PERMISSION_REQUEST_LIMIT`, and `CALL_PERMISSION_ALREADY_GRANTED`. See
+`CALL_PERMISSION_REQUEST_LIMIT`, `CALL_PERMISSION_ALREADY_GRANTED`, and
+`CALL_PAYMENT_ISSUE`. See
 [Error codes of the official connection](/en/functions/calls#error-codes-of-the-official-connection).
 
 </Update>
