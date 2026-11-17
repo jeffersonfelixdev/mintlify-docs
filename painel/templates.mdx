@@ -135,6 +135,27 @@ campo por nome. A ordem de preenchimento não importa.
 Nos dois casos, a criação pede um **Exemplo para variável**. A Meta usa o exemplo
 para avaliar o template.
 
+### Posição das variáveis no corpo
+
+A Meta verifica a posição das variáveis quando você cria o template. O corpo não
+pode começar nem terminar com uma variável. Coloque texto fixo antes da primeira
+variável e depois da última.
+
+| Corpo | Resultado |
+|---|---|
+| `{{1}}, seu pedido foi enviado.` | Recusado: começa com variável |
+| `O prestador {{1}} chegou em {{2}}.` | Recusado: termina com variável |
+| `O prestador {{1}} chegou em {{2}}. Responda se precisar de ajuda.` | Aceito |
+
+<Note>
+A pontuação não conta como texto fixo. Um ponto depois da última variável não
+resolve. Coloque pelo menos uma palavra depois dela.
+</Note>
+
+A Meta recusa o template na criação, com o erro `#100`. O painel mostra a
+mensagem de erro da Meta. O template não entra na lista e não recebe o status
+**Rejeitado**. Corrija o corpo e crie o template outra vez.
+
 ## Enviar um template
 
 Clique em **Enviar mensagem**. O painel abre **Enviar mensagem de template**, com

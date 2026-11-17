@@ -137,6 +137,27 @@ field per name. The fill order does not matter.
 
 In both cases, the creation asks for a **Example for variable**. Meta uses the example to evaluate the template.
 
+### Position of the variables in the body
+
+Meta checks the position of the variables when you create the template. The body
+cannot start or end with a variable. Put fixed text before the first variable and
+after the last variable.
+
+| Body | Result |
+|---|---|
+| `{{1}}, seu pedido foi enviado.` | Refused: starts with a variable |
+| `O prestador {{1}} chegou em {{2}}.` | Refused: ends with a variable |
+| `O prestador {{1}} chegou em {{2}}. Responda se precisar de ajuda.` | Accepted |
+
+<Note>
+Punctuation is not fixed text. A period after the last variable does not solve
+the problem. Put at least one word after the last variable.
+</Note>
+
+Meta refuses the template at creation, with the error `#100`. The panel shows the
+error message from Meta. The template does not go into the list and does not get
+the **Rejected** status. Correct the body and create the template again.
+
 ## Send a template
 
 Click **Send message**. The panel opens *Send template message*, with a **Preview**.
