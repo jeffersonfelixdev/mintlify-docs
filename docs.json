@@ -23,7 +23,7 @@
           "links": [
             {
               "label": "Suporte",
-              "href": "https://api.whatsapp.com/send?phone=551231971643&text=Olá!+Preciso+de+ajuda"
+              "href": "https://api.whatsapp.com/send?phone=551231996580&text=Olá!+Preciso+de+ajuda"
             }
           ],
           "primary": {
@@ -146,7 +146,7 @@
           "links": [
             {
               "label": "Support",
-              "href": "https://api.whatsapp.com/send?phone=551231971643&text=Hello!+I+need+help"
+              "href": "https://api.whatsapp.com/send?phone=551231996580&text=Hello!+I+need+help"
             }
           ],
           "primary": {
