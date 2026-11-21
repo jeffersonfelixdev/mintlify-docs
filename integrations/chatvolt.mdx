@@ -1,6 +1,6 @@
 ---
 title: Chatvolt AI
-description: "Conectar um agente da Chatvolt ao WhatsApp pela ZapperHub"
+description: "Conectar um agente da Chatvolt a um número do WhatsApp pela ZapperHub"
 ---
 
 ## Descrição
@@ -12,16 +12,84 @@ você:
 - Responde aos clientes com base nesses dados.
 - Usa mais de 50 modelos de linguagem, como ChatGPT, Gemini, Claude e Grok.
 
-Se você não tem uma conta, faça o cadastro em
-[app.chatvolt.ai/partner/zapperapi](https://app.chatvolt.ai/partner/zapperapi).
+A ZapperHub liga um agente da Chatvolt a uma instância. A ZapperHub encaminha ao
+agente as mensagens que o número recebe e envia ao contato a resposta do agente.
+A configuração é feita no painel da ZapperHub.
 
-## Integrar um agente da Chatvolt
+A integração funciona nas duas conexões: por QR Code e pela API oficial da Meta.
 
-A Chatvolt tem uma implantação própria para a ZapperHub. A configuração é feita
-na sua conta da Chatvolt.
+## Pré-requisitos
 
-Siga a documentação oficial em
-[docs.chatvolt.ai/integrations/zapper](https://docs.chatvolt.ai/integrations/zapper).
+- Uma instância conectada. Veja [Início rápido](/quickstart).
+- Uma conta na Chatvolt, com um agente criado. Para criar uma conta, acesse
+  [app.chatvolt.ai/partner/zapperapi](https://app.chatvolt.ai/partner/zapperapi).
+- Da sua conta na Chatvolt:
+  - O ID do agente.
+  - A chave de API da conta.
 
-Para o comportamento do agente na ZapperHub e os comandos `#on` e `#off`, veja
+## Procedimento
+
+<Steps>
+  <Step title="Abra a instância">
+    Acesse [app.zapperhub.com/dash](https://app.zapperhub.com/dash) e clique na instância.
+  </Step>
+  <Step title="Abra a aba de agentes">
+    Clique em **Integrações** e depois em **Agentes de IA**.
+  </Step>
+  <Step title="Selecione a Chatvolt">
+    Em **Tipo de Integração**, selecione **Chatvolt**.
+  </Step>
+  <Step title="Preencha os dados do agente">
+    Em **ID do Agente**, informe o ID do agente. Em **Chave de API**, informe a chave de API da Chatvolt.
+  </Step>
+  <Step title="Salve">
+    Clique em **Atualizar**.
+  </Step>
+</Steps>
+
+Para criar a integração pela API, use a rota
+[Criar/atualizar integração](/api-reference/integrações/criaratualizar-integração)
+com `type` igual a `CHATVOLT`.
+
+## Resultado
+
+O agente responde as conversas da instância. A opção **Desativar IA em mensagens
+a partir do dispositivo** vem ligada. Com ela ligada, quando você responde pelo
+celular, pelo WhatsApp Web ou pelo Desktop, o agente para de responder naquela
+conversa.
+Para reativar o agente, envie `#on` na conversa. Veja
 [Agentes de IA](/integrations/ai-agents).
+
+## Configurar o follow-up
+
+Faça este procedimento para que o agente envie mensagens de follow-up e
+mensagens de nota pelo número da instância.
+
+<Steps>
+  <Step title="Copie a URL do webhook">
+    Na aba **Agentes de IA**, na seção **Webhook para Follow up e mensagens de nota**, copie a URL.
+  </Step>
+  <Step title="Configure o agente na Chatvolt">
+    Na sua conta da Chatvolt, configure o webhook do agente com essa URL.
+  </Step>
+</Steps>
+
+## Comportamento do agente
+
+| Situação | Comportamento |
+|---|---|
+| O contato envia várias mensagens seguidas | A ZapperHub espera o tempo de **Debounce** e envia as mensagens ao agente como uma pergunta. O agente envia uma resposta |
+| O contato envia imagem, áudio, vídeo ou documento | O arquivo chega ao agente como anexo |
+| Mensagem em grupo, conexão por QR Code | O agente responde só quando o número da instância é mencionado. As outras mensagens do grupo entram no contexto do agente |
+| Mensagem em grupo, conexão oficial | Não se aplica. A API oficial da Meta não tem grupos |
+| Você escreve numa conversa individual pelo celular | O texto entra no contexto do agente |
+| Você envia `#off` | O agente para de responder naquela conversa. Na conexão por QR Code, a mensagem `#off` é apagada. Na conexão oficial, a mensagem fica visível |
+
+As opções **Debounce**, **Dividir mensagens do agente** e **Responder com áudio**
+estão em [Configurações da instância](/painel/configuracoes-da-instancia).
+
+## Veja também
+
+- [Agentes de IA](/integrations/ai-agents)
+- [Integrações no painel](/painel/integracoes)
+- [ElevenLabs](/integrations/eleven-labs)

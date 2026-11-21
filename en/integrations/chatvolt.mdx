@@ -1,6 +1,6 @@
 ---
 title: Chatvolt AI
-description: "Connect a Chatvolt agent to WhatsApp through ZapperHub"
+description: "Connect a Chatvolt agent to a WhatsApp number through ZapperHub"
 ---
 
 ## Description
@@ -11,16 +11,84 @@ Chatvolt is a customer service platform with AI agents. With it, you:
 - Answer customers based on that data.
 - Use more than 50 language models, such as ChatGPT, Gemini, Claude, and Grok.
 
-If you do not have an account, register at
-[app.chatvolt.ai/partner/zapperapi](https://app.chatvolt.ai/partner/zapperapi).
+ZapperHub connects a Chatvolt agent to an instance. ZapperHub sends the messages
+that the number receives to the agent and sends the agent answer to the contact.
+You do the configuration in the ZapperHub panel.
 
-## Integrate a Chatvolt agent
+The integration operates on the two connections: QR Code and the Meta official
+API.
 
-Chatvolt has its own deployment for ZapperHub. The configuration is done in your
-Chatvolt account.
+## Prerequisites
 
-Follow the official documentation at
-[docs.chatvolt.ai/integrations/zapper](https://docs.chatvolt.ai/integrations/zapper).
+- A connected instance. See [Quickstart](/en/quickstart).
+- A Chatvolt account with an agent. To create an account, go to
+  [app.chatvolt.ai/partner/zapperapi](https://app.chatvolt.ai/partner/zapperapi).
+- From your Chatvolt account:
+  - The agent ID.
+  - The account API key.
 
-For the agent behavior in ZapperHub and the `#on` and `#off` commands, see
+## Procedure
+
+<Steps>
+  <Step title="Open the instance">
+    Go to [app.zapperhub.com/dash](https://app.zapperhub.com/dash) and click the instance.
+  </Step>
+  <Step title="Open the agents tab">
+    Click **Integrations**, then **AI Agents**.
+  </Step>
+  <Step title="Select Chatvolt">
+    In **Integration type**, select **Chatvolt**.
+  </Step>
+  <Step title="Enter the agent data">
+    In **Agent ID**, enter the agent ID. In **API Key**, enter the Chatvolt API key.
+  </Step>
+  <Step title="Save">
+    Click **Update**.
+  </Step>
+</Steps>
+
+To create the integration through the API, use the
+[Create/update integration](/api-reference/integrações/criaratualizar-integração)
+route with `type` set to `CHATVOLT`.
+
+## Result
+
+The agent answers the conversations of the instance. The option **Disable AI on
+messages from device** is on by default. When this option is on and you reply
+from the phone, WhatsApp Web, or Desktop, the agent stops answering in that
+conversation. To enable the agent again, send `#on` in the conversation. See
 [AI agents](/en/integrations/ai-agents).
+
+## Configure the follow-up
+
+Do this procedure to let the agent send follow-up messages and note messages
+from the instance number.
+
+<Steps>
+  <Step title="Copy the webhook URL">
+    In the **AI Agents** tab, in the **Webhook for follow-up and note messages** section, copy the URL.
+  </Step>
+  <Step title="Configure the agent in Chatvolt">
+    In your Chatvolt account, set the agent webhook to this URL.
+  </Step>
+</Steps>
+
+## Agent behavior
+
+| Situation | Behavior |
+|---|---|
+| The contact sends many messages in sequence | ZapperHub waits for the **Debounce** time and sends the messages to the agent as one question. The agent sends one answer |
+| The contact sends an image, audio, video, or document | The file goes to the agent as an attachment |
+| Group message, QR Code connection | The agent answers only when a message mentions the instance number. The other group messages go into the agent context |
+| Group message, official connection | Not applicable. The Meta official API does not have groups |
+| You write in an individual conversation from the phone | The text goes into the agent context |
+| You send `#off` | The agent stops answering in that conversation. On the QR Code connection, ZapperHub deletes the `#off` message. On the official connection, the message stays visible |
+
+The options **Debounce**, **Split agent messages**, and **Respond with audio**
+are in [Instance settings](/en/panel/instance-settings).
+
+## See also
+
+- [AI agents](/en/integrations/ai-agents)
+- [Integrations in the panel](/en/panel/integrations)
+- [ElevenLabs](/en/integrations/eleven-labs)
