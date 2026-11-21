@@ -1,0 +1,104 @@
+---
+title: Chatwoot
+description: "Atender as conversas de um número do WhatsApp no Chatwoot pela ZapperHub"
+---
+
+## Descrição
+
+O Chatwoot é uma plataforma de atendimento ao cliente. Os atendentes respondem
+as conversas numa caixa de entrada compartilhada.
+
+A ZapperHub liga o Chatwoot a uma instância. A ZapperHub cria uma caixa de
+entrada no seu Chatwoot e envia a ela as mensagens que o número recebe. A
+resposta do atendente sai pelo número da instância. A configuração é feita no
+painel da ZapperHub.
+
+A integração funciona nas três conexões da ZapperHub:
+
+| Conexão | O número | Como conectar |
+|---|---|---|
+| QR Code | Continua no WhatsApp do celular | [Conexão não oficial](/painel/conexao-nao-oficial) |
+| Coexistência | Continua no app WhatsApp Business do celular e usa a API oficial | **Modo de coexistência**, em [Conexão oficial](/painel/conexao-oficial) |
+| API oficial | Fica registrado na Meta, sem app no celular | [Conexão oficial](/painel/conexao-oficial) |
+
+Nas três conexões, você não cria um app na Meta para o Chatwoot. A integração
+funciona com o Chatwoot da nuvem e com o Chatwoot instalado no seu servidor.
+
+## Pré-requisitos
+
+- Uma instância conectada. Veja [Início rápido](/quickstart).
+- Uma conta no Chatwoot, com um usuário administrador.
+- Do seu Chatwoot:
+  - A URL. Exemplo: `https://app.chatwoot.com`.
+  - O ID da conta.
+  - O token de acesso do usuário administrador.
+
+## Procedimento
+
+<Steps>
+  <Step title="Copie o token de acesso">
+    No Chatwoot, abra as configurações do seu perfil. Copie o **token de acesso**.
+  </Step>
+  <Step title="Anote o ID da conta">
+    No Chatwoot, o ID da conta é o número que aparece no endereço, depois de `/accounts/`.
+    Exemplo: em `https://app.chatwoot.com/app/accounts/12/dashboard`, o ID da conta é `12`.
+  </Step>
+  <Step title="Abra a instância">
+    Acesse [app.zapperhub.com/dash](https://app.zapperhub.com/dash) e clique na instância.
+  </Step>
+  <Step title="Abra a aba Chatwoot">
+    Clique em **Integrações** e depois em **Chatwoot**.
+  </Step>
+  <Step title="Preencha os dados">
+    Em **URL do Chatwoot**, informe a URL. Em **ID da conta**, informe o ID da conta.
+    Em **Token de acesso**, informe o token. Em **Nome da caixa de entrada**, informe o
+    nome que os atendentes vão ver no Chatwoot.
+  </Step>
+  <Step title="Crie a integração">
+    Clique em **Criar integração**.
+  </Step>
+</Steps>
+
+Para criar a integração pela API, use a rota
+[Criar integração com Chatwoot](/api-reference/integrações/criar-integração-com-chatwoot).
+
+## Resultado
+
+O painel mostra **Integração ativa** e os identificadores da integração. No seu
+Chatwoot, aparecem:
+
+- Uma caixa de entrada com o nome informado.
+- Um webhook com o nome `ZapperHub Webhook`.
+
+As mensagens novas do número chegam à caixa de entrada. As mensagens anteriores
+à integração não são importadas.
+
+## Comportamento da integração
+
+| Situação | Comportamento |
+|---|---|
+| O contato envia uma mensagem | A mensagem chega à caixa de entrada. O Chatwoot cria o contato com o nome e o telefone do WhatsApp |
+| O atendente responde no Chatwoot | A resposta sai pelo número da instância |
+| O atendente escreve uma nota privada | A nota fica no Chatwoot. Ela não é enviada ao contato |
+| Você responde pelo celular (QR Code) ou pelo app WhatsApp Business (coexistência) | A resposta aparece na conversa do Chatwoot como mensagem enviada |
+| O contato envia imagem, áudio, vídeo ou documento | O arquivo chega ao Chatwoot como anexo, com a legenda |
+| O atendente envia um anexo | O arquivo sai pelo número, com o texto como legenda. Se a mensagem tem mais de um anexo, só o primeiro é enviado |
+| O contato responde citando uma mensagem | O Chatwoot mostra a resposta ligada à mensagem citada |
+| Uma mensagem do atendente não sai | O Chatwoot marca a mensagem como falha e mostra o motivo |
+| A Meta não entrega uma mensagem do contato | A ZapperHub publica um aviso na conversa. Veja **Aviso de mensagem não entregue** em [Integrações no painel](/painel/integracoes) |
+
+<Note>
+Na API oficial e na coexistência, a Meta aceita uma mensagem livre só até 24
+horas depois da última mensagem do contato. Depois desse prazo, a resposta do
+Chatwoot falha e aparece como falha na conversa.
+</Note>
+
+As opções **Exibir nome do atendente nas mensagens** e **Aviso de mensagem não
+entregue**, a desativação e a exclusão da integração estão em
+[Integrações no painel](/painel/integracoes).
+
+## Veja também
+
+- [Integrações no painel](/painel/integracoes)
+- [Conexão oficial](/painel/conexao-oficial)
+- [Conexão não oficial](/painel/conexao-nao-oficial)

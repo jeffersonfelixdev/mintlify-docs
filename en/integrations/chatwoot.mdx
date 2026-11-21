@@ -1,0 +1,106 @@
+---
+title: Chatwoot
+description: "Answer the conversations of a WhatsApp number in Chatwoot through ZapperHub"
+---
+
+## Description
+
+Chatwoot is a customer service platform. The agents answer the conversations in
+a shared inbox.
+
+ZapperHub connects Chatwoot to an instance. ZapperHub creates an inbox in your
+Chatwoot and sends to it the messages that the number receives. The agent answer
+goes out from the instance number. You do the configuration in the ZapperHub
+panel.
+
+The integration operates on the three ZapperHub connections:
+
+| Connection | The number | How to connect |
+|---|---|---|
+| QR Code | Stays on WhatsApp on the phone | [Unofficial connection](/en/panel/unofficial-connection) |
+| Coexistence | Stays on the WhatsApp Business app on the phone and uses the official API | [Coexistence mode](/en/panel/official-connection#coexistence-mode) |
+| Official API | Is registered with Meta, with no app on the phone | [Official connection](/en/panel/official-connection) |
+
+On the three connections, you do not create a Meta app for Chatwoot. The
+integration operates with Chatwoot Cloud and with a Chatwoot that you install on
+your server.
+
+## Prerequisites
+
+- A connected instance. See [Quickstart](/en/quickstart).
+- A Chatwoot account, with an administrator user.
+- From your Chatwoot:
+  - The URL. Example: `https://app.chatwoot.com`.
+  - The account ID.
+  - The access token of the administrator user.
+
+## Procedure
+
+<Steps>
+  <Step title="Copy the access token">
+    In Chatwoot, open your profile settings. Copy the **access token**.
+  </Step>
+  <Step title="Get the account ID">
+    In Chatwoot, the account ID is the number in the address, after `/accounts/`.
+    Example: in `https://app.chatwoot.com/app/accounts/12/dashboard`, the account ID is `12`.
+  </Step>
+  <Step title="Open the instance">
+    Go to [app.zapperhub.com/dash](https://app.zapperhub.com/dash) and click the instance.
+  </Step>
+  <Step title="Open the Chatwoot tab">
+    Click **Integrations**, then **Chatwoot**.
+  </Step>
+  <Step title="Enter the data">
+    In **Chatwoot URL**, enter the URL. In **Account ID**, enter the account ID.
+    In **Access token**, enter the token. In **Inbox name**, enter the name that
+    the agents see in Chatwoot.
+  </Step>
+  <Step title="Create the integration">
+    Click **Create integration**.
+  </Step>
+</Steps>
+
+To create the integration through the API, use the
+[Create Chatwoot integration](/api-reference/integrações/criar-integração-com-chatwoot)
+route.
+
+## Result
+
+The panel shows **Active integration** and the identifiers of the integration.
+In your Chatwoot, you see:
+
+- An inbox with the name that you entered.
+- A webhook with the name `ZapperHub Webhook`.
+
+The new messages of the number go to the inbox. ZapperHub does not import the
+messages from before the integration.
+
+## Integration behavior
+
+| Situation | Behavior |
+|---|---|
+| The contact sends a message | The message goes to the inbox. Chatwoot creates the contact with the WhatsApp name and phone number |
+| The agent answers in Chatwoot | The answer goes out from the instance number |
+| The agent writes a private note | The note stays in Chatwoot. ZapperHub does not send it to the contact |
+| You answer from the phone (QR Code) or from the WhatsApp Business app (coexistence) | The answer shows in the Chatwoot conversation as a sent message |
+| The contact sends an image, audio, video, or document | The file goes to Chatwoot as an attachment, with the caption |
+| The agent sends an attachment | The file goes out from the number, with the text as the caption. If the message has more than one attachment, ZapperHub sends only the first |
+| The contact replies to a quoted message | Chatwoot shows the reply linked to the quoted message |
+| A message from the agent does not go out | Chatwoot marks the message as failed and shows the cause |
+| Meta does not deliver a message from the contact | ZapperHub posts a notice in the conversation. See **Undelivered message notice** in [Integrations in the panel](/en/panel/integrations) |
+
+<Note>
+On the official API and on coexistence, Meta accepts a free-form message only
+up to 24 hours after the last message from the contact. After this period, the
+Chatwoot answer fails and shows as failed in the conversation.
+</Note>
+
+The options **Show agent name in messages** and **Undelivered message notice**,
+and the deactivation and deletion of the integration, are in
+[Integrations in the panel](/en/panel/integrations).
+
+## See also
+
+- [Integrations in the panel](/en/panel/integrations)
+- [Official connection](/en/panel/official-connection)
+- [Unofficial connection](/en/panel/unofficial-connection)

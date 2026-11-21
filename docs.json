@@ -79,6 +79,7 @@
                   "integrations/webhooks",
                   "integrations/ai-agents",
                   "integrations/chatvolt",
+                  "integrations/chatwoot",
                   "integrations/eleven-labs",
                   "integrations/n8n",
                   "integrations/make"
@@ -202,6 +203,7 @@
                   "en/integrations/webhooks",
                   "en/integrations/ai-agents",
                   "en/integrations/chatvolt",
+                  "en/integrations/chatwoot",
                   "en/integrations/eleven-labs",
                   "en/integrations/n8n",
                   "en/integrations/make"
