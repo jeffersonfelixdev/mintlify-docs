@@ -114,7 +114,9 @@ the node removes the webhook.
 <Warning>
 On the official connection, the **Call Update** event (`calls.update`) turns on
 calls for the number at Meta. If the number cannot receive calls, ZapperHub
-refuses the webhook. See [Available events](/en/integrations/webhooks#available-events).
+refuses the webhook. n8n shows the error, and the workflow is not published.
+Remove **Call Update** from **Events** and publish the workflow again. See
+[Call](/en/integrations/webhooks#call).
 </Warning>
 
 ## Resources and operations
@@ -165,7 +167,7 @@ The **ZapperHub** node also works as a tool of the n8n **AI Agent**.
     ![Body parameters for the text send](/integrations/n8n-step-2.png)
   </Step>
   <Step title="Test">
-    Close the node window and click **Test Workflow**.
+    Close the node window and click **Execute workflow**.
   </Step>
 </Steps>
 
@@ -183,7 +185,8 @@ Format the phone number with no parentheses, spaces, or dashes. See
 ## Migrate from n8n-nodes-zapperapi
 
 The `n8n-nodes-zapperapi` package is the previous package. It calls the
-`api.zapperapi.com` domain, which responds until **June 30, 2027**. See [API domain](/en/definitions/api-domain).
+`api.zapperapi.com` domain, which responds until **June 30, 2027**. See
+[API domain](/en/definitions/api-domain).
 
 The two packages can be installed at the same time. Change one workflow at a
 time.
@@ -199,9 +202,10 @@ time.
   <Step title="Replace the nodes">
     In each workflow, replace the **ZapperAPI** node with the **ZapperHub** node,
     with the same operation, and fill in the fields again. The **JID** field is
-    now named **Recipient**.
+    now named **Recipient**. In the text send, the **Message** field is now
+    named **Text**.
   </Step>
-  <Step title="Replace the webhook, if you use the trigger">
+  <Step title="Replace the Webhook node, if the workflow uses one">
     If the workflow receives events through the n8n **Webhook** node, you can
     replace it with the **ZapperHub Trigger**. Then delete the old webhook in
     [Webhooks](/en/panel/webhooks).

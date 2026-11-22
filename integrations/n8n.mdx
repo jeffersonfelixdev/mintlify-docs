@@ -114,7 +114,9 @@ desativar o fluxo, o nó remove o webhook.
 <Warning>
 Em conexão oficial, o evento **Call Update** (`calls.update`) habilita as
 chamadas do número na Meta. Se o número não pode receber chamadas, a ZapperHub
-recusa o webhook. Veja [Eventos disponíveis](/integrations/webhooks#eventos-disponiveis).
+recusa o webhook. O n8n mostra o erro e o fluxo não é publicado. Tire
+**Call Update** de **Events** e publique o fluxo outra vez. Veja
+[Chamada](/integrations/webhooks#chamada).
 </Warning>
 
 ## Recursos e operações
@@ -165,7 +167,7 @@ O nó **ZapperHub** também funciona como ferramenta do **AI Agent** do n8n.
     ![Parâmetros do corpo para o envio de texto](/integrations/n8n-step-2.png)
   </Step>
   <Step title="Teste">
-    Feche a janela do nó e clique em **Test Workflow**.
+    Feche a janela do nó e clique em **Execute workflow**.
   </Step>
 </Steps>
 
@@ -182,8 +184,9 @@ Formate o número de telefone sem parênteses, espaços ou traços. Veja
 
 ## Migrar do n8n-nodes-zapperapi
 
-O pacote `n8n-nodes-zapperapi` é o pacote anterior, que chama o domínio `api.zapperapi.com`, e que atende até
-**30 de junho de 2027**. Veja [Domínio da API](/definitions/dominio-da-api).
+O pacote `n8n-nodes-zapperapi` é o pacote anterior. Ele chama o domínio
+`api.zapperapi.com`, que atende até **30 de junho de 2027**. Veja
+[Domínio da API](/definitions/dominio-da-api).
 
 Os dois pacotes podem ficar instalados juntos. Troque um fluxo de cada vez.
 
@@ -198,9 +201,10 @@ Os dois pacotes podem ficar instalados juntos. Troque um fluxo de cada vez.
   <Step title="Troque os nós">
     Em cada fluxo, troque o nó **ZapperAPI** pelo nó **ZapperHub**, com a mesma
     operação, e preencha os campos outra vez. O campo **JID** agora se chama
-    **Recipient**.
+    **Recipient**. No envio de texto, o campo **Message** agora se chama
+    **Text**.
   </Step>
-  <Step title="Troque o webhook, se usar o gatilho">
+  <Step title="Troque o nó Webhook, se o fluxo usar um">
     Se o fluxo recebe eventos pelo nó **Webhook** do n8n, você pode trocá-lo
     pelo **ZapperHub Trigger**. Depois, apague o webhook antigo em
     [Webhooks](/painel/webhooks).
