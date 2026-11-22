@@ -1,0 +1,77 @@
+---
+title: API domain
+description: "Address of the instance API and end of the old api.zapperapi.com domain on June 30, 2027"
+keywords: ["domain", "api.zapperapi.com", "api.zapperhub.com", "Sunset", "Deprecation", "migration"]
+---
+
+## Description
+
+The instance API responds at `https://api.zapperhub.com`. Each route starts
+with the instance id:
+
+```text
+https://api.zapperhub.com/{instanceId}/messages/text
+```
+
+The old domain, `https://api.zapperapi.com`, is from the time when ZapperHub
+was named ZapperAPI. It serves the same routes, with the same key, until
+**June 30, 2027**.
+
+<Warning>
+**From July 1, 2027, ZapperHub does not guarantee requests to
+`api.zapperapi.com`.** Change the domain before this date.
+</Warning>
+
+## How to identify the old domain
+
+The responses of `api.zapperapi.com` have two more headers:
+
+| Header | Value | Meaning |
+|---|---|---|
+| `Deprecation` | `@1795305600` | The domain is deprecated since November 22, 2026 |
+| `Sunset` | `Wed, 30 Jun 2027 23:59:59 GMT` | Last day on which the domain responds |
+
+The responses of `api.zapperhub.com` do not have these headers.
+
+To find the old domain in your integration, search for `zapperapi.com` in the
+code, in the environment variables, and in the configuration of the automation
+tools.
+
+## Preliminary requirements
+
+- Access to the code or the tool that calls the API.
+
+## Procedure
+
+<Steps>
+  <Step title="Change the domain">
+    In each URL, replace `api.zapperapi.com` with `api.zapperhub.com`. The path,
+    the API key, and the request body do not change.
+  </Step>
+  <Step title="Change the n8n package">
+    If your n8n uses the `n8n-nodes-zapperapi` package, install
+    `n8n-nodes-zapperhub` and replace the nodes. See
+    [Migrate from n8n-nodes-zapperapi](/en/integrations/n8n#migrate-from-n8n-nodes-zapperapi).
+  </Step>
+  <Step title="Test">
+    Send `GET https://api.zapperhub.com/{instanceId}/connection` with the
+    instance key. Make sure that the response does not have the `Sunset` header.
+  </Step>
+</Steps>
+
+## Result
+
+The integration calls `api.zapperhub.com`. The responses do not have the
+`Deprecation` and `Sunset` headers.
+
+<Note>
+Webhooks do not change. ZapperHub sends the events to the URL that you
+registered, and the source address does not depend on the domain that your
+application calls.
+</Note>
+
+## See also
+
+- [Authentication](/en/definitions/authentication)
+- [Quickstart](/en/quickstart)
+- [n8n](/en/integrations/n8n)

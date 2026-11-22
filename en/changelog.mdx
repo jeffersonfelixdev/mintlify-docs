@@ -3,6 +3,31 @@ title: Changelog
 description: "Changes to the ZapperHub API and notices of behavior changes"
 ---
 
+<Update label="November 2026" description="End of the api.zapperapi.com domain and ZapperHub node for n8n" tags={["API", "n8n"]}>
+
+## Attention: the api.zapperapi.com domain responds until June 30, 2027
+
+The instance API responds at `https://api.zapperhub.com`. The previous domain,
+`https://api.zapperapi.com`, serves the same routes until **June 30, 2027**.
+From July 1, 2027, ZapperHub does not guarantee requests to the previous domain.
+
+- The responses of `api.zapperapi.com` have the `Deprecation` and `Sunset`
+  headers.
+- Replace `api.zapperapi.com` with `api.zapperhub.com` in each URL. The path,
+  the key, and the body do not change.
+
+See [API domain](/en/definitions/api-domain).
+
+## ZapperHub node for n8n
+
+The `n8n-nodes-zapperhub` package replaces `n8n-nodes-zapperapi`. It has the
+**ZapperHub** node, with the operations for messages, calls, contacts, chats,
+groups, templates, and Instagram, and the **ZapperHub Trigger**, which registers
+the webhook of the instance and checks the signature of each event. See
+[n8n](/en/integrations/n8n).
+
+</Update>
+
 <Update label="November 2026" description="Recording and history of Cloud API calls" tags={["Cloud API", "Webhooks"]}>
 
 ## Recording through the softphone on the official connection

@@ -52,6 +52,7 @@
                 "icon": "book",
                 "pages": [
                   "definitions/authentication",
+                  "definitions/dominio-da-api",
                   "definitions/connection",
                   "definitions/zapperhub-connect",
                   "definitions/number-format",
@@ -176,6 +177,7 @@
                 "icon": "book",
                 "pages": [
                   "en/definitions/authentication",
+                  "en/definitions/api-domain",
                   "en/definitions/connection",
                   "en/definitions/zapperhub-connect",
                   "en/definitions/number-format",

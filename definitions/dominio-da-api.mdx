@@ -1,0 +1,77 @@
+---
+title: Domínio da API
+description: "Endereço da API da instância e fim do domínio antigo api.zapperapi.com em 30 de junho de 2027"
+keywords: ["domínio", "api.zapperapi.com", "api.zapperhub.com", "Sunset", "Deprecation", "migração"]
+---
+
+## Descrição
+
+A API da instância responde em `https://api.zapperhub.com`. Cada rota começa
+com o id da instância:
+
+```text
+https://api.zapperhub.com/{instanceId}/messages/text
+```
+
+O domínio antigo, `https://api.zapperapi.com`, é do tempo em que a ZapperHub se
+chamava ZapperAPI. Ele atende as mesmas rotas, com a mesma chave, até
+**30 de junho de 2027**.
+
+<Warning>
+**A partir de 1º de julho de 2027, a ZapperHub não garante as requisições para
+`api.zapperapi.com`.** Troque o domínio antes dessa data.
+</Warning>
+
+## Como identificar o domínio antigo
+
+As respostas de `api.zapperapi.com` levam dois cabeçalhos a mais:
+
+| Cabeçalho | Valor | Significado |
+|---|---|---|
+| `Deprecation` | `@1795305600` | O domínio é obsoleto desde 22 de novembro de 2026 |
+| `Sunset` | `Wed, 30 Jun 2027 23:59:59 GMT` | Último dia em que o domínio atende |
+
+As respostas de `api.zapperhub.com` não têm esses cabeçalhos.
+
+Para encontrar o domínio antigo na sua integração, busque `zapperapi.com` no
+código, nas variáveis de ambiente e na configuração das ferramentas de
+automação.
+
+## Pré-requisitos
+
+- Acesso ao código ou à ferramenta que chama a API.
+
+## Procedimento
+
+<Steps>
+  <Step title="Troque o domínio">
+    Em cada URL, troque `api.zapperapi.com` por `api.zapperhub.com`. O caminho,
+    a chave de API e o corpo da requisição não mudam.
+  </Step>
+  <Step title="Troque o pacote do n8n">
+    Se o seu n8n usa o pacote `n8n-nodes-zapperapi`, instale o
+    `n8n-nodes-zapperhub` e troque os nós. Veja
+    [Migrar do n8n-nodes-zapperapi](/integrations/n8n#migrar-do-n8n-nodes-zapperapi).
+  </Step>
+  <Step title="Teste">
+    Envie `GET https://api.zapperhub.com/{instanceId}/connection` com a chave da
+    instância. Confira que a resposta não tem o cabeçalho `Sunset`.
+  </Step>
+</Steps>
+
+## Resultado
+
+A integração chama `api.zapperhub.com`. As respostas não trazem os cabeçalhos
+`Deprecation` e `Sunset`.
+
+<Note>
+Os webhooks não mudam. A ZapperHub envia os eventos para a URL que você
+cadastrou, e o endereço de origem não depende do domínio que a sua aplicação
+chama.
+</Note>
+
+## Veja também
+
+- [Autenticação](/definitions/authentication)
+- [Início rápido](/quickstart)
+- [n8n](/integrations/n8n)
