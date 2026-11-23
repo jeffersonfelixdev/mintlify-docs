@@ -72,6 +72,7 @@ the business: the phone, if known, or the BSUID. Without a link, the response is
 | `delay` | Text, audio, media | Delay before the send, from 0 to 20 seconds. |
 | `expiration` | Text | Disappearing message: `none` (default), `24h`, `7d`, or `90d`. |
 | `quotedMessageId` | All queued sends, including template | Id of the message to quote. See [Reply with a quote](#reply-with-a-quote). |
+| `groupStatus` | Text, media (image, video, and audio), audio | Posts the send as a group status. See [Group status](#group-status). |
 
 ## Reply with a quote
 
@@ -123,6 +124,48 @@ Only the first one quotes.
 
 On the Cloud API, Meta accepts the quote on a template, but the device of the
 contact does not show the quote bubble.
+
+## Group status
+
+A group status is a status that only the participants of a group see. It shows
+in the status updates of the participants. It does not show in the group chat.
+
+To post a group status, send `groupStatus: true` with the `jid` of the group:
+
+```json
+{
+  "jid": "120363012345678901@g.us",
+  "message": "The store opens at 9 AM on Saturday.",
+  "groupStatus": true
+}
+```
+
+The field applies to these routes:
+
+| Route | Types |
+| --- | --- |
+| [Text](#text) | Text |
+| [Media](#media) | `image`, `video`, and `audio` |
+| [Audio (voice note)](#audio-voice-note) | Voice note |
+
+Rules:
+
+- Only the unofficial connection (QR Code) posts group status. For a different
+  instance type, the API responds `422` with
+  `code: "UNSUPPORTED_FOR_INSTANCE_TYPE"`.
+- The `jid` must be a group (`@g.us`). For a different destination, the API
+  responds `400`.
+- The API responds `400` when the body has `quotedMessageId` or
+  `mediaType: "document"`.
+- The send does not show "typing" or "recording", also when presence simulation
+  is on.
+- With `splitMessage` or `processImageLink`, each part of the message becomes a
+  status.
+
+The outgoing `messages.upsert` has `groupStatus: true`.
+
+To post a status for your contacts, use `status@broadcast` in `jid`, without
+`groupStatus`.
 
 ## Text
 
@@ -902,3 +945,4 @@ messages from other participants.
 | Mark as read | ✅ | — | — |
 | Quote (`quotedMessageId`), except buttons, list, and PIX charge on unofficial | ✅ | ✅ | ⚠️ |
 | Human agent (`humanAgent`) | — | — | ✅ |
+| Group status (`groupStatus`) | ✅ | — | — |

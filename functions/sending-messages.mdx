@@ -71,6 +71,7 @@ com `code: "CONTACT_NOT_FOUND"`. Veja
 | `delay` | Texto, áudio, mídia | Atraso antes do envio, de 0 a 20 segundos. |
 | `expiration` | Texto | Mensagem temporária: `none` (padrão), `24h`, `7d` ou `90d`. |
 | `quotedMessageId` | Todos os envios enfileirados, inclusive template | Id da mensagem a citar. Veja [Responder citando uma mensagem](#responder-citando-uma-mensagem). |
+| `groupStatus` | Texto, mídia (imagem, vídeo e áudio), áudio | Publica o envio como status do grupo. Veja [Status em grupo](#status-em-grupo). |
 
 ## Responder citando uma mensagem
 
@@ -121,6 +122,47 @@ Com `splitMessage` ou `processImageLink`, a mensagem vira várias. Só a primeir
 
 Na Cloud API, a Meta aceita a citação em template, mas o aparelho do contato não
 exibe a bolha de citação.
+
+## Status em grupo
+
+Um status em grupo é um status que só os participantes de um grupo veem. Ele
+aparece nas atualizações de status dos participantes e não aparece na conversa
+do grupo.
+
+Para publicar um status em grupo, envie `groupStatus: true` com o `jid` do grupo:
+
+```json
+{
+  "jid": "120363012345678901@g.us",
+  "message": "A loja abre às 9h no sábado.",
+  "groupStatus": true
+}
+```
+
+O campo vale nestas rotas:
+
+| Rota | Tipos |
+| --- | --- |
+| [Texto](#texto) | Texto |
+| [Mídia](#midia) | `image`, `video` e `audio` |
+| [Áudio (nota de voz)](#audio-nota-de-voz) | Nota de voz |
+
+Regras:
+
+- Só a conexão não oficial (QR Code) publica status em grupo. Em outro tipo de
+  instância, a API responde `422` com `code: "UNSUPPORTED_FOR_INSTANCE_TYPE"`.
+- O `jid` precisa ser de um grupo (`@g.us`). Para outro destino, a API responde
+  `400`.
+- A API responde `400` quando o corpo tem `quotedMessageId` ou
+  `mediaType: "document"`.
+- O envio não mostra "digitando" nem "gravando", também quando a simulação de
+  presença está ligada.
+- Com `splitMessage` ou `processImageLink`, cada parte da mensagem vira um status.
+
+O `messages.upsert` de saída traz `groupStatus: true`.
+
+Para publicar um status para os seus contatos, use `status@broadcast` em `jid`,
+sem `groupStatus`.
 
 ## Texto
 
@@ -885,3 +927,4 @@ administrador pode excluir mensagens de outros participantes.
 | Marcar como lida | ✅ | — | — |
 | Citar (`quotedMessageId`), exceto botões, lista e cobrança PIX no não oficial | ✅ | ✅ | ⚠️ |
 | Atendimento humano (`humanAgent`) | — | — | ✅ |
+| Status em grupo (`groupStatus`) | ✅ | — | — |

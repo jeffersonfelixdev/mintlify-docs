@@ -141,6 +141,7 @@ changes with the type.
 | `mediaStorageWarning` | The own storage is registered and the file was not stored in it. `code` is `CUSTOM_STORAGE_FAILED` |
 | `mediaExpiresAt` | When the file expires in the ZapperHub storage, in ISO 8601. See [File storage](/en/definitions/storage) |
 | `jobId` | Id of the job in the queue. Present in messages sent through the API |
+| `groupStatus` | `true` when the API posted the send as a [group status](/en/functions/sending-messages#group-status) |
 | `trackId` / `trackSource` | The values given at the send. In received messages, `trackSource` is `whatsapp` |
 
 On the official connection (Cloud API), the events also carry the original body

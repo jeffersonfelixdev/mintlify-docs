@@ -34,6 +34,10 @@ A ZapperHub envia mensagens para contatos, grupos, comunidades e canais.
 | Status | `status@broadcast` |
 | Canal | `@newsletter` |
 
+O destino `status@broadcast` publica o status para os seus contatos. Para
+publicar um status que só os participantes de um grupo veem, use o `jid` do grupo
+com `groupStatus`. Veja [Status em grupo](/functions/sending-messages#status-em-grupo).
+
 ## Outras operações
 
 Além de enviar, a API permite reagir a uma mensagem, marcar mensagens como lidas

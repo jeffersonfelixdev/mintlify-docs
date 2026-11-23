@@ -140,6 +140,7 @@ Os eventos de mensagem compartilham a mesma estrutura. O conteúdo do objeto
 | `mediaStorageWarning` | O storage próprio está cadastrado e o arquivo não foi gravado nele. `code` é `CUSTOM_STORAGE_FAILED` |
 | `mediaExpiresAt` | Quando o arquivo expira no storage da ZapperHub, em ISO 8601. Veja [Armazenamento de arquivos](/definitions/storage) |
 | `jobId` | Id do job na fila. Presente nas mensagens enviadas pela API |
+| `groupStatus` | `true` quando a API publicou o envio como [status do grupo](/functions/sending-messages#status-em-grupo) |
 | `trackId` / `trackSource` | Os valores informados no envio. Em mensagens recebidas, `trackSource` é `whatsapp` |
 
 Em conexão oficial (Cloud API), os eventos também trazem o corpo original da

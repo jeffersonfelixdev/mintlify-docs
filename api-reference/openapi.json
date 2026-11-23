@@ -14790,6 +14790,17 @@
                     "maxLength": 255,
                     "description": "Id da mensagem a citar (\"Responder\"). Se ela não for encontrada no histórico da instância, ou se o tipo de mensagem não aceitar citação neste canal, a mensagem sai sem citação e o evento `messages.upsert` de saída indica isso em `quote`."
                   },
+                  "groupStatus": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ],
+                    "description": "Publica a mensagem como **status do grupo**, visível só para os participantes do grupo, em vez de enviá-la na conversa. Exige `jid` de grupo e instância conectada por QR Code. Não aceita `quotedMessageId`."
+                  },
                   "humanAgent": {
                     "anyOf": [
                       {
@@ -28541,6 +28552,17 @@
                     "maxLength": 255,
                     "description": "Id da mensagem a citar (\"Responder\"). Se ela não for encontrada no histórico da instância, ou se o tipo de mensagem não aceitar citação neste canal, a mensagem sai sem citação e o evento `messages.upsert` de saída indica isso em `quote`."
                   },
+                  "groupStatus": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ],
+                    "description": "Publica a mensagem como **status do grupo**, visível só para os participantes do grupo, em vez de enviá-la na conversa. Exige `jid` de grupo e instância conectada por QR Code. Não aceita `quotedMessageId`."
+                  },
                   "humanAgent": {
                     "anyOf": [
                       {
@@ -28989,6 +29011,17 @@
                     "minLength": 1,
                     "maxLength": 255,
                     "description": "Id da mensagem a citar (\"Responder\"). Se ela não for encontrada no histórico da instância, ou se o tipo de mensagem não aceitar citação neste canal, a mensagem sai sem citação e o evento `messages.upsert` de saída indica isso em `quote`."
+                  },
+                  "groupStatus": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ],
+                    "description": "Publica a mensagem como **status do grupo**, visível só para os participantes do grupo, em vez de enviá-la na conversa. Exige `jid` de grupo e instância conectada por QR Code. Não aceita `quotedMessageId`."
                   },
                   "humanAgent": {
                     "anyOf": [
@@ -36038,7 +36071,7 @@
           },
           {
             "schema": {
-              "default": "2026-11-23T18:26:26.921Z"
+              "default": "2026-11-23T20:42:57.512Z"
             },
             "in": "query",
             "name": "endDate",
