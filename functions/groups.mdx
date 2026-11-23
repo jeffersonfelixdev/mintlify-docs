@@ -1,23 +1,65 @@
 ---
 title: Grupos
-description: "Operações sobre grupos e comunidades"
+description: "Operações sobre grupos"
 ---
+
+## Descrição
+
+As rotas de grupo estão disponíveis só para instâncias conectadas por QR Code.
+Uma instância de outro tipo recebe `422` com o código
+`UNSUPPORTED_FOR_INSTANCE_TYPE`.
 
 ## Operações
 
 A API permite estas operações em grupos:
 
-- Criar um grupo ou uma comunidade.
-- Consultar os detalhes de um grupo.
-- Atualizar o nome e a foto de um grupo.
+- Criar um grupo.
+- Listar os grupos de que o número participa.
+- Consultar os detalhes e os participantes de um grupo.
+- Alterar o nome e a descrição de um grupo.
+- Alterar e remover a foto de um grupo.
 - Adicionar e remover participantes.
 - Promover um participante a administrador e remover essa permissão.
-- Gerar o link de convite.
-- Listar os grupos de que o número participa.
-- Listar os participantes de um grupo.
+- Obter o link de convite.
+- Redefinir o link de convite.
+
+As rotas estão na seção *Grupos* da [API Reference](/api-reference).
 
 Para enviar texto e mídia a um grupo, use as rotas de
 [Envio de mensagens](/functions/sending-messages) com o JID do grupo em `jid`.
+
+## Criar um grupo
+
+Informe o nome e ao menos um participante. A conta conectada é a criadora e a
+primeira administradora do grupo. A resposta tem os dados do grupo novo, com o
+JID em `id`.
+
+## Alterar o nome e a descrição
+
+Envie `name`, `description` ou os dois. Quando o corpo tem os dois campos, a API
+altera o nome primeiro.
+
+<Warning>
+Se a alteração da descrição falhar, o nome novo fica gravado. Consulte o grupo
+para ver o estado atual antes de enviar a alteração de novo.
+</Warning>
+
+## Redefinir o link de convite
+
+<Warning>
+Quando você redefine o link de convite, o link anterior deixa de funcionar.
+</Warning>
+
+A resposta tem o link novo em `inviteLink`.
+
+## Recusa do WhatsApp
+
+Algumas operações exigem que a conta conectada seja administradora do grupo.
+Por exemplo: mudar participantes, obter o link de convite e, em grupos com
+edição restrita, alterar nome, descrição e foto.
+
+Quando o WhatsApp recusa a operação, a API responde `422` com o código
+`PROVIDER_REJECTED`. O motivo está em `detail`.
 
 <Note>
 Se o número conectado não é administrador do grupo, a Meta pode ocultar o

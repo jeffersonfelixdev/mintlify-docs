@@ -1,24 +1,67 @@
 ---
 title: Groups
-description: "Operations on groups and communities"
+description: "Operations on groups"
 ---
+
+## Description
+
+The group routes are available only for instances connected by QR Code. An
+instance of a different type receives `422` with the code
+`UNSUPPORTED_FOR_INSTANCE_TYPE`.
 
 ## Operations
 
 The API supports these operations on groups:
 
-- Create a group or a community.
-- Get the details of a group.
-- Update the name and the photo of a group.
+- Create a group.
+- List the groups the number participates in.
+- Get the details and the participants of a group.
+- Change the name and the description of a group.
+- Change and remove the photo of a group.
 - Add and remove participants.
 - Promote a participant to admin and remove that permission.
-- Generate the invite link.
-- List the groups the number participates in.
-- List the participants of a group.
+- Get the invite link.
+- Reset the invite link.
+
+The routes are in the *Grupos* section of the
+[API Reference](/api-reference).
 
 To send text and media to a group, use the
 [Sending messages](/en/functions/sending-messages) routes with the group JID in
 `jid`.
+
+## Create a group
+
+Give the name and at least one participant. The connected account is the
+creator and the first admin of the group. The response contains the data of the
+new group, with the JID in `id`.
+
+## Change the name and the description
+
+Send `name`, `description` or the two. When the body has the two fields, the API
+changes the name first.
+
+<Warning>
+If the change of the description fails, the new name stays saved. Get the group
+to see the current state before you send the change again.
+</Warning>
+
+## Reset the invite link
+
+<Warning>
+When you reset the invite link, the previous link stops working.
+</Warning>
+
+The response contains the new link in `inviteLink`.
+
+## Rejection by WhatsApp
+
+Some operations require that the connected account is an admin of the group.
+For example: change participants, get the invite link and, in groups with
+restricted editing, change the name, the description and the photo.
+
+When WhatsApp rejects the operation, the API responds `422` with the code
+`PROVIDER_REJECTED`. The reason is in `detail`.
 
 <Note>
 If the connected number is not an admin of the group, Meta can hide the phone
