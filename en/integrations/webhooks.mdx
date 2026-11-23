@@ -17,7 +17,7 @@ application receives the data at the moment of the event.
 | `contacts.preference` | The contact asked to stop, or to resume, marketing messages. Or the integrator set it through the API. Official connection only. Opt-in subscription |
 | `contacts.identity` | The link between phone, BSUID, and username of a contact changed. Official connection only. Opt-in subscription |
 | `messages.update` | The contact edited or deleted a received message. Official connection only, on a number in coexistence with WhatsApp Business. Opt-in subscription |
-| `messages.status` | The state of a sent message changed. Official connection: sent, delivered, read, or failed. Unofficial connection: delivered or read |
+| `messages.status` | The state of a sent message changed. Official connection: sent, delivered, read, or failed. Unofficial connection: delivered, read, or failed |
 | `messages.error` | The send of a message failed permanently |
 | `connection.update` | The instance connection opened or closed |
 | `group-participants.update` | Participants joined, left, were promoted, or were demoted in a group. Unofficial connection only |
@@ -1007,13 +1007,35 @@ message of the batch generates its own event. The `messageId` is the same
 - `chatId` is the chat. When the chat is identified by LID, the event carries
   `recipientLid` with the LID and, if ZapperHub knows the link, `recipientPn`
   with the phone. Without the link, `recipientId` carries the LID.
-- There is no `sent` or `failed` on the unofficial connection. The send
-  confirmation is the API response. The permanent failure arrives in
+- There is no `sent` on the unofficial connection. The send confirmation is the
+  API response.
+- When WhatsApp drops a message that it accepted before, the event arrives with
+  `status` `failed` and the `error` field. The message did not reach the
+  recipient. The permanent failure of a send through the API arrives in
   `messages.error`.
-- Group receipts are not delivered.
+- Delivery receipts and read receipts of groups are not delivered.
 - If the contact turned off read receipts, the `read` event does not arrive. Only `delivered` arrives.
 - To tell WhatsApp that you read a message, use
   [Mark as read](/en/functions/sending-messages#mark-as-read).
+
+Example of a message that WhatsApp dropped:
+
+```json
+{
+  "type": "messages.status",
+  "instanceId": "inst_01hxyz1234567890",
+  "messageId": "3AB16AB78CD9012E89A0",
+  "recipientId": "5512912345678",
+  "recipientPn": "5512912345678",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "status": "failed",
+  "error": {
+    "title": "integrity-drop",
+    "message": "WhatsApp dropped the message. The message was not delivered to the recipient."
+  },
+  "timestamp": 1785312030
+}
+```
 
 #### On the official connection (Cloud API)
 

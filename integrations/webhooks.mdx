@@ -17,7 +17,7 @@ evento acontece na instância. O webhook substitui a consulta periódica
 | `contacts.preference` | O contato pediu para parar, ou voltou a aceitar, mensagens de marketing. Ou o integrador marcou isso pela API. Só em conexão oficial. Assinatura opt-in |
 | `contacts.identity` | O vínculo entre telefone, BSUID e username de um contato mudou. Só em conexão oficial. Assinatura opt-in |
 | `messages.update` | O contato editou ou apagou uma mensagem recebida. Só em conexão oficial, em número em coexistência com o WhatsApp Business. Assinatura opt-in |
-| `messages.status` | O estado de uma mensagem enviada mudou. Em conexão oficial: enviada, entregue, lida ou falhou. Em conexão não oficial: entregue ou lida |
+| `messages.status` | O estado de uma mensagem enviada mudou. Em conexão oficial: enviada, entregue, lida ou falhou. Em conexão não oficial: entregue, lida ou falhou |
 | `messages.error` | O envio de uma mensagem falhou em definitivo |
 | `connection.update` | A conexão da instância abriu ou fechou |
 | `group-participants.update` | Participantes entraram, saíram, foram promovidos ou rebaixados em um grupo. Só em conexão não oficial |
@@ -1004,12 +1004,33 @@ mensagem do lote gera o seu evento. O `messageId` é o mesmo `key.id` recebido n
 - `chatId` é a conversa. Quando a conversa é identificada por LID, o evento traz
   `recipientLid` com o LID e, se a ZapperHub conhece o vínculo, `recipientPn` com
   o telefone. Sem o vínculo, `recipientId` carrega o LID.
-- Não há `sent` nem `failed` em conexão não oficial. A confirmação de envio é a
-  resposta da API. A falha definitiva chega em `messages.error`.
-- Recibos de grupo não são entregues.
+- Não há `sent` em conexão não oficial. A confirmação de envio é a resposta da API.
+- Quando o WhatsApp descarta uma mensagem que já aceitou, o evento chega com
+  `status` `failed` e o campo `error`. A mensagem não chegou ao destinatário.
+  A falha definitiva do envio pela API chega em `messages.error`.
+- Recibos de entrega e de leitura de grupo não são entregues.
 - Se o contato desativou a confirmação de leitura, o evento `read` não chega. Só o `delivered` chega.
 - Para informar ao WhatsApp que você leu uma mensagem, use
   [Marcar como lida](/functions/sending-messages#marcar-como-lida).
+
+Exemplo de mensagem descartada pelo WhatsApp:
+
+```json
+{
+  "type": "messages.status",
+  "instanceId": "inst_01hxyz1234567890",
+  "messageId": "3AB16AB78CD9012E89A0",
+  "recipientId": "5512912345678",
+  "recipientPn": "5512912345678",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "status": "failed",
+  "error": {
+    "title": "integrity-drop",
+    "message": "WhatsApp dropped the message. The message was not delivered to the recipient."
+  },
+  "timestamp": 1785312030
+}
+```
 
 #### Em conexão oficial (Cloud API)
 
