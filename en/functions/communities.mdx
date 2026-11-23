@@ -1,0 +1,62 @@
+---
+title: Communities
+description: "Operations on communities"
+---
+
+## Description
+
+A community holds related groups. Each community has an announcement group,
+which WhatsApp creates together with the community.
+
+The community routes are available only for instances connected by QR Code. An
+instance of a different type receives `422` with the code
+`UNSUPPORTED_FOR_INSTANCE_TYPE`.
+
+## Operations
+
+The API supports these operations on communities:
+
+- Create a community.
+- List the communities the number participates in.
+- List the groups of a community.
+- Create a group in a community.
+- Link an existing group to a community.
+- Unlink a group from a community.
+- List the participants of all the groups of a community.
+
+The routes are in the *Comunidades* section of the
+[API Reference](/api-reference).
+
+A community has a JID with the suffix `@g.us`, as a group has. To change the
+name, the description, the photo, and the settings of a community, use the
+[Groups](/en/functions/groups) routes with the JID of the community.
+
+## Create a community
+
+Give the name in `name`. The connected account is the creator and the first
+admin. The response contains the community data in `community`, with the JID in
+`id` and `isCommunity` set to `true`.
+
+## Groups of the community
+
+The list of groups of the community includes the announcement group. In that
+group, `isCommunityAnnounce` is `true`.
+
+To create a group in the community, give the name and, if necessary, the
+participants. The response has the same format as the creation of a usual
+group. Refer to
+[Result per participant](/en/functions/groups#result-per-participant).
+
+To link an existing group, the connected account must be an admin of the
+community and of the group.
+
+<Note>
+When you unlink a group, the group continues to exist with the same
+participants. It only stops being part of the community.
+</Note>
+
+## Rejection by WhatsApp
+
+The operations on a community require that the connected account is an admin of
+the community. When WhatsApp rejects the operation, the API responds `422` with
+the code `PROVIDER_REJECTED`. The reason is in `detail`.

@@ -47,6 +47,8 @@ Click **Create**. Success: *Webhook created successfully.*
 | `messages.error` | A message failed |
 | `connection.update` | The connection state of the instance changed |
 | `group-participants.update` | Participants joined, left, were promoted, or were demoted in a group. Unofficial connection only |
+| `groups.update` | The name, description, picture, settings, or invite link of a group changed. Unofficial connection only |
+| `groups.upsert` | The number started to participate in a group: it created the group, was added, or joined with an invite. Unofficial connection only |
 | `calls.update` | A call was received, answered, or ended. Official and unofficial connections |
 | `comments.upsert` | The account received a comment on a post. Instagram instances only |
 | `token.expired` | The Instagram token expired or was revoked |

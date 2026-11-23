@@ -1,0 +1,60 @@
+---
+title: Comunidades
+description: "Operações sobre comunidades"
+---
+
+## Descrição
+
+Uma comunidade reúne grupos relacionados. Toda comunidade tem um grupo de
+avisos, que o WhatsApp cria junto com a comunidade.
+
+As rotas de comunidade estão disponíveis só para instâncias conectadas por QR
+Code. Uma instância de outro tipo recebe `422` com o código
+`UNSUPPORTED_FOR_INSTANCE_TYPE`.
+
+## Operações
+
+A API permite estas operações em comunidades:
+
+- Criar uma comunidade.
+- Listar as comunidades de que o número participa.
+- Listar os grupos de uma comunidade.
+- Criar um grupo dentro de uma comunidade.
+- Vincular um grupo que já existe a uma comunidade.
+- Desvincular um grupo de uma comunidade.
+- Listar os participantes de todos os grupos de uma comunidade.
+
+As rotas estão na seção *Comunidades* da [API Reference](/api-reference).
+
+A comunidade tem um JID com o sufixo `@g.us`, como um grupo. Para alterar nome,
+descrição, foto e configurações de uma comunidade, use as rotas de
+[Grupos](/functions/groups) com o JID da comunidade.
+
+## Criar uma comunidade
+
+Informe o nome em `name`. A conta conectada é a criadora e a primeira
+administradora. A resposta tem os dados da comunidade em `community`, com o JID
+em `id` e `isCommunity` igual a `true`.
+
+## Grupos da comunidade
+
+A lista de grupos da comunidade inclui o grupo de avisos. Nele,
+`isCommunityAnnounce` é `true`.
+
+Para criar um grupo dentro da comunidade, informe o nome e, se quiser, os
+participantes. A resposta tem o mesmo formato da criação de um grupo comum. Veja
+[Resultado por participante](/functions/groups#resultado-por-participante).
+
+Para vincular um grupo que já existe, a conta conectada precisa ser
+administradora da comunidade e do grupo.
+
+<Note>
+Quando você desvincula um grupo, ele continua a existir com os mesmos
+participantes. Ele só deixa de fazer parte da comunidade.
+</Note>
+
+## Recusa do WhatsApp
+
+As operações em uma comunidade exigem que a conta conectada seja administradora
+dela. Quando o WhatsApp recusa a operação, a API responde `422` com o código
+`PROVIDER_REJECTED`. O motivo está em `detail`.

@@ -22,9 +22,16 @@ The API supports these operations on groups:
 - Promote a participant to admin and remove that permission.
 - Get the invite link.
 - Reset the invite link.
+- Change the settings of a group.
+- List, approve and reject join requests.
+- Get the data of an invite without joining the group.
+- Join a group with an invite.
+- Leave a group.
 
 The routes are in the *Grupos* section of the
 [API Reference](/api-reference).
+
+For communities, refer to [Communities](/en/functions/communities).
 
 To send text and media to a group, use the
 [Sending messages](/en/functions/sending-messages) routes with the group JID in
@@ -46,9 +53,9 @@ WhatsApp creates the group also when it rejects some of the participants.
 
 ## Result per participant
 
-WhatsApp accepts or rejects each participant separately. The group creation and
-the participants route respond with a list that has one item for each
-participant:
+WhatsApp accepts or rejects each participant separately. The group creation,
+the participants route and the approval of join requests respond with a list
+that has one item for each participant:
 
 | Field | Description |
 |---|---|
@@ -93,11 +100,73 @@ When you reset the invite link, the previous link stops working.
 
 The response contains the new link in `inviteLink`.
 
+## Change the settings
+
+Send one or more of these settings:
+
+| Field | Effect |
+|---|---|
+| `announce` | `true`: only admins send messages. |
+| `restrict` | `true`: only admins change the name, the description and the photo. |
+| `joinApprovalMode` | `true`: a person who joins with the invite link must get the approval of an admin. |
+| `ephemeralDuration` | Disappearing messages, in seconds: `0` (off), `86400` (24 hours), `604800` (7 days) or `7776000` (90 days). |
+
+The API applies the settings in this sequence: `announce`, `restrict`,
+`joinApprovalMode`, `ephemeralDuration`.
+
+<Warning>
+If a setting fails, the previous settings stay saved. Get the group to see the
+current state before you send the change again.
+</Warning>
+
+## Join requests
+
+When `joinApprovalMode` is `true`, a person who uses the invite link sends a join
+request. To process the requests:
+
+<Steps>
+  <Step title="List the requests">
+    Send `GET /{instanceId}/groups/{groupId}/requests`. The response contains the
+    `id` of each pending request.
+  </Step>
+  <Step title="Approve or reject">
+    Send `PATCH /{instanceId}/groups/{groupId}/requests` with the `id` values in
+    `participants` and `approve` or `reject` in `action`.
+  </Step>
+</Steps>
+
+The response contains the result for each request. Refer to
+[Result per participant](#result-per-participant).
+
+## Join a group with an invite
+
+Give the invite link or only the code in `invite`.
+
+To see the data of the group before you join, send
+`GET /{instanceId}/groups/invite-info?invite=<link or code>`. This query does
+not cause the account to join the group.
+
+To join, send `POST /{instanceId}/groups/join`. The response has two fields:
+
+- `groupId`: the JID of the group.
+- `pendingApproval`: `true` when the group requires approval. In that case, the
+  account joins the group only after an admin approves the request.
+
+## Leave a group
+
+<Warning>
+After it leaves, the account can go back to the group only with an invite or
+when an admin adds it.
+</Warning>
+
+Send `POST /{instanceId}/groups/{groupId}/leave`.
+
 ## Rejection by WhatsApp
 
 Some operations require that the connected account is an admin of the group.
-For example: change participants, get the invite link and, in groups with
-restricted editing, change the name, the description and the photo.
+For example: change participants, get the invite link, change the settings,
+process join requests and, in groups with restricted editing, change the name,
+the description and the photo.
 
 When WhatsApp rejects the operation, the API responds `422` with the code
 `PROVIDER_REJECTED`. The reason is in `detail`.

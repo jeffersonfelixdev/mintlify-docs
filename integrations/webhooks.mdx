@@ -21,6 +21,8 @@ evento acontece na instância. O webhook substitui a consulta periódica
 | `messages.error` | O envio de uma mensagem falhou em definitivo |
 | `connection.update` | A conexão da instância abriu ou fechou |
 | `group-participants.update` | Participantes entraram, saíram, foram promovidos ou rebaixados em um grupo. Só em conexão não oficial |
+| `groups.update` | Nome, descrição, foto, configurações ou link de convite de um grupo mudaram. Só em conexão não oficial |
+| `groups.upsert` | O número passou a participar de um grupo: criou, foi adicionado ou entrou por convite. Só em conexão não oficial |
 | `calls.update` | Uma chamada de voz ou vídeo foi recebida, atendida ou encerrada. Em conexão oficial e não oficial |
 | `templates.sync` | Uma sincronização de templates terminou. Só em conexão oficial. Assinatura opt-in |
 | `storage.failed` | Uma gravação no storage próprio falhou. Assinatura opt-in |
@@ -1080,6 +1082,85 @@ preenchido. Os outros são omitidos.
   "groupId": "120363012345678901@g.us",
   "join": ["5512912345678@s.whatsapp.net"],
   "timestamp": "2026-07-29T12:00:00Z"
+}
+```
+
+### Mudança nos dados de um grupo
+
+Tipo: `groups.update`
+
+Publicado em instâncias não oficiais quando o nome, a descrição, a foto, as
+configurações ou o link de convite de um grupo mudam. A mudança pode vir de
+qualquer participante, de outro aparelho ou da própria API.
+
+Só os campos que mudaram vêm preenchidos. Os nomes são os mesmos dos dados do
+grupo na API:
+
+| Campo | Descrição |
+|---|---|
+| `subject` | Nome novo do grupo. |
+| `desc` | Descrição nova. Vem vazia quando a descrição foi apagada. |
+| `announce` | `true`: só administradores enviam mensagens. |
+| `restrict` | `true`: só administradores alteram nome, descrição e foto. |
+| `joinApprovalMode` | `true`: a entrada pelo link de convite precisa de aprovação. |
+| `ephemeralDuration` | Mensagens temporárias, em segundos. `0` quando desligadas. |
+| `inviteLink` | Link de convite novo, depois de uma redefinição. |
+| `picture` | Foto do grupo: `{ "removed": true }` quando foi removida, ou `{ "removed": false, "pictureId": "..." }` quando mudou. |
+| `deleted` | `true` quando o grupo foi apagado. |
+| `suspended` | `true` quando o WhatsApp suspendeu o grupo. `false` quando a suspensão terminou. |
+
+`author` é o JID ou LID de quem fez a mudança. `authorPn` é o número, quando
+`author` é um LID. Os dois são omitidos quando o WhatsApp não informa o autor.
+
+```json
+{
+  "type": "groups.update",
+  "groupId": "120363012345678901@g.us",
+  "author": "123456789012345@lid",
+  "authorPn": "5512912345678@s.whatsapp.net",
+  "subject": "Equipe de vendas",
+  "announce": true,
+  "timestamp": "2026-07-29T12:00:00Z"
+}
+```
+
+<Note>
+Uma mudança de foto chega em um evento separado, só com `picture`, `author` e
+`timestamp`.
+</Note>
+
+### Entrada do número em um grupo
+
+Tipo: `groups.upsert`
+
+Publicado em instâncias não oficiais quando o número conectado passa a
+participar de um grupo. `reason` diz o motivo:
+
+| `reason` | Significado |
+|---|---|
+| `created` | O próprio número criou o grupo. |
+| `added` | Outra pessoa criou o grupo com o número ou adicionou o número a um grupo. |
+| `invite` | O número entrou pelo link de convite. |
+
+`group` tem os dados do grupo no mesmo formato de
+`GET /{instanceId}/groups/{groupId}`. `author` e `authorPn` identificam quem
+adicionou o número, quando o WhatsApp informa.
+
+```json
+{
+  "type": "groups.upsert",
+  "groupId": "120363012345678901@g.us",
+  "reason": "added",
+  "author": "123456789012345@lid",
+  "authorPn": "5512912345678@s.whatsapp.net",
+  "group": {
+    "id": "120363012345678901@g.us",
+    "subject": "Equipe de vendas",
+    "size": 3,
+    "participants": [
+      { "id": "123456789012345@lid", "isAdmin": true, "isSuperAdmin": true, "admin": "superadmin" }
+    ]
+  }
 }
 ```
 

@@ -22,8 +22,15 @@ A API permite estas operações em grupos:
 - Promover um participante a administrador e remover essa permissão.
 - Obter o link de convite.
 - Redefinir o link de convite.
+- Alterar as configurações do grupo.
+- Listar, aprovar e recusar pedidos de entrada.
+- Consultar um convite sem entrar no grupo.
+- Entrar em um grupo pelo convite.
+- Sair de um grupo.
 
 As rotas estão na seção *Grupos* da [API Reference](/api-reference).
+
+Para comunidades, veja [Comunidades](/functions/communities).
 
 Para enviar texto e mídia a um grupo, use as rotas de
 [Envio de mensagens](/functions/sending-messages) com o JID do grupo em `jid`.
@@ -44,9 +51,9 @@ O WhatsApp cria o grupo mesmo quando recusa uma parte dos participantes.
 
 ## Resultado por participante
 
-O WhatsApp aceita ou recusa cada participante separadamente. A criação do grupo
-e a rota de participantes respondem com uma lista que tem um item por
-participante:
+O WhatsApp aceita ou recusa cada participante separadamente. A criação do
+grupo, a rota de participantes e a aprovação de pedidos de entrada respondem
+com uma lista que tem um item por participante:
 
 | Campo | Descrição |
 |---|---|
@@ -91,11 +98,73 @@ Quando você redefine o link de convite, o link anterior deixa de funcionar.
 
 A resposta tem o link novo em `inviteLink`.
 
+## Alterar as configurações
+
+Envie uma ou mais destas configurações:
+
+| Campo | Efeito |
+|---|---|
+| `announce` | `true`: só administradores enviam mensagens. |
+| `restrict` | `true`: só administradores alteram nome, descrição e foto. |
+| `joinApprovalMode` | `true`: quem entra pelo link de convite precisa da aprovação de um administrador. |
+| `ephemeralDuration` | Mensagens temporárias, em segundos: `0` (desligadas), `86400` (24 horas), `604800` (7 dias) ou `7776000` (90 dias). |
+
+A API aplica as configurações nesta ordem: `announce`, `restrict`,
+`joinApprovalMode`, `ephemeralDuration`.
+
+<Warning>
+Se uma configuração falhar, as configurações anteriores ficam gravadas.
+Consulte o grupo para ver o estado atual antes de enviar a alteração de novo.
+</Warning>
+
+## Pedidos de entrada
+
+Quando `joinApprovalMode` é `true`, quem usa o link de convite envia um pedido de
+entrada. Para tratar os pedidos:
+
+<Steps>
+  <Step title="Listar os pedidos">
+    Envie `GET /{instanceId}/groups/{groupId}/requests`. A resposta tem o `id` de
+    cada pedido pendente.
+  </Step>
+  <Step title="Aprovar ou recusar">
+    Envie `PATCH /{instanceId}/groups/{groupId}/requests` com os `id` em
+    `participants` e `approve` ou `reject` em `action`.
+  </Step>
+</Steps>
+
+A resposta tem o resultado de cada pedido. Veja
+[Resultado por participante](#resultado-por-participante).
+
+## Entrar em um grupo pelo convite
+
+Informe o link de convite ou só o código em `invite`.
+
+Para ver os dados do grupo antes de entrar, envie
+`GET /{instanceId}/groups/invite-info?invite=<link ou código>`. Esta consulta não
+faz a conta entrar no grupo.
+
+Para entrar, envie `POST /{instanceId}/groups/join`. A resposta tem dois campos:
+
+- `groupId`: o JID do grupo.
+- `pendingApproval`: `true` quando o grupo exige aprovação. Nesse caso, a conta
+  só entra no grupo depois que um administrador aprova o pedido.
+
+## Sair de um grupo
+
+<Warning>
+Depois de sair, a conta só volta ao grupo com um convite ou quando um
+administrador a adiciona.
+</Warning>
+
+Envie `POST /{instanceId}/groups/{groupId}/leave`.
+
 ## Recusa do WhatsApp
 
 Algumas operações exigem que a conta conectada seja administradora do grupo.
-Por exemplo: mudar participantes, obter o link de convite e, em grupos com
-edição restrita, alterar nome, descrição e foto.
+Por exemplo: mudar participantes, obter o link de convite, alterar as
+configurações, tratar pedidos de entrada e, em grupos com edição restrita,
+alterar nome, descrição e foto.
 
 Quando o WhatsApp recusa a operação, a API responde `422` com o código
 `PROVIDER_REJECTED`. O motivo está em `detail`.

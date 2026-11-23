@@ -21,6 +21,8 @@ application receives the data at the moment of the event.
 | `messages.error` | The send of a message failed permanently |
 | `connection.update` | The instance connection opened or closed |
 | `group-participants.update` | Participants joined, left, were promoted, or were demoted in a group. Unofficial connection only |
+| `groups.update` | The name, description, picture, settings, or invite link of a group changed. Unofficial connection only |
+| `groups.upsert` | The number started to participate in a group: it created the group, was added, or joined with an invite. Unofficial connection only |
 | `calls.update` | A voice or video call was received, answered, or ended. Official and unofficial connections |
 | `templates.sync` | A template sync ended. Official connection only. Opt-in subscription |
 | `storage.failed` | A write to the own storage failed. Opt-in subscription |
@@ -1085,6 +1087,86 @@ The others are omitted.
   "groupId": "120363012345678901@g.us",
   "join": ["5512912345678@s.whatsapp.net"],
   "timestamp": "2026-07-29T12:00:00Z"
+}
+```
+
+### Group data change
+
+Type: `groups.update`
+
+Published on unofficial instances when the name, the description, the picture,
+the settings, or the invite link of a group change. The change can come from
+any participant, from another device, or from the API.
+
+Only the fields that changed are filled. The names are the same as in the group
+data of the API:
+
+| Field | Description |
+|---|---|
+| `subject` | New name of the group. |
+| `desc` | New description. It is empty when the description was deleted. |
+| `announce` | `true`: only admins send messages. |
+| `restrict` | `true`: only admins change the name, the description, and the picture. |
+| `joinApprovalMode` | `true`: entry with the invite link requires approval. |
+| `ephemeralDuration` | Disappearing messages, in seconds. `0` when off. |
+| `inviteLink` | New invite link, after a reset. |
+| `picture` | Group picture: `{ "removed": true }` when it was removed, or `{ "removed": false, "pictureId": "..." }` when it changed. |
+| `deleted` | `true` when the group was deleted. |
+| `suspended` | `true` when WhatsApp suspended the group. `false` when the suspension ended. |
+
+`author` is the JID or LID of the person who made the change. `authorPn` is the
+number, when `author` is a LID. The two are omitted when WhatsApp does not give
+the author.
+
+```json
+{
+  "type": "groups.update",
+  "groupId": "120363012345678901@g.us",
+  "author": "123456789012345@lid",
+  "authorPn": "5512912345678@s.whatsapp.net",
+  "subject": "Sales team",
+  "announce": true,
+  "timestamp": "2026-07-29T12:00:00Z"
+}
+```
+
+<Note>
+A picture change comes in a separate event, with only `picture`, `author`, and
+`timestamp`.
+</Note>
+
+### Number joins a group
+
+Type: `groups.upsert`
+
+Published on unofficial instances when the connected number starts to
+participate in a group. `reason` gives the cause:
+
+| `reason` | Meaning |
+|---|---|
+| `created` | The number created the group. |
+| `added` | Another person created the group with the number or added the number to a group. |
+| `invite` | The number joined with the invite link. |
+
+`group` contains the group data in the same format as
+`GET /{instanceId}/groups/{groupId}`. `author` and `authorPn` identify the
+person who added the number, when WhatsApp gives them.
+
+```json
+{
+  "type": "groups.upsert",
+  "groupId": "120363012345678901@g.us",
+  "reason": "added",
+  "author": "123456789012345@lid",
+  "authorPn": "5512912345678@s.whatsapp.net",
+  "group": {
+    "id": "120363012345678901@g.us",
+    "subject": "Sales team",
+    "size": 3,
+    "participants": [
+      { "id": "123456789012345@lid", "isAdmin": true, "isSuperAdmin": true, "admin": "superadmin" }
+    ]
+  }
 }
 ```
 
