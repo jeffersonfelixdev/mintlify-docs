@@ -116,6 +116,7 @@
                 "group": "Operação",
                 "icon": "message",
                 "pages": [
+                  "painel/grupos",
                   "painel/templates",
                   "painel/consumo-e-cobranca",
                   "painel/log-de-mensagens",
@@ -242,6 +243,7 @@
                 "group": "Operation",
                 "icon": "message",
                 "pages": [
+                  "en/panel/groups",
                   "en/panel/templates",
                   "en/panel/usage-and-billing",
                   "en/panel/message-log",
