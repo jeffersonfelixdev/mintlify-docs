@@ -31,8 +31,47 @@ Para enviar texto e mídia a um grupo, use as rotas de
 ## Criar um grupo
 
 Informe o nome e ao menos um participante. A conta conectada é a criadora e a
-primeira administradora do grupo. A resposta tem os dados do grupo novo, com o
-JID em `id`.
+primeira administradora do grupo.
+
+A resposta tem dois campos:
+
+- `group`: os dados do grupo novo, com o JID em `id`. A lista `participants`
+  tem só quem entrou no grupo.
+- `participants`: o resultado de cada participante pedido. Veja
+  [Resultado por participante](#resultado-por-participante).
+
+O WhatsApp cria o grupo mesmo quando recusa uma parte dos participantes.
+
+## Resultado por participante
+
+O WhatsApp aceita ou recusa cada participante separadamente. A criação do grupo
+e a rota de participantes respondem com uma lista que tem um item por
+participante:
+
+| Campo | Descrição |
+|---|---|
+| `id` | JID ou LID do participante. Em grupos que usam LID, o valor pode ser o LID mesmo quando o pedido usou o número. |
+| `phoneNumber`, `lid` | Número e LID do participante, quando o WhatsApp informa. Use estes campos para relacionar o item ao pedido. |
+| `success` | `true` quando a ação valeu para o participante. |
+| `error` | Código (`code`) e motivo (`reason`) da recusa. Só aparece quando `success` é `false`. |
+| `invite` | Código do convite e validade (`expiresAt`, em epoch ms). Só aparece quando o motivo é `invite_required`. |
+
+Os motivos mais comuns são:
+
+| `reason` | Código | Significado |
+|---|---|---|
+| `invite_required` | 403 | A privacidade do participante só permite entrar por convite. Envie a ele o link de convite do grupo. |
+| `invalid_phone_number` | 404 | O número não tem WhatsApp. |
+| `temporarily_blocked` | 408 | O participante saiu do grupo há pouco tempo. |
+| `conflict` | 409 | Ao adicionar, o participante já está no grupo. |
+| `group_full` | 419 | O grupo atingiu o limite de participantes. |
+
+Um código fora desta lista vem com o motivo `unknown`.
+
+<Note>
+A rota de participantes responde `200` mesmo quando o WhatsApp recusa todos os
+participantes. Verifique `success` em cada item.
+</Note>
 
 ## Alterar o nome e a descrição
 

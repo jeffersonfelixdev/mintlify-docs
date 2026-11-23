@@ -33,8 +33,47 @@ To send text and media to a group, use the
 ## Create a group
 
 Give the name and at least one participant. The connected account is the
-creator and the first admin of the group. The response contains the data of the
-new group, with the JID in `id`.
+creator and the first admin of the group.
+
+The response has two fields:
+
+- `group`: the data of the new group, with the JID in `id`. The
+  `participants` list contains only the participants that joined the group.
+- `participants`: the result for each requested participant. Refer to
+  [Result per participant](#result-per-participant).
+
+WhatsApp creates the group also when it rejects some of the participants.
+
+## Result per participant
+
+WhatsApp accepts or rejects each participant separately. The group creation and
+the participants route respond with a list that has one item for each
+participant:
+
+| Field | Description |
+|---|---|
+| `id` | JID or LID of the participant. In groups that use LID, the value can be the LID also when the request used the number. |
+| `phoneNumber`, `lid` | Number and LID of the participant, when WhatsApp gives them. Use these fields to relate the item to the request. |
+| `success` | `true` when the action applied to the participant. |
+| `error` | Code (`code`) and reason (`reason`) of the rejection. Only present when `success` is `false`. |
+| `invite` | Invite code and expiry (`expiresAt`, in epoch ms). Only present when the reason is `invite_required`. |
+
+The most frequent reasons are:
+
+| `reason` | Code | Meaning |
+|---|---|---|
+| `invite_required` | 403 | The privacy settings of the participant allow entry only by invite. Send the group invite link to the participant. |
+| `invalid_phone_number` | 404 | The number does not have WhatsApp. |
+| `temporarily_blocked` | 408 | The participant left the group a short time ago. |
+| `conflict` | 409 | To add: the participant is already in the group. |
+| `group_full` | 419 | The group has the maximum number of participants. |
+
+A code that is not in this list comes with the reason `unknown`.
+
+<Note>
+The participants route responds `200` also when WhatsApp rejects all the
+participants. Examine `success` in each item.
+</Note>
 
 ## Change the name and the description
 
