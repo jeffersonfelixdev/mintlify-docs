@@ -3,7 +3,7 @@
   "info": {
     "title": "ZapperHub Reference API",
     "description": "Documentação Oficial da ZapperHub",
-    "version": "3.23.0"
+    "version": "3.23.6"
   },
   "components": {
     "securitySchemes": {
@@ -36038,7 +36038,7 @@
           },
           {
             "schema": {
-              "default": "2026-11-11T19:10:11.558Z"
+              "default": "2026-11-23T16:12:24.180Z"
             },
             "in": "query",
             "name": "endDate",
@@ -44317,7 +44317,7 @@
         "tags": [
           "Grupos"
         ],
-        "description": "Lista todos os grupos que o usuário participa.",
+        "description": "Lista todos os grupos de que a conta conectada participa. Disponível só para instâncias conectadas por QR Code.",
         "parameters": [
           {
             "schema": {
@@ -44708,6 +44708,736 @@
               }
             }
           },
+          "422": {
+            "description": "Instância que não é conectada por QR Code (`UNSUPPORTED_FOR_INSTANCE_TYPE`), ou sessão encerrada (`INSTANCE_NOT_CONNECTED`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Instância que não é conectada por QR Code (`UNSUPPORTED_FOR_INSTANCE_TYPE`), ou sessão encerrada (`INSTANCE_NOT_CONNECTED`)."
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável."
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar grupo",
+        "tags": [
+          "Grupos"
+        ],
+        "description": "Cria um grupo no WhatsApp. A conta conectada é a criadora e a primeira administradora do grupo. Disponível só para instâncias conectadas por QR Code.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Nome do grupo."
+                  },
+                  "participants": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "Id do participante"
+                    },
+                    "description": "Participantes que entram no grupo na criação. Informe ao menos um, além da conta conectada."
+                  }
+                },
+                "required": [
+                  "name",
+                  "participants"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "instanceId",
+            "required": true,
+            "description": "Id da instância"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Grupo criado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "group": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "Id do grupo, com o sufixo `@g.us`."
+                        },
+                        "owner": {
+                          "type": "string",
+                          "description": "Jid de quem criou o grupo."
+                        },
+                        "subject": {
+                          "type": "string",
+                          "description": "Nome do grupo."
+                        },
+                        "subjectOwner": {
+                          "type": "string",
+                          "description": "Jid de quem definiu o nome atual do grupo."
+                        },
+                        "subjectOwnerPn": {
+                          "type": "string",
+                          "description": "Número de telefone de quem definiu o nome atual do grupo."
+                        },
+                        "subjectTime": {
+                          "type": "number",
+                          "description": "Momento em que o nome atual foi definido, em epoch (ms)."
+                        },
+                        "creation": {
+                          "type": "number",
+                          "description": "Momento de criação do grupo, em epoch (ms)."
+                        },
+                        "desc": {
+                          "type": "string",
+                          "description": "Descrição (tópico) do grupo."
+                        },
+                        "descOwner": {
+                          "type": "string",
+                          "description": "Jid de quem definiu a descrição atual."
+                        },
+                        "descId": {
+                          "type": "string",
+                          "description": "Id da versão atual da descrição."
+                        },
+                        "linkedParent": {
+                          "type": "string",
+                          "description": "Jid da comunidade à qual o grupo pertence, quando houver."
+                        },
+                        "restrict": {
+                          "type": "boolean",
+                          "description": "`true` quando apenas administradores podem editar os dados."
+                        },
+                        "announce": {
+                          "type": "boolean",
+                          "description": "`true` quando apenas administradores podem enviar mensagens."
+                        },
+                        "memberAddMode": {
+                          "type": "string",
+                          "description": "Quem pode adicionar participantes — ex.: `admin_add`."
+                        },
+                        "joinApprovalMode": {
+                          "type": "boolean",
+                          "description": "`true` quando a entrada depende de aprovação de administrador."
+                        },
+                        "isCommunity": {
+                          "type": "boolean",
+                          "description": "`true` quando o grupo é a comunidade-mãe, e não um subgrupo."
+                        },
+                        "isCommunityAnnounce": {
+                          "type": "boolean",
+                          "description": "`true` quando o grupo é o canal de avisos de uma comunidade."
+                        },
+                        "size": {
+                          "type": "number",
+                          "description": "Quantidade de participantes."
+                        },
+                        "participants": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "description": "Jid ou lid do participante."
+                              },
+                              "isAdmin": {
+                                "type": "boolean",
+                                "description": "`true` quando o participante é administrador."
+                              },
+                              "isSuperAdmin": {
+                                "type": "boolean",
+                                "description": "`true` quando o participante é o criador do grupo."
+                              },
+                              "phoneNumber": {
+                                "type": "string",
+                                "description": "Número de telefone do participante, quando não estiver oculto por privacidade."
+                              },
+                              "admin": {
+                                "nullable": true,
+                                "type": "string",
+                                "enum": [
+                                  "admin",
+                                  "superadmin"
+                                ],
+                                "description": "Papel do participante, ou `null` quando é membro comum. Forma resumida de `isAdmin`/`isSuperAdmin`."
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "description": "Participantes do grupo. Ausente quando a listagem é pedida sem participantes."
+                        },
+                        "ephemeralDuration": {
+                          "type": "number",
+                          "description": "Tempo de desaparecimento das mensagens, em segundos. `0` quando desligado."
+                        },
+                        "inviteCode": {
+                          "type": "string",
+                          "description": "Código do convite do grupo — a URL completa é `https://chat.whatsapp.com/<inviteCode>`."
+                        },
+                        "author": {
+                          "type": "string",
+                          "description": "Jid de quem criou o grupo."
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "subject"
+                      ],
+                      "additionalProperties": false,
+                      "description": "Grupo criado, com a lista de participantes."
+                    }
+                  },
+                  "required": [
+                    "group"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Grupo criado."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Corpo fora do schema, ou WhatsApp desconectado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Corpo fora do schema, ou WhatsApp desconectado."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Header `x-api-key` ausente, inválido ou de outra instância.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Header `x-api-key` ausente, inválido ou de outra instância."
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Instância que não é conectada por QR Code (`UNSUPPORTED_FOR_INSTANCE_TYPE`), sessão encerrada (`INSTANCE_NOT_CONNECTED`), ou o WhatsApp recusou a criação (`PROVIDER_REJECTED`, com o motivo em `detail`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Instância que não é conectada por QR Code (`UNSUPPORTED_FOR_INSTANCE_TYPE`), sessão encerrada (`INSTANCE_NOT_CONNECTED`), ou o WhatsApp recusou a criação (`PROVIDER_REJECTED`, com o motivo em `detail`)."
+                }
+              }
+            }
+          },
           "429": {
             "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável.",
             "content": {
@@ -44822,7 +45552,7 @@
         "tags": [
           "Grupos"
         ],
-        "description": "Obtém informações de um grupo no WhatsApp e seus participantes.",
+        "description": "Obtém informações de um grupo no WhatsApp e seus participantes. Disponível só para instâncias conectadas por QR Code.",
         "parameters": [
           {
             "schema": {
@@ -45000,7 +45730,7 @@
             }
           },
           "400": {
-            "description": "WhatsApp desconectado, ou `groupId` que a conta conectada não pode consultar — grupo inexistente ou do qual não participa.",
+            "description": "WhatsApp desconectado.",
             "content": {
               "application/json": {
                 "schema": {
@@ -45099,7 +45829,7 @@
                     }
                   },
                   "additionalProperties": {},
-                  "description": "WhatsApp desconectado, ou `groupId` que a conta conectada não pode consultar — grupo inexistente ou do qual não participa."
+                  "description": "WhatsApp desconectado."
                 }
               }
             }
@@ -45205,6 +45935,596 @@
                   },
                   "additionalProperties": {},
                   "description": "Header `x-api-key` ausente, inválido ou de outra instância."
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Instância que não é conectada por QR Code (`UNSUPPORTED_FOR_INSTANCE_TYPE`), sessão encerrada (`INSTANCE_NOT_CONNECTED`), ou `groupId` que a conta conectada não pode consultar — grupo inexistente ou do qual não participa (`PROVIDER_REJECTED`, com o motivo em `detail`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Instância que não é conectada por QR Code (`UNSUPPORTED_FOR_INSTANCE_TYPE`), sessão encerrada (`INSTANCE_NOT_CONNECTED`), ou `groupId` que a conta conectada não pode consultar — grupo inexistente ou do qual não participa (`PROVIDER_REJECTED`, com o motivo em `detail`)."
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável."
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Atualizar grupo",
+        "tags": [
+          "Grupos"
+        ],
+        "description": "Altera o nome, a descrição ou os dois. Quando o corpo tem os dois campos, o nome é alterado primeiro. Se a alteração da descrição falhar, o nome novo fica gravado. Disponível só para instâncias conectadas por QR Code.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Nome novo do grupo."
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Descrição nova do grupo."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "instanceId",
+            "required": true,
+            "description": "Id da instância"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "groupId",
+            "required": true,
+            "description": "Id do grupo, com ou sem o sufixo `@g.us`"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Grupo atualizado. Sem corpo de resposta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Grupo atualizado. Sem corpo de resposta."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Corpo fora do schema (sem `name` nem `description`), ou WhatsApp desconectado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Corpo fora do schema (sem `name` nem `description`), ou WhatsApp desconectado."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Header `x-api-key` ausente, inválido ou de outra instância.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Header `x-api-key` ausente, inválido ou de outra instância."
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Instância que não é conectada por QR Code (`UNSUPPORTED_FOR_INSTANCE_TYPE`), sessão encerrada (`INSTANCE_NOT_CONNECTED`), ou o WhatsApp recusou a alteração (`PROVIDER_REJECTED`, com o motivo em `detail`) — por exemplo, quando só administradores podem editar os dados e a conta conectada não é administradora.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Instância que não é conectada por QR Code (`UNSUPPORTED_FOR_INSTANCE_TYPE`), sessão encerrada (`INSTANCE_NOT_CONNECTED`), ou o WhatsApp recusou a alteração (`PROVIDER_REJECTED`, com o motivo em `detail`) — por exemplo, quando só administradores podem editar os dados e a conta conectada não é administradora."
                 }
               }
             }
@@ -45323,7 +46643,7 @@
         "tags": [
           "Grupos"
         ],
-        "description": "Atualiza os participantes de um grupo no WhatsApp, adicionando ou removendo no grupo, ou ainda promovendo ou revogandos como admins.",
+        "description": "Atualiza os participantes de um grupo no WhatsApp, adicionando ou removendo no grupo, ou ainda promovendo ou revogando como admins. Disponível só para instâncias conectadas por QR Code.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -45396,7 +46716,7 @@
             }
           },
           "400": {
-            "description": "Corpo fora do schema, WhatsApp desconectado, ou ação recusada — a conta conectada precisa ser administradora do grupo.",
+            "description": "Corpo fora do schema, ou WhatsApp desconectado.",
             "content": {
               "application/json": {
                 "schema": {
@@ -45495,7 +46815,7 @@
                     }
                   },
                   "additionalProperties": {},
-                  "description": "Corpo fora do schema, WhatsApp desconectado, ou ação recusada — a conta conectada precisa ser administradora do grupo."
+                  "description": "Corpo fora do schema, ou WhatsApp desconectado."
                 }
               }
             }
@@ -45601,6 +46921,2015 @@
                   },
                   "additionalProperties": {},
                   "description": "Header `x-api-key` ausente, inválido ou de outra instância."
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Instância que não é conectada por QR Code (`UNSUPPORTED_FOR_INSTANCE_TYPE`), sessão encerrada (`INSTANCE_NOT_CONNECTED`), ou ação recusada pelo WhatsApp (`PROVIDER_REJECTED`, com o motivo em `detail`) — a conta conectada precisa ser administradora do grupo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Instância que não é conectada por QR Code (`UNSUPPORTED_FOR_INSTANCE_TYPE`), sessão encerrada (`INSTANCE_NOT_CONNECTED`), ou ação recusada pelo WhatsApp (`PROVIDER_REJECTED`, com o motivo em `detail`) — a conta conectada precisa ser administradora do grupo."
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{instanceId}/groups/{groupId}/invite-link": {
+      "get": {
+        "summary": "Obter link de convite do grupo",
+        "tags": [
+          "Grupos"
+        ],
+        "description": "Obtém o link de convite atual do grupo. A conta conectada precisa ser administradora. Disponível só para instâncias conectadas por QR Code.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "instanceId",
+            "required": true,
+            "description": "Id da instância"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "groupId",
+            "required": true,
+            "description": "Id do grupo, com ou sem o sufixo `@g.us`"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Link de convite do grupo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "inviteLink": {
+                      "type": "string",
+                      "description": "Link de convite do grupo, no formato `https://chat.whatsapp.com/<código>`."
+                    }
+                  },
+                  "required": [
+                    "inviteLink"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Link de convite do grupo."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "WhatsApp desconectado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "WhatsApp desconectado."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Header `x-api-key` ausente, inválido ou de outra instância.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Header `x-api-key` ausente, inválido ou de outra instância."
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Instância que não é conectada por QR Code (`UNSUPPORTED_FOR_INSTANCE_TYPE`), sessão encerrada (`INSTANCE_NOT_CONNECTED`), ou o WhatsApp recusou o pedido (`PROVIDER_REJECTED`, com o motivo em `detail`) — por exemplo, quando a conta conectada não é administradora do grupo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Instância que não é conectada por QR Code (`UNSUPPORTED_FOR_INSTANCE_TYPE`), sessão encerrada (`INSTANCE_NOT_CONNECTED`), ou o WhatsApp recusou o pedido (`PROVIDER_REJECTED`, com o motivo em `detail`) — por exemplo, quando a conta conectada não é administradora do grupo."
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{instanceId}/groups/{groupId}/invite-link/reset": {
+      "post": {
+        "summary": "Redefinir link de convite do grupo",
+        "tags": [
+          "Grupos"
+        ],
+        "description": "Gera um link de convite novo. O link anterior deixa de funcionar. A conta conectada precisa ser administradora. Disponível só para instâncias conectadas por QR Code.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "instanceId",
+            "required": true,
+            "description": "Id da instância"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "groupId",
+            "required": true,
+            "description": "Id do grupo, com ou sem o sufixo `@g.us`"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Link de convite novo do grupo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "inviteLink": {
+                      "type": "string",
+                      "description": "Link de convite do grupo, no formato `https://chat.whatsapp.com/<código>`."
+                    }
+                  },
+                  "required": [
+                    "inviteLink"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Link de convite novo do grupo."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "WhatsApp desconectado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "WhatsApp desconectado."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Header `x-api-key` ausente, inválido ou de outra instância.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Header `x-api-key` ausente, inválido ou de outra instância."
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Instância que não é conectada por QR Code (`UNSUPPORTED_FOR_INSTANCE_TYPE`), sessão encerrada (`INSTANCE_NOT_CONNECTED`), ou o WhatsApp recusou o pedido (`PROVIDER_REJECTED`, com o motivo em `detail`) — por exemplo, quando a conta conectada não é administradora do grupo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Instância que não é conectada por QR Code (`UNSUPPORTED_FOR_INSTANCE_TYPE`), sessão encerrada (`INSTANCE_NOT_CONNECTED`), ou o WhatsApp recusou o pedido (`PROVIDER_REJECTED`, com o motivo em `detail`) — por exemplo, quando a conta conectada não é administradora do grupo."
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{instanceId}/groups/{groupId}/picture": {
+      "patch": {
+        "summary": "Alterar foto do grupo",
+        "tags": [
+          "Grupos"
+        ],
+        "description": "Altera a foto do grupo. Disponível só para instâncias conectadas por QR Code.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "picture": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "URL ou Base64 da imagem. Precisa ser no formato JPEG e com tamanho 640x640px."
+                  }
+                },
+                "required": [
+                  "picture"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "instanceId",
+            "required": true,
+            "description": "Id da instância"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "groupId",
+            "required": true,
+            "description": "Id do grupo, com ou sem o sufixo `@g.us`"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Foto do grupo alterada. Sem corpo de resposta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Foto do grupo alterada. Sem corpo de resposta."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Corpo fora do schema, ou WhatsApp desconectado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Corpo fora do schema, ou WhatsApp desconectado."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Header `x-api-key` ausente, inválido ou de outra instância.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Header `x-api-key` ausente, inválido ou de outra instância."
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Instância que não é conectada por QR Code (`UNSUPPORTED_FOR_INSTANCE_TYPE`), sessão encerrada (`INSTANCE_NOT_CONNECTED`), ou o WhatsApp recusou a imagem (`PROVIDER_REJECTED`, com o motivo em `detail`) — por exemplo, imagem fora do formato JPEG, ou conta conectada sem permissão para editar os dados do grupo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Instância que não é conectada por QR Code (`UNSUPPORTED_FOR_INSTANCE_TYPE`), sessão encerrada (`INSTANCE_NOT_CONNECTED`), ou o WhatsApp recusou a imagem (`PROVIDER_REJECTED`, com o motivo em `detail`) — por exemplo, imagem fora do formato JPEG, ou conta conectada sem permissão para editar os dados do grupo."
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Limite de requisições excedido. Aguarde e repita — é o único 4xx retentável."
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remover foto do grupo",
+        "tags": [
+          "Grupos"
+        ],
+        "description": "Remove a foto do grupo. Disponível só para instâncias conectadas por QR Code.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "instanceId",
+            "required": true,
+            "description": "Id da instância"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "groupId",
+            "required": true,
+            "description": "Id do grupo, com ou sem o sufixo `@g.us`"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Foto do grupo removida. Sem corpo de resposta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Foto do grupo removida. Sem corpo de resposta."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Corpo fora do schema, ou WhatsApp desconectado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Corpo fora do schema, ou WhatsApp desconectado."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Header `x-api-key` ausente, inválido ou de outra instância.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Header `x-api-key` ausente, inválido ou de outra instância."
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Instância que não é conectada por QR Code (`UNSUPPORTED_FOR_INSTANCE_TYPE`), sessão encerrada (`INSTANCE_NOT_CONNECTED`), ou o WhatsApp recusou a remoção (`PROVIDER_REJECTED`, com o motivo em `detail`) — por exemplo, imagem fora do formato JPEG, ou conta conectada sem permissão para editar os dados do grupo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem legível do que ocorreu."
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Classe do erro — `Bad Request`, `Application Error`, `Too Many Requests` ou `Internal Server Error`."
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "Status HTTP da resposta, repetido no corpo."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "Código estável do erro, para tratamento programático. Presente nos erros que o carregam — ex.: `POST_NOT_FOUND`."
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "Mensagem original do provedor, presente em `PROVIDER_ERROR`."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "number",
+                          "description": "Código original do erro da Meta."
+                        },
+                        "subcode": {
+                          "type": "number",
+                          "description": "Subcódigo original da Meta, escopado pelo código."
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Título do erro da Meta."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Mensagem original da Meta."
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ],
+                      "additionalProperties": {},
+                      "description": "Erro da Meta com o código e o subcódigo originais. Presente nas recusas e falhas do provedor (`PROVIDER_REJECTED`, `PROVIDER_ERROR`, `RATE_LIMITED`)."
+                    },
+                    "localizedMessage": {
+                      "type": "string",
+                      "description": "Texto em português para o código da Meta, quando conhecido. Igual a `message` em `PROVIDER_REJECTED`."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Contexto estruturado do erro — ex.: `{ optedOutAt, source }` em `MARKETING_OPT_OUT`."
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "description": "Tipo da violação — ex.: `invalid_type`."
+                          },
+                          "instancePath": {
+                            "type": "string",
+                            "description": "Caminho do campo rejeitado dentro do corpo — ex.: `/jid`."
+                          },
+                          "schemaPath": {
+                            "type": "string",
+                            "description": "Caminho da regra violada no schema."
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Descrição legível da violação."
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": {},
+                            "description": "Detalhes da violação — ex.: `{ \"expected\": \"string\" }`."
+                          }
+                        },
+                        "additionalProperties": {},
+                        "description": "Violação individual de schema."
+                      },
+                      "description": "Violações de schema, presente apenas nos `400` de validação do corpo, dos parâmetros ou da query."
+                    }
+                  },
+                  "additionalProperties": {},
+                  "description": "Instância que não é conectada por QR Code (`UNSUPPORTED_FOR_INSTANCE_TYPE`), sessão encerrada (`INSTANCE_NOT_CONNECTED`), ou o WhatsApp recusou a remoção (`PROVIDER_REJECTED`, com o motivo em `detail`) — por exemplo, imagem fora do formato JPEG, ou conta conectada sem permissão para editar os dados do grupo."
                 }
               }
             }
