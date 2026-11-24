@@ -146,6 +146,7 @@ changes with the type.
 | `mediaStorage` | Where the file is stored: `zapper` (ZapperHub storage) or `custom` ([own storage](/en/definitions/storage#own-storage)). Present with `mediaUrl`, except for media sent through the API that stayed in a URL of yours |
 | `mediaStorageWarning` | The own storage is registered and the file was not stored in it. `code` is `CUSTOM_STORAGE_FAILED` |
 | `mediaExpiresAt` | When the file expires in the ZapperHub storage, in ISO 8601. See [File storage](/en/definitions/storage) |
+| `mediaPending` | `true` when the file left the WhatsApp server and a resend was requested from the sender's device. The file arrives later, in a [`messages.update`](#media-that-arrives-later-device). Only on an unofficial connection |
 | `jobId` | Id of the job in the queue. Present in messages sent through the API |
 | `groupStatus` | `true` when the API posted the send as a [group status](/en/functions/sending-messages#group-status) |
 | `trackId` / `trackSource` | The values given at the send. In received messages, `trackSource` is `whatsapp` |
@@ -414,6 +415,10 @@ Type: `messages.upsert`
   "mediaExpiresAt": "2025-04-18T19:54:35.832Z"
 }
 ```
+
+On an unofficial connection, the round video (PTV) arrives in
+`message.ptvMessage`, with the same fields as `videoMessage`. The instant photo
+and the instant video arrive in `instantImageMessage` and `instantVideoMessage`.
 
 **Contact**
 
@@ -933,7 +938,7 @@ On deletion, `update` carries only the kind:
 ```
 
 - `update.kind` is `edited` or `deleted`. On an unofficial connection, also
-  `starred`, `unstarred`, or `deleted_for_me` (see below).
+  `starred`, `unstarred`, `deleted_for_me`, or `media` (see below).
 - On an edit, `update.message` carries the new text (`extendedTextMessage`) or
   the new caption (`imageMessage`, `videoMessage`, or `documentMessage`, with
   `caption`). The media is not resent. If Meta does not report the new content,
@@ -983,6 +988,57 @@ message.
 | `deleted_for_me` | The message was deleted only for the account. The contact still has it. |
 
 The sync done when the number connects does not generate these events.
+
+#### Media that arrives later (`device`)
+
+On an unofficial connection, the `update.kind` `media` delivers a file of the
+message after the `messages.upsert`. `key.id` is the id of the original message.
+The `key` has the same fields as in `messages.upsert`.
+
+```json
+{
+  "type": "messages.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "3EB0C7A1B2D3E4F5A6B7",
+    "senderPn": "5512912345678@s.whatsapp.net",
+    "senderLid": "123456789012345@lid"
+  },
+  "update": {
+    "kind": "media",
+    "reason": "hd",
+    "mediaType": "imageMessage",
+    "mimetype": "image/jpeg",
+    "mediaUrl": "https://storage.zapperhub.com/media/551245678900/5512912345678/1763920800000-3eb0c7a1b2d3e4f5.jpeg",
+    "mediaStorage": "zapper",
+    "mediaExpiresAt": "2026-11-30T18:00:00.000Z"
+  },
+  "eventId": "3EB0D8B2C3E4F5A6B7C8",
+  "timestamp": 1763920800
+}
+```
+
+| `update.reason` | Meaning |
+|---|---|
+| `hd` | High-quality version of the photo or video. It replaces the file of the `messages.upsert`. |
+| `original` | Original file, without compression. It replaces the file of the `messages.upsert`. |
+| `motion_photo` | Video of a motion photo. The photo stays in the `messages.upsert`. |
+| `reupload` | The file left the WhatsApp server, and the sender's device sent it again. The `messages.upsert` came without `mediaUrl` and with `mediaPending: true`. |
+
+- `update.mediaType` is the media field in `message`, for example `imageMessage`
+  or `ptvMessage`.
+- `update.mediaUrl`, `update.mediaStorage`, `update.mediaExpiresAt`, and
+  `update.mediaStorageWarning` have the same meaning as in `messages.upsert`.
+- When the sender's device does not send the file again, the event comes without
+  `mediaUrl` and with `update.error`. The values are `not_found`,
+  `not_on_phone`, `decryption_error`, `general_error`, and `download_failed`.
+- The sender's device answers when it is online. The answer can take hours. Not
+  every request gets an answer. Without an answer, the event is not published
+  and the message stays without a file.
+- A channel message has no resend.
 
 ### Option chosen in a list message
 

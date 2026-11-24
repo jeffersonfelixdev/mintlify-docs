@@ -145,6 +145,7 @@ Os eventos de mensagem compartilham a mesma estrutura. O conteúdo do objeto
 | `mediaStorage` | Onde o arquivo foi gravado: `zapper` (storage da ZapperHub) ou `custom` ([storage próprio](/definitions/storage#storage-proprio)). Presente com `mediaUrl`, exceto na mídia enviada pela API que ficou numa URL sua |
 | `mediaStorageWarning` | O storage próprio está cadastrado e o arquivo não foi gravado nele. `code` é `CUSTOM_STORAGE_FAILED` |
 | `mediaExpiresAt` | Quando o arquivo expira no storage da ZapperHub, em ISO 8601. Veja [Armazenamento de arquivos](/definitions/storage) |
+| `mediaPending` | `true` quando o arquivo saiu do servidor do WhatsApp e o reenvio foi pedido ao aparelho de origem. O arquivo chega depois, em um [`messages.update`](#mídia-que-chega-depois-device). Só em conexão não oficial |
 | `jobId` | Id do job na fila. Presente nas mensagens enviadas pela API |
 | `groupStatus` | `true` quando a API publicou o envio como [status do grupo](/functions/sending-messages#status-em-grupo) |
 | `trackId` / `trackSource` | Os valores informados no envio. Em mensagens recebidas, `trackSource` é `whatsapp` |
@@ -413,6 +414,10 @@ Tipo: `messages.upsert`
   "mediaExpiresAt": "2025-04-18T19:54:35.832Z"
 }
 ```
+
+Em conexão não oficial, o vídeo redondo (PTV) chega em `message.ptvMessage`,
+com os mesmos campos de `videoMessage`. A foto e o vídeo instantâneos chegam em
+`instantImageMessage` e `instantVideoMessage`.
 
 **Contato**
 
@@ -931,7 +936,7 @@ Na remoção, `update` vem só com o tipo:
 ```
 
 - `update.kind` é `edited` ou `deleted`. Em conexão não oficial, também
-  `starred`, `unstarred` ou `deleted_for_me` (veja abaixo).
+  `starred`, `unstarred`, `deleted_for_me` ou `media` (veja abaixo).
 - Na edição, `update.message` traz o texto novo (`extendedTextMessage`) ou a
   legenda nova (`imageMessage`, `videoMessage` ou `documentMessage`, com
   `caption`). A mídia não é reenviada. Se a Meta não informa o conteúdo novo,
@@ -979,6 +984,57 @@ traz só o tipo. Em grupo, `key.participant` traz o autor da mensagem.
 | `deleted_for_me` | A mensagem foi apagada só para a conta. Ela continua com o contato. |
 
 A sincronização feita ao conectar o número não gera estes eventos.
+
+#### Mídia que chega depois (`device`)
+
+Em conexão não oficial, o `update.kind` `media` entrega um arquivo da mensagem
+depois do `messages.upsert`. `key.id` é o id da mensagem original. A `key` tem
+os mesmos campos do `messages.upsert`.
+
+```json
+{
+  "type": "messages.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "key": {
+    "remoteJid": "5512912345678@s.whatsapp.net",
+    "fromMe": false,
+    "id": "3EB0C7A1B2D3E4F5A6B7",
+    "senderPn": "5512912345678@s.whatsapp.net",
+    "senderLid": "123456789012345@lid"
+  },
+  "update": {
+    "kind": "media",
+    "reason": "hd",
+    "mediaType": "imageMessage",
+    "mimetype": "image/jpeg",
+    "mediaUrl": "https://storage.zapperhub.com/media/551245678900/5512912345678/1763920800000-3eb0c7a1b2d3e4f5.jpeg",
+    "mediaStorage": "zapper",
+    "mediaExpiresAt": "2026-11-30T18:00:00.000Z"
+  },
+  "eventId": "3EB0D8B2C3E4F5A6B7C8",
+  "timestamp": 1763920800
+}
+```
+
+| `update.reason` | Significado |
+|---|---|
+| `hd` | Versão em alta qualidade da foto ou do vídeo. Substitui o arquivo do `messages.upsert`. |
+| `original` | Arquivo original, sem compressão. Substitui o arquivo do `messages.upsert`. |
+| `motion_photo` | Vídeo de uma foto em movimento. A foto continua no `messages.upsert`. |
+| `reupload` | O arquivo saiu do servidor do WhatsApp, e o aparelho de origem enviou de novo. O `messages.upsert` veio sem `mediaUrl` e com `mediaPending: true`. |
+
+- `update.mediaType` é o campo da mídia em `message`, por exemplo `imageMessage`
+  ou `ptvMessage`.
+- `update.mediaUrl`, `update.mediaStorage`, `update.mediaExpiresAt` e
+  `update.mediaStorageWarning` têm o mesmo significado que no `messages.upsert`.
+- Quando o aparelho de origem não envia o arquivo de novo, o evento vem sem
+  `mediaUrl` e com `update.error`. Os valores são `not_found`, `not_on_phone`,
+  `decryption_error`, `general_error` e `download_failed`.
+- O aparelho de origem responde quando fica online. A resposta pode levar horas.
+  Nem todo pedido tem resposta. Sem resposta, o evento não é publicado e a
+  mensagem fica sem arquivo.
+- Mensagem de canal não tem reenvio.
 
 ### Escolha de opção em mensagem de lista
 
