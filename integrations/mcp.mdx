@@ -127,8 +127,8 @@ termina em `@g.us` ou um LID que termina em `@lid`.
 |---|---|
 | `list_instances` | Lista as instâncias da conta, com id, nome, número, tipo, status e tags. Chame primeiro: as outras ferramentas usam um id ou um nome desta lista |
 | `list_chats` | Lista as conversas mais recentes de uma instância, da mais nova para a mais antiga, com a última mensagem. `limit` de 1 a 50 |
-| `read_messages` | Lê as mensagens de uma conversa, da mais antiga para a mais nova. `after` e `before` aceitam um cursor para paginar. `limit` de 1 a 100 |
-| `wait_for_reply` | Espera uma mensagem nova na conversa e devolve as mensagens recebidas e um `cursor` novo. `timeout_seconds` de 1 a 60. Sem mensagem no prazo, devolve `timedOut: true` |
+| `read_messages` | Lê as mensagens de uma conversa, da mais antiga para a mais nova. `after` e `before` aceitam um cursor para paginar. `limit` de 1 a 100. As mensagens enviadas pela conta mostram o status do envio |
+| `wait_for_reply` | Espera uma mensagem nova do contato ou do grupo e devolve as mensagens recebidas e um `cursor` novo. `after` é obrigatório: use o `cursor` de um envio ou de `read_messages`. `timeout_seconds` de 1 a 60, padrão 50. Sem mensagem no prazo, devolve `timedOut: true`. As mensagens devolvidas podem incluir reações e avisos do sistema |
 | `check_numbers` | Confere se até 50 números têm WhatsApp e devolve o JID de cada um |
 | `get_service_window` | Diz se a janela de 24 horas está aberta para um contato. Só faz diferença em `cloud_api` |
 | `list_templates` | Lista os templates de uma instância `cloud_api`, com nome, idioma, status, categoria e componentes |
@@ -138,13 +138,31 @@ termina em `@g.us` ou um LID que termina em `@lid`.
 | Ferramenta | O que faz |
 |---|---|
 | `send_text` | Envia uma mensagem de texto a um contato ou grupo. Até 4096 caracteres |
-| `send_media` | Envia uma imagem, vídeo, áudio ou documento a partir de uma URL pública, com legenda e nome de arquivo opcionais |
+| `send_media` | Envia uma imagem, vídeo, áudio ou documento a partir de uma URL pública, com legenda e nome de arquivo opcionais. Um documento precisa de nome: sem `filename`, o servidor usa o nome de arquivo do fim da URL. Uma URL de endereço privado ou interno é recusada com `INVALID_MEDIA_URL` |
 | `send_template` | Envia um template aprovado em uma instância `cloud_api`. Serve para iniciar uma conversa ou quando a janela de 24 horas está fechada |
 | `react` | Reage a uma mensagem com um emoji. Um texto vazio remove a reação |
 | `mark_as_read` | Marca mensagens recebidas como lidas. Em grupo, informe também `sender` |
 
-Os envios entram na fila. A resposta traz `status`, `jobIds` e `cursor`. Passe o
-`cursor` a `wait_for_reply` para esperar a resposta do contato.
+Os envios entram na fila. A resposta traz `status`, `jobIds` e `cursor`. O
+`cursor` vem em todo envio, também na primeira mensagem a um contato novo. Passe
+esse `cursor` a `wait_for_reply` para esperar a resposta do contato.
+
+### Status das mensagens enviadas
+
+Em `read_messages`, cada mensagem enviada pela conta (`fromMe: true`) traz
+`status`, `jobId` e, na falha, `error`. O `jobId` é um dos `jobIds` do envio.
+Se a resposta do contato não chegar, leia a conversa e confira o status da
+mensagem.
+
+| `status` | Significado |
+|---|---|
+| `pending` | A mensagem está na conversa, sem confirmação de envio |
+| `sent` | A plataforma confirmou o envio |
+| `delivered` | A mensagem chegou ao aparelho do contato |
+| `read` | O contato leu a mensagem |
+| `failed` | O envio falhou. `error` traz `code` e `title` |
+
+Uma mensagem apagada para todos vem com `deleted: true`, sem texto e sem mídia.
 
 ### Instâncias da API oficial
 
@@ -158,6 +176,8 @@ responde `SERVICE_WINDOW_CLOSED`. Nesse caso, use `list_templates` e
 - Cada usuário pode fazer até 120 chamadas por minuto.
 - `wait_for_reply` espera no máximo 60 segundos por chamada. Para esperar mais,
   chame a ferramenta de novo com o `cursor` devolvido.
+- Cada conta pode ter até 10 chamadas de `wait_for_reply` ao mesmo tempo. A
+  chamada seguinte responde `TOO_MANY_WAITS`.
 - As ferramentas só enxergam as instâncias da conta da chave.
 
 ## Agentes que rodam o tempo todo
@@ -174,7 +194,7 @@ webhook. A instância avisa o agente, e o agente responde pelas ferramentas do M
     Aponte o webhook da instância para essa URL e assine o evento `messages.upsert`. O procedimento está em [Webhooks](/integrations/webhooks).
   </Step>
   <Step title="Valide a assinatura">
-    Confira o cabeçalho `x-webhook-signature` de cada entrega, como descreve [Webhooks](/integrations/webhooks).
+    Confira o cabeçalho `x-webhook-signature` de cada entrega, como descreve [Webhooks](/integrations/webhooks). A assinatura usa a chave de API da instância. Copie essa chave no painel, com **Copiar X-Api-Key** em [Instâncias](/painel/instancias), e configure-a só no código que recebe o webhook. Não coloque essa chave no cliente MCP.
   </Step>
   <Step title="Responda pelo MCP">
     A cada evento, o agente chama as ferramentas. Use `instanceId` como `instance` e `key.remoteJid` como `chat`. Por exemplo, chame `read_messages` para ler o contexto e `send_text` para responder.

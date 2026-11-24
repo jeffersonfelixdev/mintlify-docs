@@ -126,8 +126,8 @@ in `@g.us`, or a LID that ends in `@lid`.
 |---|---|
 | `list_instances` | Lists the instances of the account, with id, name, number, type, status, and tags. Call it first: the other tools use an id or a name from this list |
 | `list_chats` | Lists the most recent conversations of an instance, newest first, with the last message. `limit` from 1 to 50 |
-| `read_messages` | Reads the messages of a conversation, oldest first. `after` and `before` accept a cursor to page. `limit` from 1 to 100 |
-| `wait_for_reply` | Waits for a new message in the conversation and returns the received messages and a new `cursor`. `timeout_seconds` from 1 to 60. With no message in time, it returns `timedOut: true` |
+| `read_messages` | Reads the messages of a conversation, oldest first. `after` and `before` accept a cursor to page. `limit` from 1 to 100. The messages that the account sent show the send status |
+| `wait_for_reply` | Waits for a new message from the contact or the group and returns the received messages and a new `cursor`. `after` is required: use the `cursor` of a send or of `read_messages`. `timeout_seconds` from 1 to 60, default 50. With no message in time, it returns `timedOut: true`. The returned messages can include reactions and system notices |
 | `check_numbers` | Checks whether up to 50 numbers have WhatsApp and returns the JID of each |
 | `get_service_window` | Tells whether the 24-hour window is open for a contact. It matters only in `cloud_api` |
 | `list_templates` | Lists the templates of a `cloud_api` instance, with name, language, status, category, and components |
@@ -137,13 +137,31 @@ in `@g.us`, or a LID that ends in `@lid`.
 | Tool | What it does |
 |---|---|
 | `send_text` | Sends a text message to a contact or group. Up to 4096 characters |
-| `send_media` | Sends an image, video, audio, or document from a public URL, with an optional caption and file name |
+| `send_media` | Sends an image, video, audio, or document from a public URL, with an optional caption and file name. A document needs a name: without `filename`, the server uses the file name at the end of the URL. A URL of a private or internal address is refused with `INVALID_MEDIA_URL` |
 | `send_template` | Sends an approved template on a `cloud_api` instance. Use it to start a conversation or when the 24-hour window is closed |
 | `react` | Reacts to a message with an emoji. An empty text removes the reaction |
 | `mark_as_read` | Marks received messages as read. In a group, also enter `sender` |
 
-Sends are queued. The response has `status`, `jobIds`, and `cursor`. Pass the
-`cursor` to `wait_for_reply` to wait for the reply of the contact.
+Sends are queued. The response has `status`, `jobIds`, and `cursor`. Every send
+returns the `cursor`, also the first message to a new contact. Pass this `cursor`
+to `wait_for_reply` to wait for the reply of the contact.
+
+### Status of the sent messages
+
+In `read_messages`, each message that the account sent (`fromMe: true`) has
+`status`, `jobId`, and, on a failure, `error`. The `jobId` is one of the `jobIds`
+of the send. If the reply of the contact does not arrive, read the conversation
+and check the status of the message.
+
+| `status` | Meaning |
+|---|---|
+| `pending` | The message is in the conversation, with no send confirmation |
+| `sent` | The platform confirmed the send |
+| `delivered` | The message arrived on the device of the contact |
+| `read` | The contact read the message |
+| `failed` | The send failed. `error` has `code` and `title` |
+
+A message deleted for everyone has `deleted: true`, with no text and no media.
 
 ### Official API instances
 
@@ -157,6 +175,8 @@ See [Templates](/en/panel/templates).
 - Each user can make up to 120 calls per minute.
 - `wait_for_reply` waits at most 60 seconds per call. To wait longer, call the
   tool again with the returned `cursor`.
+- Each account can have up to 10 `wait_for_reply` calls at the same time. The
+  next call responds `TOO_MANY_WAITS`.
 - The tools see only the instances of the account of the key.
 
 ## Agents that run all the time
@@ -174,7 +194,7 @@ the MCP tools.
     Point the webhook of the instance to this URL and subscribe to the `messages.upsert` event. The procedure is in [Webhooks](/en/integrations/webhooks).
   </Step>
   <Step title="Validate the signature">
-    Check the `x-webhook-signature` header of each delivery, as [Webhooks](/en/integrations/webhooks) describes.
+    Check the `x-webhook-signature` header of each delivery, as [Webhooks](/en/integrations/webhooks) describes. The signature uses the API key of the instance. Copy this key in the panel, with **Copy X-Api-Key** in [Instances](/en/panel/instances), and configure it only in the code that receives the webhook. Do not put this key in the MCP client.
   </Step>
   <Step title="Answer through the MCP">
     On each event, the agent calls the tools. Use `instanceId` as `instance` and `key.remoteJid` as `chat`. For example, call `read_messages` to read the context and `send_text` to answer.
