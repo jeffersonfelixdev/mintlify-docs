@@ -81,6 +81,7 @@
                 "pages": [
                   "integrations/webhooks",
                   "integrations/ai-agents",
+                  "integrations/mcp",
                   "integrations/chatvolt",
                   "integrations/chatwoot",
                   "integrations/eleven-labs",
@@ -209,6 +210,7 @@
                 "pages": [
                   "en/integrations/webhooks",
                   "en/integrations/ai-agents",
+                  "en/integrations/mcp",
                   "en/integrations/chatvolt",
                   "en/integrations/chatwoot",
                   "en/integrations/eleven-labs",

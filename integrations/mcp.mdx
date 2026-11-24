@@ -1,0 +1,206 @@
+---
+title: Servidor MCP
+description: "Conectar um agente de IA às instâncias da ZapperHub pelo Model Context Protocol, para ler e enviar mensagens"
+keywords: ["MCP", "Model Context Protocol", "agente de IA", "Claude Code", "Cursor", "Hermes", "OpenClaw"]
+---
+
+## Descrição
+
+O servidor MCP da ZapperHub deixa um agente de IA operar o WhatsApp das suas
+instâncias. O agente lista as instâncias, lê conversas, espera uma resposta e
+envia mensagens. Ele usa as ferramentas do MCP e não precisa de código de
+integração.
+
+O servidor atende instâncias dos tipos `device` (conexão não oficial) e
+`cloud_api` (conexão oficial). Cada chave acessa só as instâncias da própria
+conta.
+
+| Item | Valor |
+|---|---|
+| URL | `https://mcp.zapperhub.com/mcp` |
+| Transporte | Streamable HTTP |
+| Autenticação | Cabeçalho `Authorization: Bearer zsk_...` |
+| Chave | A chave global da conta, a **Global API Key** |
+
+<Note>
+O agente nunca recebe a chave de uma instância. A chave global fica no cabeçalho
+do cliente MCP. O servidor usa as credenciais das instâncias por conta própria,
+e nenhuma ferramenta as devolve.
+</Note>
+
+## Pré-requisitos
+
+- Uma instância conectada. Veja [Início rápido](/quickstart).
+- A chave global da conta, que começa com `zsk_`.
+- Um cliente MCP que aceita Streamable HTTP e cabeçalhos próprios.
+
+## Gerar a chave da conta
+
+<Steps>
+  <Step title="Abra a tela da chave">
+    Acesse [app.zapperhub.com/dash](https://app.zapperhub.com/dash) e clique em **Global API Key** no menu lateral.
+  </Step>
+  <Step title="Crie a chave">
+    Clique em **Criar chave global**.
+  </Step>
+  <Step title="Copie a chave">
+    Copie a chave e guarde-a no cliente MCP. O painel mostra a chave uma única vez.
+  </Step>
+</Steps>
+
+A chave da conta é a mesma chave global da Instance API. A tela, a rotação e a
+exclusão estão em [Chave de API global](/painel/chave-de-api-global).
+
+<Warning>
+A chave da conta dá ao agente escrita em todas as instâncias da conta. Guarde-a
+como um segredo. Não a coloque em código versionado. Se você rotacionar ou
+excluir a chave, o cliente MCP perde o acesso até você atualizar o cabeçalho.
+</Warning>
+
+## Configurar o cliente
+
+Em todos os clientes, o endereço é `https://mcp.zapperhub.com/mcp` e o cabeçalho
+é `Authorization: Bearer zsk_...`. Troque `zsk_...` pela sua chave.
+
+<Tabs>
+  <Tab title="Claude Code">
+    Execute o comando no terminal:
+
+    ```bash
+    claude mcp add --transport http zapperhub https://mcp.zapperhub.com/mcp --header "Authorization: Bearer zsk_..."
+    ```
+  </Tab>
+  <Tab title="Cursor">
+    Adicione o servidor ao arquivo `mcp.json`:
+
+    ```json mcp.json
+    {
+      "mcpServers": {
+        "zapperhub": {
+          "url": "https://mcp.zapperhub.com/mcp",
+          "headers": {
+            "Authorization": "Bearer zsk_..."
+          }
+        }
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="Hermes">
+    Adicione o servidor à chave `mcp_servers` do arquivo `~/.hermes/config.yaml`:
+
+    ```yaml config.yaml
+    mcp_servers:
+      zapperhub:
+        url: "https://mcp.zapperhub.com/mcp"
+        headers:
+          Authorization: "Bearer zsk_..."
+    ```
+  </Tab>
+  <Tab title="OpenClaw">
+    Execute o comando no terminal:
+
+    ```bash
+    openclaw mcp set zapperhub '{"url":"https://mcp.zapperhub.com/mcp","transport":"streamable-http","headers":{"Authorization":"Bearer zsk_..."}}'
+    ```
+  </Tab>
+  <Tab title="Outro cliente">
+    Use qualquer cliente MCP que aceite Streamable HTTP e cabeçalhos próprios.
+    Informe a URL `https://mcp.zapperhub.com/mcp` e o cabeçalho
+    `Authorization: Bearer zsk_...`.
+  </Tab>
+</Tabs>
+
+Depois de configurar, peça ao agente para listar as instâncias. A resposta
+confirma que a chave funciona.
+
+## Ferramentas
+
+O servidor expõe 12 ferramentas. Elas têm nomes e descrições em inglês, para o
+agente. Em toda ferramenta, `instance` é o id ou o nome de uma instância de
+`list_instances`. `chat` é um número com código do país, um id de grupo que
+termina em `@g.us` ou um LID que termina em `@lid`.
+
+### Ler e consultar
+
+| Ferramenta | O que faz |
+|---|---|
+| `list_instances` | Lista as instâncias da conta, com id, nome, número, tipo, status e tags. Chame primeiro: as outras ferramentas usam um id ou um nome desta lista |
+| `list_chats` | Lista as conversas mais recentes de uma instância, da mais nova para a mais antiga, com a última mensagem. `limit` de 1 a 50 |
+| `read_messages` | Lê as mensagens de uma conversa, da mais antiga para a mais nova. `after` e `before` aceitam um cursor para paginar. `limit` de 1 a 100 |
+| `wait_for_reply` | Espera uma mensagem nova na conversa e devolve as mensagens recebidas e um `cursor` novo. `timeout_seconds` de 1 a 60. Sem mensagem no prazo, devolve `timedOut: true` |
+| `check_numbers` | Confere se até 50 números têm WhatsApp e devolve o JID de cada um |
+| `get_service_window` | Diz se a janela de 24 horas está aberta para um contato. Só faz diferença em `cloud_api` |
+| `list_templates` | Lista os templates de uma instância `cloud_api`, com nome, idioma, status, categoria e componentes |
+
+### Enviar
+
+| Ferramenta | O que faz |
+|---|---|
+| `send_text` | Envia uma mensagem de texto a um contato ou grupo. Até 4096 caracteres |
+| `send_media` | Envia uma imagem, vídeo, áudio ou documento a partir de uma URL pública, com legenda e nome de arquivo opcionais |
+| `send_template` | Envia um template aprovado em uma instância `cloud_api`. Serve para iniciar uma conversa ou quando a janela de 24 horas está fechada |
+| `react` | Reage a uma mensagem com um emoji. Um texto vazio remove a reação |
+| `mark_as_read` | Marca mensagens recebidas como lidas. Em grupo, informe também `sender` |
+
+Os envios entram na fila. A resposta traz `status`, `jobIds` e `cursor`. Passe o
+`cursor` a `wait_for_reply` para esperar a resposta do contato.
+
+### Instâncias da API oficial
+
+Em uma instância `cloud_api`, `send_text` e `send_media` só funcionam até 24
+horas depois da última mensagem do contato. Com a janela fechada, a ferramenta
+responde `SERVICE_WINDOW_CLOSED`. Nesse caso, use `list_templates` e
+`send_template`. Veja [Templates](/painel/templates).
+
+### Limites
+
+- Cada usuário pode fazer até 120 chamadas por minuto.
+- `wait_for_reply` espera no máximo 60 segundos por chamada. Para esperar mais,
+  chame a ferramenta de novo com o `cursor` devolvido.
+- As ferramentas só enxergam as instâncias da conta da chave.
+
+## Agentes que rodam o tempo todo
+
+Um agente interativo, como o Claude Code, usa `wait_for_reply` para esperar uma
+resposta. Um agente que atende conversas o tempo todo recebe as mensagens por
+webhook. A instância avisa o agente, e o agente responde pelas ferramentas do MCP.
+
+<Steps>
+  <Step title="Exponha uma URL no agente">
+    O agente precisa de uma URL HTTPS que receba requisições `POST`.
+  </Step>
+  <Step title="Cadastre o webhook na instância">
+    Aponte o webhook da instância para essa URL e assine o evento `messages.upsert`. O procedimento está em [Webhooks](/integrations/webhooks).
+  </Step>
+  <Step title="Valide a assinatura">
+    Confira o cabeçalho `x-webhook-signature` de cada entrega, como descreve [Webhooks](/integrations/webhooks).
+  </Step>
+  <Step title="Responda pelo MCP">
+    A cada evento, o agente chama as ferramentas. Use `instanceId` como `instance` e `key.remoteJid` como `chat`. Por exemplo, chame `read_messages` para ler o contexto e `send_text` para responder.
+  </Step>
+</Steps>
+
+O webhook também entrega as mensagens que a própria conta envia. Ignore os
+eventos com `key.fromMe` igual a `true`. Sem esse filtro, o agente responde às
+próprias mensagens.
+
+Para um agente de atendimento pronto, sem servidor próprio, veja
+[Agentes de IA](/integrations/ai-agents).
+
+## MCP da documentação
+
+A documentação da ZapperHub também tem um servidor MCP, em
+`https://docs.zapperhub.com/mcp`. Ele permite que o agente pesquise nesta
+documentação. Ele não exige chave e não acessa as suas instâncias. Adicione-o ao
+cliente da mesma forma, sem o cabeçalho `Authorization`. No Claude Code:
+
+```bash
+claude mcp add --transport http zapperhub-docs https://docs.zapperhub.com/mcp
+```
+
+## Veja também
+
+- [Chave de API global](/painel/chave-de-api-global): criar, rotacionar e excluir a chave da conta.
+- [Webhooks](/integrations/webhooks): receber os eventos da instância.
+- [Agentes de IA](/integrations/ai-agents): o agente da Chatvolt, ligado à instância.

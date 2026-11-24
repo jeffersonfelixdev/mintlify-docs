@@ -1,0 +1,206 @@
+---
+title: MCP server
+description: "Connect an AI agent to your ZapperHub instances through the Model Context Protocol, to read and send messages"
+keywords: ["MCP", "Model Context Protocol", "AI agent", "Claude Code", "Cursor", "Hermes", "OpenClaw"]
+---
+
+## Description
+
+The ZapperHub MCP server lets an AI agent operate the WhatsApp of your
+instances. The agent lists the instances, reads conversations, waits for a reply,
+and sends messages. It uses the MCP tools and needs no integration code.
+
+The server serves instances of the types `device` (unofficial connection) and
+`cloud_api` (official connection). Each key accesses only the instances of its
+own account.
+
+| Item | Value |
+|---|---|
+| URL | `https://mcp.zapperhub.com/mcp` |
+| Transport | Streamable HTTP |
+| Authentication | Header `Authorization: Bearer zsk_...` |
+| Key | The global key of the account, the **Global API Key** |
+
+<Note>
+The agent never receives the key of an instance. The global key stays in the
+header of the MCP client. The server uses the instance credentials on its own,
+and no tool returns them.
+</Note>
+
+## Preliminary requirements
+
+- A connected instance. See [Quickstart](/en/quickstart).
+- The global key of the account, which starts with `zsk_`.
+- An MCP client that supports Streamable HTTP and custom headers.
+
+## Generate the account key
+
+<Steps>
+  <Step title="Open the key screen">
+    Go to [app.zapperhub.com/dash](https://app.zapperhub.com/dash) and click **Global API Key** in the side menu.
+  </Step>
+  <Step title="Create the key">
+    Click **Create global key**.
+  </Step>
+  <Step title="Copy the key">
+    Copy the key and store it in the MCP client. The panel shows the key only once.
+  </Step>
+</Steps>
+
+The account key is the same global key of the Instance API. The screen, the
+rotation, and the deletion are in [Global API key](/en/panel/global-api-key).
+
+<Warning>
+The account key gives the agent write access to all instances of the account.
+Store it as a secret. Do not put it in versioned code. If you rotate or delete
+the key, the MCP client loses access until you update the header.
+</Warning>
+
+## Configure the client
+
+In all clients, the address is `https://mcp.zapperhub.com/mcp` and the header is
+`Authorization: Bearer zsk_...`. Replace `zsk_...` with your key.
+
+<Tabs>
+  <Tab title="Claude Code">
+    Run the command in the terminal:
+
+    ```bash
+    claude mcp add --transport http zapperhub https://mcp.zapperhub.com/mcp --header "Authorization: Bearer zsk_..."
+    ```
+  </Tab>
+  <Tab title="Cursor">
+    Add the server to the `mcp.json` file:
+
+    ```json mcp.json
+    {
+      "mcpServers": {
+        "zapperhub": {
+          "url": "https://mcp.zapperhub.com/mcp",
+          "headers": {
+            "Authorization": "Bearer zsk_..."
+          }
+        }
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="Hermes">
+    Add the server to the `mcp_servers` key of the `~/.hermes/config.yaml` file:
+
+    ```yaml config.yaml
+    mcp_servers:
+      zapperhub:
+        url: "https://mcp.zapperhub.com/mcp"
+        headers:
+          Authorization: "Bearer zsk_..."
+    ```
+  </Tab>
+  <Tab title="OpenClaw">
+    Run the command in the terminal:
+
+    ```bash
+    openclaw mcp set zapperhub '{"url":"https://mcp.zapperhub.com/mcp","transport":"streamable-http","headers":{"Authorization":"Bearer zsk_..."}}'
+    ```
+  </Tab>
+  <Tab title="Other client">
+    Use any MCP client that supports Streamable HTTP and custom headers. Enter
+    the URL `https://mcp.zapperhub.com/mcp` and the header
+    `Authorization: Bearer zsk_...`.
+  </Tab>
+</Tabs>
+
+After you configure the client, ask the agent to list the instances. The answer
+confirms that the key works.
+
+## Tools
+
+The server exposes 12 tools. Their names and descriptions are in English, for the
+agent. In every tool, `instance` is the id or the name of an instance from
+`list_instances`. `chat` is a number with the country code, a group id that ends
+in `@g.us`, or a LID that ends in `@lid`.
+
+### Read and check
+
+| Tool | What it does |
+|---|---|
+| `list_instances` | Lists the instances of the account, with id, name, number, type, status, and tags. Call it first: the other tools use an id or a name from this list |
+| `list_chats` | Lists the most recent conversations of an instance, newest first, with the last message. `limit` from 1 to 50 |
+| `read_messages` | Reads the messages of a conversation, oldest first. `after` and `before` accept a cursor to page. `limit` from 1 to 100 |
+| `wait_for_reply` | Waits for a new message in the conversation and returns the received messages and a new `cursor`. `timeout_seconds` from 1 to 60. With no message in time, it returns `timedOut: true` |
+| `check_numbers` | Checks whether up to 50 numbers have WhatsApp and returns the JID of each |
+| `get_service_window` | Tells whether the 24-hour window is open for a contact. It matters only in `cloud_api` |
+| `list_templates` | Lists the templates of a `cloud_api` instance, with name, language, status, category, and components |
+
+### Send
+
+| Tool | What it does |
+|---|---|
+| `send_text` | Sends a text message to a contact or group. Up to 4096 characters |
+| `send_media` | Sends an image, video, audio, or document from a public URL, with an optional caption and file name |
+| `send_template` | Sends an approved template on a `cloud_api` instance. Use it to start a conversation or when the 24-hour window is closed |
+| `react` | Reacts to a message with an emoji. An empty text removes the reaction |
+| `mark_as_read` | Marks received messages as read. In a group, also enter `sender` |
+
+Sends are queued. The response has `status`, `jobIds`, and `cursor`. Pass the
+`cursor` to `wait_for_reply` to wait for the reply of the contact.
+
+### Official API instances
+
+On a `cloud_api` instance, `send_text` and `send_media` work only within 24 hours
+of the last message of the contact. With the window closed, the tool responds
+`SERVICE_WINDOW_CLOSED`. In this case, use `list_templates` and `send_template`.
+See [Templates](/en/panel/templates).
+
+### Limits
+
+- Each user can make up to 120 calls per minute.
+- `wait_for_reply` waits at most 60 seconds per call. To wait longer, call the
+  tool again with the returned `cursor`.
+- The tools see only the instances of the account of the key.
+
+## Agents that run all the time
+
+An interactive agent, such as Claude Code, uses `wait_for_reply` to wait for a
+reply. An agent that answers conversations all the time receives the messages
+through a webhook. The instance notifies the agent, and the agent answers with
+the MCP tools.
+
+<Steps>
+  <Step title="Expose a URL in the agent">
+    The agent needs an HTTPS URL that receives `POST` requests.
+  </Step>
+  <Step title="Register the webhook in the instance">
+    Point the webhook of the instance to this URL and subscribe to the `messages.upsert` event. The procedure is in [Webhooks](/en/integrations/webhooks).
+  </Step>
+  <Step title="Validate the signature">
+    Check the `x-webhook-signature` header of each delivery, as [Webhooks](/en/integrations/webhooks) describes.
+  </Step>
+  <Step title="Answer through the MCP">
+    On each event, the agent calls the tools. Use `instanceId` as `instance` and `key.remoteJid` as `chat`. For example, call `read_messages` to read the context and `send_text` to answer.
+  </Step>
+</Steps>
+
+The webhook also delivers the messages that the account itself sends. Ignore the
+events with `key.fromMe` equal to `true`. Without this filter, the agent answers
+its own messages.
+
+For a ready-made support agent, with no server of your own, see
+[AI agents](/en/integrations/ai-agents).
+
+## Documentation MCP
+
+The ZapperHub documentation also has an MCP server, at
+`https://docs.zapperhub.com/mcp`. It lets the agent search this documentation. It
+needs no key and does not access your instances. Add it to the client in the same
+way, without the `Authorization` header. In Claude Code:
+
+```bash
+claude mcp add --transport http zapperhub-docs https://docs.zapperhub.com/mcp
+```
+
+## See also
+
+- [Global API key](/en/panel/global-api-key): create, rotate, and delete the account key.
+- [Webhooks](/en/integrations/webhooks): receive the events of the instance.
+- [AI agents](/en/integrations/ai-agents): the Chatvolt agent, linked to the instance.
