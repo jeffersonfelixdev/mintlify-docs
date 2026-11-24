@@ -1,7 +1,7 @@
 ---
 title: MCP server
 description: "Connect an AI agent to your ZapperHub instances through the Model Context Protocol, to read and send messages"
-keywords: ["MCP", "Model Context Protocol", "AI agent", "Claude Code", "Cursor", "Hermes", "OpenClaw"]
+keywords: ["MCP", "Model Context Protocol", "AI agent", "Claude", "ChatGPT", "OAuth", "Claude Code", "Cursor", "Hermes", "OpenClaw"]
 ---
 
 ## Description
@@ -11,29 +11,165 @@ instances. The agent lists the instances, reads conversations, waits for a reply
 and sends messages. It uses the MCP tools and needs no integration code.
 
 The server serves instances of the types `device` (unofficial connection) and
-`cloud_api` (official connection). Each key accesses only the instances of its
-own account.
+`cloud_api` (official connection). Each connection accesses only the instances of
+its own account.
 
 | Item | Value |
 |---|---|
 | URL | `https://mcp.zapperhub.com/mcp` |
 | Transport | Streamable HTTP |
-| Authentication | Header `Authorization: Bearer zsk_...` |
-| Key | The global key of the account, the **Global API Key** |
+| Authentication | Account login (OAuth) or header `Authorization: Bearer zsk_...` |
 
 <Note>
-The agent never receives the key of an instance. The global key stays in the
-header of the MCP client. The server uses the instance credentials on its own,
-and no tool returns them.
+The agent never receives the key of an instance. The server uses the instance
+credentials on its own, and no tool returns them.
 </Note>
 
-## Preliminary requirements
+## Choose how to connect
+
+There are two ways to connect. Choose by client.
+
+| Client | How to connect |
+|---|---|
+| Claude.ai, Claude Desktop, and ChatGPT | [Account login](#connect-with-the-account-login). You do not paste a key |
+| Claude Code, Cursor, Hermes, and OpenClaw | [Account key](#connect-with-the-account-key), in a header of the client |
+
+A remote MCP client that supports login (OAuth) finds the login screen on its
+own. Another client without this function uses the account key.
+
+## Connect with the account login
+
+With the account login, you sign in to ZapperHub and choose what the agent
+accesses. You do not copy any key. The connection stays in the list
+[Connected apps](/en/panel/connected-apps), where you edit or revoke the access.
+
+### Preliminary requirements
+
+- A connected instance. See [Quickstart](/en/quickstart).
+- A client that supports a remote MCP server with login (OAuth).
+
+### Add the connector in the client
+
+In all clients, the address of the server is `https://mcp.zapperhub.com/mcp`.
+
+<Tabs>
+  <Tab title="Claude.ai and Claude Desktop">
+    <Steps>
+      <Step title="Open the connectors">
+        Go to **Customize** > **Connectors**.
+      </Step>
+      <Step title="Add the connector">
+        Click **+ Add** and **Add custom connector**.
+      </Step>
+      <Step title="Enter the data">
+        Enter a name, for example `ZapperHub`. Enter the URL `https://mcp.zapperhub.com/mcp`. Click **Continue**.
+      </Step>
+      <Step title="Finish">
+        Review the authentication options and click **Continue**. Then click **Add**.
+      </Step>
+      <Step title="Sign in to ZapperHub">
+        Claude opens ZapperHub. If ZapperHub asks for a login, sign in to your account. Then go on to the [authorization screen](#authorization-screen).
+      </Step>
+    </Steps>
+
+    On the Team and Enterprise plans, an owner of the organization adds the
+    connector in **Organization settings** > **Connectors**. Each member clicks
+    **Connect** on the connector and signs in with their own ZapperHub account.
+
+    The menu names follow the Claude documentation and change between versions.
+    Claude Desktop also supports a custom connector. If the menu of your app is
+    different, look for the option to add a custom connector and use the same
+    URL.
+  </Tab>
+  <Tab title="ChatGPT">
+    <Steps>
+      <Step title="Open the plugins">
+        Go to [chatgpt.com/plugins](https://chatgpt.com/plugins) on the web.
+      </Step>
+      <Step title="Add the server">
+        Click the plus button and **Add custom MCP server**.
+      </Step>
+      <Step title="Enter the data">
+        Enter a name. In **Server URL**, enter `https://mcp.zapperhub.com/mcp`. For authentication, choose **OAuth**.
+      </Step>
+      <Step title="Create">
+        Confirm the risk warning and click **Create as a plugin**.
+      </Step>
+      <Step title="Install and sign in">
+        Install the plugin to use it in a conversation. ChatGPT opens ZapperHub. If ZapperHub asks for a login, sign in to your account. Then go on to the [authorization screen](#authorization-screen).
+      </Step>
+    </Steps>
+
+    Availability depends on the plan and the workspace. On team plans, only
+    administrators create the server. ChatGPT supports a custom MCP server on the
+    web only. Check the limits of your plan in the OpenAI help. If your menu is
+    different from the one described here, ChatGPT has a new version: look for
+    the option to add a custom MCP server and use the same URL.
+  </Tab>
+  <Tab title="Other client">
+    Add a connector or a remote MCP server with the URL
+    `https://mcp.zapperhub.com/mcp`. The client finds the account login and opens
+    the ZapperHub login screen.
+  </Tab>
+</Tabs>
+
+### Authorization screen
+
+After the login, ZapperHub shows the authorization screen. It has the name of the
+app and its address. Choose what the app accesses and click **Authorize**. To
+give up, click **Cancel**. In both cases, you go back to the app.
+
+<Warning>
+Check the address that the screen shows next to the name. It must be the address
+of the app that you are connecting, for example `claude.ai`. If the address is
+different, click **Cancel**.
+</Warning>
+
+The screen has two choices.
+
+| Choice | Option | What it allows |
+|---|---|---|
+| **Instances** | **All instances** | All instances of the account, also the ones that you create later |
+| | **Only the selected ones** | Only the instances that you select. Select at least one |
+| **Access** | **Read only** (default) | View messages and chats. The agent uses 7 tools |
+| | **Read and write** | View and send messages. The agent uses all 12 tools |
+
+The 7 tools of the **Read only** access are `list_instances`, `list_chats`,
+`read_messages`, `wait_for_reply`, `check_numbers`, `get_service_window`, and
+`list_templates`. The **Read and write** access adds `send_text`, `send_media`,
+`send_template`, `react`, and `mark_as_read`. With **Read only**, the agent does
+not see the write tools.
+
+With both options, the agent also sees the list of the authorized instances,
+with name, number, status, and tags.
+
+After you authorize, the client keeps the connection and renews the access on its
+own. You do not paste a key and you do not sign in again at each use.
+
+### Edit or revoke the connection
+
+Each connected app appears in [Connected apps](/en/panel/connected-apps), in the
+side menu of the panel. On this screen, you change the instances and the access
+with **Edit** and remove the access with **Revoke**. The change takes effect on
+the next call of the agent.
+
+Revoking a connection does not affect the account key or the other integrations.
+Rotating or deleting the account key does not affect a connection by login
+either.
+
+## Connect with the account key
+
+The account key is the alternative for the clients that support custom headers:
+Claude Code, Cursor, Hermes, and OpenClaw. The agent has the access of the key:
+write access to all instances of the account.
+
+### Preliminary requirements
 
 - A connected instance. See [Quickstart](/en/quickstart).
 - The global key of the account, which starts with `zsk_`.
 - An MCP client that supports Streamable HTTP and custom headers.
 
-## Generate the account key
+### Generate the account key
 
 <Steps>
   <Step title="Open the key screen">
@@ -56,7 +192,7 @@ Store it as a secret. Do not put it in versioned code. If you rotate or delete
 the key, the MCP client loses access until you update the header.
 </Warning>
 
-## Configure the client
+### Configure the client
 
 In all clients, the address is `https://mcp.zapperhub.com/mcp` and the header is
 `Authorization: Bearer zsk_...`. Replace `zsk_...` with your key.
@@ -110,8 +246,10 @@ In all clients, the address is `https://mcp.zapperhub.com/mcp` and the header is
   </Tab>
 </Tabs>
 
-After you configure the client, ask the agent to list the instances. The answer
-confirms that the key works.
+## Test the connection
+
+After you connect, by login or by key, ask the agent to list the instances. The
+answer confirms that the connection works.
 
 ## Tools
 
@@ -177,7 +315,7 @@ See [Templates](/en/panel/templates).
   tool again with the returned `cursor`.
 - Each account can have up to 10 `wait_for_reply` calls at the same time. The
   next call responds `TOO_MANY_WAITS`.
-- The tools see only the instances of the account of the key.
+- The tools see only the instances of the account of the connection. With a connection by login, only the authorized instances.
 
 ## Agents that run all the time
 
@@ -221,6 +359,7 @@ claude mcp add --transport http zapperhub-docs https://docs.zapperhub.com/mcp
 
 ## See also
 
+- [Connected apps](/en/panel/connected-apps): edit and revoke the connections by login.
 - [Global API key](/en/panel/global-api-key): create, rotate, and delete the account key.
 - [Webhooks](/en/integrations/webhooks): receive the events of the instance.
 - [AI agents](/en/integrations/ai-agents): the Chatvolt agent, linked to the instance.

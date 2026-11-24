@@ -1,0 +1,87 @@
+---
+title: Aplicativos conectados
+description: "Ver, editar e revogar o acesso dos aplicativos conectados ao MCP da ZapperHub com o login da conta"
+keywords: ["aplicativos conectados", "MCP", "OAuth", "Claude", "ChatGPT", "revogar acesso"]
+---
+
+**Onde fica**: menu lateral > **Aplicativos conectados**.
+
+## Descrição
+
+A tela **Aplicativos conectados** (`dash/connected-apps`) lista os aplicativos que
+você conectou ao [servidor MCP](/integrations/mcp) com o login da conta, como o
+Claude ou o ChatGPT. Para cada aplicativo, você escolhe o que ele acessa e pode
+retirar o acesso quando quiser.
+
+Esta tela não lista as chaves da conta (`zsk_`). A chave da conta fica em
+[Chave de API global](/painel/chave-de-api-global).
+
+## O que a lista mostra
+
+Cada conexão é uma linha separada. Dois agentes conectados são duas linhas,
+mesmo que sejam do mesmo aplicativo. A linha traz:
+
+| Dado | Significado |
+|---|---|
+| **Nome e endereço** | O aplicativo e o endereço dele, como na tela de autorização |
+| **Instâncias** | **Todas as instâncias** ou os nomes das instâncias autorizadas |
+| **Acesso** | **Somente leitura** ou **Leitura e escrita** |
+| **Conectado em** | A data em que você autorizou |
+| **Último uso em** | A data da última chamada do aplicativo. **Ainda não foi usado** indica que ele não fez nenhuma chamada |
+
+Sem nenhum aplicativo conectado, a tela mostra **Nenhum aplicativo conectado**.
+Para conectar, veja [Conectar com o login da conta](/integrations/mcp#conectar-com-o-login-da-conta).
+
+## Editar o acesso
+
+<Steps>
+  <Step title="Abra a edição">
+    Na linha do aplicativo, clique em **Editar**. O painel abre **Editar o acesso de** seguido do nome do aplicativo.
+  </Step>
+  <Step title="Escolha as instâncias">
+    Escolha **Todas as instâncias** ou **Somente as selecionadas**. Com **Somente as selecionadas**, marque ao menos uma instância.
+  </Step>
+  <Step title="Escolha o acesso">
+    Escolha **Somente leitura** ou **Leitura e escrita**.
+  </Step>
+  <Step title="Salve">
+    Clique em **Salvar**. Sucesso: **Acesso atualizado.**
+  </Step>
+</Steps>
+
+As opções são as mesmas da tela de autorização. **Todas as instâncias** inclui as
+instâncias que você criar depois. **Somente leitura** libera 7 ferramentas do
+MCP e **Leitura e escrita** libera as 12. A lista das ferramentas está em
+[Servidor MCP](/integrations/mcp#tela-de-autorizacao).
+
+A mudança vale na próxima chamada do agente. O agente não precisa se conectar de
+novo.
+
+## Revogar o acesso
+
+<Steps>
+  <Step title="Inicie a revogação">
+    Na linha do aplicativo, clique em **Revogar**. O painel abre **Revogar o acesso de** seguido do nome do aplicativo.
+  </Step>
+  <Step title="Confirme">
+    Clique em **Revogar acesso**. Sucesso: **Acesso revogado.**
+  </Step>
+</Steps>
+
+<Warning>
+**A revogação vale na hora e não pode ser desfeita.** O aplicativo perde o acesso
+à conta na próxima chamada. Para voltar a usar a conta, conecte o aplicativo de
+novo.
+</Warning>
+
+A revogação afeta só aquela conexão. Ela não muda a chave da conta, as chaves das
+instâncias, as outras conexões nem as outras integrações.
+
+Se outra pessoa ou outra aba já revogou o acesso, o painel mostra **Este
+aplicativo já tinha perdido o acesso. A lista foi atualizada.**
+
+## Veja também
+
+- [Servidor MCP](/integrations/mcp): conectar um agente com o login da conta ou com a chave.
+- [Chave de API global](/painel/chave-de-api-global): a chave da conta, uma alternativa ao login.
+- [Visão geral do painel](/painel/visao-geral): a organização do painel.

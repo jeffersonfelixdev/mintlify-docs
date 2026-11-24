@@ -1,0 +1,91 @@
+---
+title: Connected apps
+description: "View, edit, and revoke the access of the apps connected to the ZapperHub MCP with the account login"
+keywords: ["connected apps", "MCP", "OAuth", "Claude", "ChatGPT", "revoke access"]
+---
+
+import PanelNote from '/snippets/en-panel-note.mdx';
+
+**Location**: side menu > **Connected apps**.
+
+<PanelNote />
+
+## Description
+
+The screen **Connected apps** (`dash/connected-apps`) lists the apps that you
+connected to the [MCP server](/en/integrations/mcp) with the account login, such
+as Claude or ChatGPT. For each app, you choose what it accesses and you can
+remove the access at any time.
+
+This screen does not list the account keys (`zsk_`). The account key is in
+[Global API key](/en/panel/global-api-key).
+
+## What the list shows
+
+Each connection is a separate row. Two connected agents are two rows, even if
+they are from the same app. The row has:
+
+| Data | Meaning |
+|---|---|
+| **Name and address** | The app and its address, as on the authorization screen |
+| **Instances** | **All instances** or the names of the authorized instances |
+| **Access** | **Read only** or **Read and write** |
+| **Connected on** | The date when you authorized |
+| **Last used on** | The date of the last call of the app. **Not used yet** means that it made no call |
+
+With no connected app, the screen shows **No connected apps**. To connect, see
+[Connect with the account login](/en/integrations/mcp#connect-with-the-account-login).
+
+## Edit the access
+
+<Steps>
+  <Step title="Open the edit">
+    On the row of the app, click **Edit**. The panel opens **Edit access for** followed by the name of the app.
+  </Step>
+  <Step title="Choose the instances">
+    Choose **All instances** or **Only the selected ones**. With **Only the selected ones**, select at least one instance.
+  </Step>
+  <Step title="Choose the access">
+    Choose **Read only** or **Read and write**.
+  </Step>
+  <Step title="Save">
+    Click **Save**. Success: **Access updated.**
+  </Step>
+</Steps>
+
+The options are the same as on the authorization screen. **All instances**
+includes the instances that you create later. **Read only** allows 7 tools of
+the MCP and **Read and write** allows all 12. The list of the tools is in
+[MCP server](/en/integrations/mcp#authorization-screen).
+
+The change takes effect on the next call of the agent. The agent does not need to
+connect again.
+
+## Revoke the access
+
+<Steps>
+  <Step title="Start the revocation">
+    On the row of the app, click **Revoke**. The panel opens **Revoke access for** followed by the name of the app.
+  </Step>
+  <Step title="Confirm">
+    Click **Revoke access**. Success: **Access revoked.**
+  </Step>
+</Steps>
+
+<Warning>
+**The revocation takes effect at once and cannot be undone.** The app loses
+access to the account on its next call. To use the account again, connect the
+app again.
+</Warning>
+
+The revocation affects only that connection. It does not change the account key,
+the instance keys, the other connections, or the other integrations.
+
+If another person or another tab already revoked the access, the panel shows
+**This app had already lost access. The list was refreshed.**
+
+## See also
+
+- [MCP server](/en/integrations/mcp): connect an agent with the account login or with the key.
+- [Global API key](/en/panel/global-api-key): the account key, an alternative to the login.
+- [Panel overview](/en/panel/overview): how the panel is organized.

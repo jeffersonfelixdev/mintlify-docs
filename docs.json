@@ -100,7 +100,8 @@
                 "pages": [
                   "painel/visao-geral",
                   "painel/conta-e-assinatura",
-                  "painel/chave-de-api-global"
+                  "painel/chave-de-api-global",
+                  "painel/aplicativos-conectados"
                 ]
               },
               {
@@ -229,7 +230,8 @@
                 "pages": [
                   "en/panel/overview",
                   "en/panel/account-and-subscription",
-                  "en/panel/global-api-key"
+                  "en/panel/global-api-key",
+                  "en/panel/connected-apps"
                 ]
               },
               {
