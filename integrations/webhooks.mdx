@@ -23,6 +23,9 @@ evento acontece na instância. O webhook substitui a consulta periódica
 | `group-participants.update` | Participantes entraram, saíram, foram promovidos ou rebaixados em um grupo. Só em conexão não oficial |
 | `groups.update` | Nome, descrição, foto, configurações ou link de convite de um grupo mudaram. Só em conexão não oficial |
 | `groups.upsert` | O número passou a participar de um grupo: criou, foi adicionado ou entrou por convite. Só em conexão não oficial |
+| `newsletters.upsert` | O número criou ou começou a seguir um canal. Só em conexão não oficial |
+| `newsletters.update` | O número silenciou ou reativou um canal. Só em conexão não oficial |
+| `newsletters.delete` | O número deixou de seguir um canal, ou o canal foi apagado. Só em conexão não oficial |
 | `chats.update` | Uma conversa foi fixada, arquivada, silenciada, marcada como lida ou não lida, limpa ou apagada em outro aparelho da conta. Só em conexão não oficial. Assinatura opt-in |
 | `contacts.update` | Um contato foi editado na agenda do celular, ou mudou o nome de perfil ou o nome comercial. Só em conexão não oficial. Assinatura opt-in |
 | `labels.update` | Uma etiqueta foi criada, editada ou apagada, ou foi posta ou tirada de uma conversa ou mensagem. Só em conexão não oficial, com WhatsApp Business. Assinatura opt-in |
@@ -535,6 +538,36 @@ composto (`ig-reaction:<mid>:<remetente>:<timestamp>`). A retirada vem com
   aparelho, a uma mensagem do contato.
 - Uma segunda reação à mesma mensagem é um evento novo, com outro `key.id`.
 - Para reagir, use [`POST /{instanceId}/messages/react`](/functions/sending-messages#reagir-a-uma-mensagem).
+
+### Mensagem recebida de um canal
+
+Tipo: `messages.upsert`
+
+Publicado em instâncias não oficiais com a opção `receiveNewsletterMessages`
+ligada, quando um canal que o número segue publica uma mensagem. `key.remoteJid`
+é o id do canal. `serverId` é o id de servidor da mensagem. Use `serverId` para
+reagir à mensagem. Veja [Canais](/functions/channels#receber-mensagens-de-um-canal).
+
+```json
+{
+  "type": "messages.upsert",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "120363012345678901@newsletter",
+  "key": {
+    "remoteJid": "120363012345678901@newsletter",
+    "fromMe": false,
+    "id": "3EB0C767D26A1B9F7C31"
+  },
+  "serverId": 142,
+  "messageTimestamp": 1795471562,
+  "pushName": "",
+  "broadcast": false,
+  "message": {
+    "conversation": "Novidade no canal"
+  },
+  "trackSource": "whatsapp"
+}
+```
 
 ### Cobrança PIX enviada
 
@@ -1217,6 +1250,57 @@ adicionou o número, quando o WhatsApp informa.
       { "id": "123456789012345@lid", "isAdmin": true, "isSuperAdmin": true, "admin": "superadmin" }
     ]
   }
+}
+```
+
+### Eventos de canal
+
+Tipos: `newsletters.upsert`, `newsletters.update` e `newsletters.delete`
+
+Publicados em instâncias não oficiais quando a lista de canais do número muda.
+
+`newsletters.upsert`: o número criou ou começou a seguir um canal. `newsletter`
+tem os dados do canal no mesmo formato de
+`GET /{instanceId}/newsletters/{newsletterId}`.
+
+```json
+{
+  "type": "newsletters.upsert",
+  "newsletter": {
+    "id": "120363012345678901@newsletter",
+    "name": "Novidades da loja",
+    "description": "Ofertas e avisos",
+    "inviteCode": "0029VaAbCdEfGhIjKlMnOp",
+    "verification": "unverified",
+    "state": "active",
+    "subscribers": 128,
+    "createdAt": 1760776422,
+    "mute": true,
+    "role": "subscriber"
+  }
+}
+```
+
+`newsletters.update`: o número silenciou ou reativou um canal. `update.mute` é
+`true` quando o canal foi silenciado.
+
+```json
+{
+  "type": "newsletters.update",
+  "newsletterId": "120363012345678901@newsletter",
+  "update": {
+    "mute": false
+  }
+}
+```
+
+`newsletters.delete`: o número deixou de seguir um canal, ou o canal foi
+apagado.
+
+```json
+{
+  "type": "newsletters.delete",
+  "newsletterId": "120363012345678901@newsletter"
 }
 ```
 

@@ -1,0 +1,318 @@
+---
+title: Channels
+description: "Operations on WhatsApp channels"
+---
+
+## Description
+
+A WhatsApp channel publishes messages to its followers. Only the admins of the
+channel publish. The followers read and react.
+
+The channel routes are available only for instances connected by QR Code. An
+instance of a different type receives `422` with the code
+`UNSUPPORTED_FOR_INSTANCE_TYPE`.
+
+## Operations
+
+The API supports these operations on channels:
+
+- List the channels the number follows or administers.
+- Create a channel.
+- Get a channel by its id or by its invite link.
+- Follow and unfollow a channel.
+- Mute and unmute a channel.
+- Change the name, the description, and the photo of a channel.
+- Delete a channel.
+- List the followers of a channel.
+- Invite and remove admins, and transfer the channel.
+- Send messages, polls, and questions to a channel.
+- Pin a message and react to a message of a channel.
+- Get the insights of a channel.
+- Receive the messages of the channels the number follows.
+
+The routes are in the *Canais* section of the [API Reference](/api-reference).
+
+## Channel identification
+
+A channel has an id with the suffix `@newsletter`, for example
+`120363012345678901@newsletter`. The routes accept the id with or without the
+suffix.
+
+A channel also has an invite code, in `inviteCode`. The invite link is
+`https://whatsapp.com/channel/<inviteCode>`.
+
+## Channel data
+
+The routes return the channel with these fields:
+
+| Field | Meaning |
+|---|---|
+| `id` | Channel id, with the suffix `@newsletter`. |
+| `name` | Channel name. |
+| `description` | Channel description. |
+| `inviteCode` | Invite code. |
+| `preview` | Temporary URL of the photo thumbnail. |
+| `picture` | Temporary URL of the full-size photo. Only in the query by id. |
+| `verification` | `verified` or `unverified`. |
+| `state` | `active`, `suspended`, or `geosuspended`. |
+| `subscribers` | Number of followers. The list does not give this field. |
+| `createdAt` | Creation time, in Unix seconds. |
+| `mute` | `true` when the number muted the channel. |
+| `role` | Role of the number in the channel: `owner`, `admin`, `subscriber`, or `guest`. |
+
+The query by invite link does not give `mute`, `role`, or `picture`.
+
+## Create a channel
+
+`POST /{instanceId}/newsletters`
+
+Give the name in `name` and, if necessary, the description in `description`.
+The connected number is the owner of the channel. The response contains the
+channel data in `newsletter`.
+
+## Get a channel
+
+`GET /{instanceId}/newsletters/{newsletterId}` gets a channel that the number
+follows or administers.
+
+`GET /{instanceId}/newsletters/invite-info?invite=<link>` gets any channel by
+its invite link. Use this route to get the id of a channel that the number does
+not follow.
+
+## Follow and mute
+
+- `POST /{instanceId}/newsletters/{newsletterId}/follow` follows the channel.
+- `POST /{instanceId}/newsletters/{newsletterId}/unfollow` unfollows the
+  channel.
+- `PUT /{instanceId}/newsletters/{newsletterId}/mute` mutes the channel with
+  `"mute": true` and unmutes it with `"mute": false`.
+
+The three routes respond `204`, with no body.
+
+<Note>
+WhatsApp mutes the channel when the number starts to follow it. To receive the
+notifications on the phone, unmute the channel.
+</Note>
+
+## Change the name, the description, and the photo
+
+`PATCH /{instanceId}/newsletters/{newsletterId}` changes `name`, `description`,
+or the two. A field that you do not send does not change. An empty string in
+`description` removes the description.
+
+`PATCH /{instanceId}/newsletters/{newsletterId}/picture` changes the photo. Give
+in `picture` the URL or the Base64 of a square JPEG image, 640x640 pixels.
+
+`DELETE /{instanceId}/newsletters/{newsletterId}/picture` removes the photo.
+
+The three routes respond `204`, with no body. The number must be an admin of the
+channel.
+
+## Delete a channel
+
+<Warning>
+The deletion is permanent. The followers lose access to the channel, and you
+cannot undo the operation.
+</Warning>
+
+`DELETE /{instanceId}/newsletters/{newsletterId}` deletes the channel. Only the
+owner of the channel can delete it. The API responds `204`, with no body.
+
+## Followers
+
+`GET /{instanceId}/newsletters/{newsletterId}/followers` lists the followers of
+the channel. The number must be the owner or an admin of the channel. Use
+`limit` to set the maximum number of followers, from 1 to 1000. The default is
+100.
+
+Each follower has these fields:
+
+| Field | Meaning |
+|---|---|
+| `id` | LID of the follower, with the suffix `@lid`. |
+| `phone` | Number of the follower. WhatsApp gives the number only for accounts that the connected number knows. |
+| `name` | Profile name. |
+| `username` | Username on WhatsApp. |
+| `role` | `owner`, `admin`, or `subscriber`. |
+| `followedAt` | Time when the account started to follow, in Unix seconds. |
+
+## Admins
+
+The owner of the channel invites followers to be admins. In the routes below,
+`user` is the phone number with the country code, or the LID with the suffix
+`@lid`.
+
+| Operation | Route |
+|---|---|
+| Get | `GET /{instanceId}/newsletters/{newsletterId}/admins` |
+| Invite | `POST /{instanceId}/newsletters/{newsletterId}/admins/invites` |
+| Revoke an invite | `DELETE /{instanceId}/newsletters/{newsletterId}/admins/invites/{user}` |
+| Accept an invite | `POST /{instanceId}/newsletters/{newsletterId}/admins/accept` |
+| Remove an admin | `DELETE /{instanceId}/newsletters/{newsletterId}/admins/{user}` |
+| Transfer the channel | `PUT /{instanceId}/newsletters/{newsletterId}/owner` |
+
+The query returns the number of admins in `adminCount` and the invites that are
+not accepted in `pendingInvites`. To know who the admins are, list the followers
+and use the `role` field.
+
+### Invite an admin
+
+Give the user in `user` and, if necessary, a text in `message`. The API creates
+the invite and sends the invite message in the private chat of the user. The
+user accepts the invite on WhatsApp.
+
+The response contains the expiry time of the invite in `expiresAt` and the
+`messageSent` field.
+
+<Note>
+With `messageSent` set to `false`, the invite exists, but the user did not
+receive the message. Send the invite again or revoke the invite.
+</Note>
+
+### Accept an invite
+
+When the connected number receives an admin invite, it accepts the invite with
+`POST /{instanceId}/newsletters/{newsletterId}/admins/accept`.
+
+### Transfer the channel
+
+<Warning>
+The transfer is permanent for the connected number. It stops being the owner,
+and only the new owner can transfer the channel again.
+</Warning>
+
+Send `PUT /{instanceId}/newsletters/{newsletterId}/owner` with an admin of the
+channel in `user`. The API responds `204`, with no body.
+
+## Send messages to a channel
+
+Use the [message sending](/en/functions/sending-messages) routes with the
+channel id as the recipient. The number must be an admin of the channel.
+
+### Poll and quiz
+
+`POST /{instanceId}/newsletters/{newsletterId}/polls` publishes a poll.
+
+```json
+{
+  "name": "Which time do you prefer?",
+  "options": ["Morning", "Afternoon", "Night"],
+  "singleChoice": true
+}
+```
+
+- `options` accepts from 2 to 12 options, with no repetition.
+- With `singleChoice` set to `true`, each follower chooses only one option.
+- With `correctOption`, the poll is a quiz. `correctOption` is the position of
+  the correct option in `options`, starting at 0. A quiz is always single
+  choice.
+
+The response contains the `id` and the `serverId` of the message.
+
+### Question
+
+`POST /{instanceId}/newsletters/{newsletterId}/questions` publishes a question.
+Give the text in `text`. The followers answer the question on WhatsApp.
+
+The response contains the `id` and the `serverId` of the message.
+
+<Note>
+WhatsApp decides in which channels the quiz and the question are available.
+When WhatsApp rejects the publication, the API responds `422` with the code
+`PROVIDER_REJECTED`.
+</Note>
+
+### Pin a message
+
+- `PUT /{instanceId}/newsletters/{newsletterId}/messages/{serverId}/pin` pins
+  the message at the top of the channel.
+- `DELETE /{instanceId}/newsletters/{newsletterId}/messages/{serverId}/pin`
+  unpins the message.
+
+`serverId` is the server id of the message. The two routes return in
+`pinnedMessages` the messages that stay pinned after the operation.
+
+## Receive messages from a channel
+
+The instance delivers the channel messages only with the
+`receiveNewsletterMessages` option on. The option is off by default.
+
+1. Send `POST /{instanceId}/settings` with
+   `"receiveNewsletterMessages": true` in the `messages` block.
+2. Subscribe to the `messages.upsert` event in the webhook.
+
+Each channel message arrives in the `messages.upsert` event. The channel id is
+in `key.remoteJid`, and the server id of the message is in `serverId`. Refer to
+the [payload example](/en/integrations/webhooks#message-received-from-a-channel).
+
+The channel message goes only to the webhook. It does not go to the
+[message log](/en/panel/message-log), to Chatwoot, or to the AI agent.
+
+## React to a channel message
+
+Send `POST /{instanceId}/messages/react` with the channel id in `remoteJid` and
+the `serverId` of the message:
+
+```json
+{
+  "remoteJid": "120363012345678901@newsletter",
+  "id": "3EB0C767D26A1B9F7C31",
+  "serverId": 142,
+  "text": "👍"
+}
+```
+
+An empty string in `text` removes the reaction. Without `serverId`, the API
+responds `400`.
+
+## Events
+
+The webhook receives these channel events, when you subscribe to them:
+
+| Event | When |
+|---|---|
+| `newsletters.upsert` | The number created or started to follow a channel. |
+| `newsletters.update` | The number muted or unmuted a channel. |
+| `newsletters.delete` | The number unfollowed a channel, or the channel was deleted. |
+
+Refer to the [payload examples](/en/integrations/webhooks#channel-events).
+
+## Insights
+
+`GET /{instanceId}/newsletters/{newsletterId}/insights` returns the audience
+metrics of the channel in the last 30 days. The number must be the owner or an
+admin of the channel.
+
+| Field | Meaning |
+|---|---|
+| `followers` | Number of followers. |
+| `netFollows` | Balance of followers in the period. |
+| `uniqueVisitors` | Accounts that viewed the channel in the period. |
+| `newUniqueVisitors` | Accounts that viewed the channel for the first time in the period. |
+| `uniqueVisitorsByCountry` | Accounts that viewed the channel, by country. |
+| `uniqueVisitorsByRole` | Accounts that viewed the channel, by role in the channel. |
+| `followersByCountry` | Followers by country. |
+| `followsPerDay` | New followers per day. |
+| `unfollowsPerDay` | Accounts that unfollowed, per day. |
+| `updatedAt` | Time of the last update of the metrics, in Unix seconds. |
+| `status` | State of the metrics, as WhatsApp gives it. |
+
+A metric that WhatsApp does not give is absent from the response. The lists
+come empty.
+
+<Note>
+WhatsApp gives the insights only for channels with a minimum number of
+followers. For a channel without the minimum, the API responds `422` with the
+code `PROVIDER_REJECTED`.
+</Note>
+
+## Rejection by WhatsApp
+
+When WhatsApp rejects the operation, the API responds `422` with the code
+`PROVIDER_REJECTED`. The reason is in `detail`. Examples of rejection:
+
+- The channel does not exist or was deleted.
+- The number gets by id a channel that it does not follow.
+- The number changes or deletes a channel that it does not administer.
+- The photo is not a square JPEG.
+- The number invites or removes an admin of a channel that it does not own.

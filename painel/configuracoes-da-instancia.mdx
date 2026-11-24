@@ -66,6 +66,16 @@ Marca automaticamente as mensagens recebidas como lidas.
 - **Ligada**: quem escreveu vê o visto duplo azul assim que a instância recebe a mensagem.
 - **Desligada**: a mensagem fica como não lida para quem enviou, mesmo depois de o seu sistema processá-la.
 
+### Receber mensagens de canais
+
+Entrega no webhook as mensagens dos canais que a conta segue. Vale só para
+conexão por QR Code.
+
+- **Ligada**: cada mensagem de canal chega no evento `messages.upsert`.
+- **Desligada**: a instância descarta as mensagens de canal.
+
+A opção vem desligada. Veja [Canais](/functions/channels#receber-mensagens-de-um-canal).
+
 ## Aba Integração
 
 Estas opções valem para o comportamento com agentes de IA. Veja

@@ -23,6 +23,9 @@ application receives the data at the moment of the event.
 | `group-participants.update` | Participants joined, left, were promoted, or were demoted in a group. Unofficial connection only |
 | `groups.update` | The name, description, picture, settings, or invite link of a group changed. Unofficial connection only |
 | `groups.upsert` | The number started to participate in a group: it created the group, was added, or joined with an invite. Unofficial connection only |
+| `newsletters.upsert` | The number created or started to follow a channel. Only on unofficial connection |
+| `newsletters.update` | The number muted or unmuted a channel. Only on unofficial connection |
+| `newsletters.delete` | The number unfollowed a channel, or the channel was deleted. Only on unofficial connection |
 | `chats.update` | A chat was pinned, archived, muted, marked as read or unread, cleared, or deleted on another device of the account. Unofficial connection only. Opt-in subscription |
 | `contacts.update` | A contact was edited in the phone address book, or changed the profile name or the business name. Unofficial connection only. Opt-in subscription |
 | `labels.update` | A label was created, edited, or deleted, or was added to or removed from a chat or message. Unofficial connection only, with WhatsApp Business. Opt-in subscription |
@@ -536,6 +539,37 @@ composite (`ig-reaction:<mid>:<sender>:<timestamp>`). The removal comes with
   reacted, from the device, to a message from the contact.
 - A second reaction to the same message is a new event, with another `key.id`.
 - To react, use [`POST /{instanceId}/messages/react`](/en/functions/sending-messages#react-to-a-message).
+
+### Message received from a channel
+
+Type: `messages.upsert`
+
+Published on unofficial instances with the `receiveNewsletterMessages` option
+on, when a channel that the number follows publishes a message. `key.remoteJid`
+is the channel id. `serverId` is the server id of the message. Use `serverId` to
+react to the message. Refer to
+[Channels](/en/functions/channels#receive-messages-from-a-channel).
+
+```json
+{
+  "type": "messages.upsert",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "120363012345678901@newsletter",
+  "key": {
+    "remoteJid": "120363012345678901@newsletter",
+    "fromMe": false,
+    "id": "3EB0C767D26A1B9F7C31"
+  },
+  "serverId": 142,
+  "messageTimestamp": 1795471562,
+  "pushName": "",
+  "broadcast": false,
+  "message": {
+    "conversation": "Novidade no canal"
+  },
+  "trackSource": "whatsapp"
+}
+```
 
 ### Sent PIX charge
 
@@ -1225,6 +1259,58 @@ person who added the number, when WhatsApp gives them.
       { "id": "123456789012345@lid", "isAdmin": true, "isSuperAdmin": true, "admin": "superadmin" }
     ]
   }
+}
+```
+
+### Channel events
+
+Types: `newsletters.upsert`, `newsletters.update`, and `newsletters.delete`
+
+Published on unofficial instances when the list of channels of the number
+changes.
+
+`newsletters.upsert`: the number created or started to follow a channel.
+`newsletter` contains the channel data in the same format as
+`GET /{instanceId}/newsletters/{newsletterId}`.
+
+```json
+{
+  "type": "newsletters.upsert",
+  "newsletter": {
+    "id": "120363012345678901@newsletter",
+    "name": "Novidades da loja",
+    "description": "Ofertas e avisos",
+    "inviteCode": "0029VaAbCdEfGhIjKlMnOp",
+    "verification": "unverified",
+    "state": "active",
+    "subscribers": 128,
+    "createdAt": 1760776422,
+    "mute": true,
+    "role": "subscriber"
+  }
+}
+```
+
+`newsletters.update`: the number muted or unmuted a channel. `update.mute` is
+`true` when the channel was muted.
+
+```json
+{
+  "type": "newsletters.update",
+  "newsletterId": "120363012345678901@newsletter",
+  "update": {
+    "mute": false
+  }
+}
+```
+
+`newsletters.delete`: the number unfollowed a channel, or the channel was
+deleted.
+
+```json
+{
+  "type": "newsletters.delete",
+  "newsletterId": "120363012345678901@newsletter"
 }
 ```
 

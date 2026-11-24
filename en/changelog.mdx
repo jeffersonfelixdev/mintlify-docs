@@ -3,6 +3,38 @@ title: Changelog
 description: "Changes to the ZapperHub API and notices of behavior changes"
 ---
 
+<Update label="November 2026" description="WhatsApp channels on unofficial connection" tags={["API", "Webhooks", "n8n"]}>
+
+## WhatsApp channels
+
+On unofficial connection, the API has the [Channels](/en/functions/channels)
+routes: create, get by id or by invite link, follow, unfollow, mute, change the
+name, the description, and the photo, and delete.
+
+The owner and the admins of the channel also have routes to list the followers,
+invite and remove admins, transfer the channel, pin messages, get the insights,
+and publish a poll, a quiz, and a question.
+
+- `GET /{instanceId}/newsletters` also returns `preview`, `mute`, `role`,
+  `state`, and `createdAt`.
+- `POST /{instanceId}/messages/react` accepts `serverId`, to react to a channel
+  message.
+- The **ZapperHub** node for n8n has the same operations in the **Channel**
+  resource.
+
+## Channel messages and events in the webhook
+
+The `receiveNewsletterMessages` option, in the
+[instance settings](/en/panel/instance-settings), delivers the messages of the
+channels the number follows in the `messages.upsert` event. The option is off by
+default.
+
+The `newsletters.upsert`, `newsletters.update`, and `newsletters.delete` events
+tell when the number creates, follows, mutes, or unfollows a channel. Refer to
+[Channel events](/en/integrations/webhooks#channel-events).
+
+</Update>
+
 <Update label="November 2026" description="End of the api.zapperapi.com domain and ZapperHub node for n8n" tags={["API", "n8n"]}>
 
 ## Attention: the api.zapperapi.com domain responds until June 30, 2027

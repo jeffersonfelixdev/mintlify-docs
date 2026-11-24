@@ -3,6 +3,37 @@ title: Novidades
 description: "Mudanças na API da ZapperHub e avisos de mudança de comportamento"
 ---
 
+<Update label="Novembro de 2026" description="Canais do WhatsApp na conexão não oficial" tags={["API", "Webhooks", "n8n"]}>
+
+## Canais do WhatsApp
+
+Em conexão não oficial, a API tem as rotas de [Canais](/functions/channels):
+criar, consultar pelo id ou pelo link de convite, seguir, deixar de seguir,
+silenciar, alterar nome, descrição e foto, e apagar.
+
+O dono e os administradores do canal também têm rotas para listar os
+seguidores, convidar e remover administradores, transferir o canal, fixar
+mensagens, consultar os insights e publicar enquete, quiz e pergunta.
+
+- `GET /{instanceId}/newsletters` devolve também `preview`, `mute`, `role`,
+  `state` e `createdAt`.
+- `POST /{instanceId}/messages/react` aceita `serverId`, para reagir a uma
+  mensagem de canal.
+- O nó **ZapperHub** do n8n tem as mesmas operações no recurso **Channel**.
+
+## Mensagens e eventos de canal no webhook
+
+A opção `receiveNewsletterMessages`, nas
+[configurações da instância](/painel/configuracoes-da-instancia), entrega as
+mensagens dos canais que o número segue no evento `messages.upsert`. A opção vem
+desligada.
+
+Os eventos `newsletters.upsert`, `newsletters.update` e `newsletters.delete`
+informam quando o número cria, segue, silencia ou deixa de seguir um canal. Veja
+[Eventos de canal](/integrations/webhooks#eventos-de-canal).
+
+</Update>
+
 <Update label="Novembro de 2026" description="Fim do domínio api.zapperapi.com e nó da ZapperHub para o n8n" tags={["API", "n8n"]}>
 
 ## Atenção: o domínio api.zapperapi.com atende até 30 de junho de 2027

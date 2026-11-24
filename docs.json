@@ -70,6 +70,7 @@
                   "functions/chats",
                   "functions/groups",
                   "functions/communities",
+                  "functions/channels",
                   "functions/calls",
                   "functions/softphone"
                 ]
@@ -197,6 +198,7 @@
                   "en/functions/chats",
                   "en/functions/groups",
                   "en/functions/communities",
+                  "en/functions/channels",
                   "en/functions/calls",
                   "en/functions/softphone"
                 ]

@@ -69,6 +69,17 @@ Marks received messages as read automatically.
 - **On**: the sender sees the blue double check mark as soon as the instance receives the message.
 - **Off**: the message stays unread for the sender, even after your system processes it.
 
+### Receive channel messages
+
+Delivers the messages of the channels the account follows to the webhook. It
+applies only to QR Code connection.
+
+- **On**: each channel message arrives in the `messages.upsert` event.
+- **Off**: the instance discards the channel messages.
+
+The option is off by default. Refer to
+[Channels](/en/functions/channels#receive-messages-from-a-channel).
+
 ## Integration tab
 
 These options apply to the behavior with AI agents. See

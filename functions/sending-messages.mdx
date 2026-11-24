@@ -867,6 +867,10 @@ A reação vale para instâncias não oficiais, para a Cloud API e para o Instag
 Na Cloud API, `remoteJid` também aceita o BSUID do contato. No Instagram,
 `remoteJid` é o id do contato, e `id` é o `mid` da mensagem.
 
+Para reagir a uma mensagem de canal, em instância não oficial, informe também o
+`serverId` da mensagem. Veja
+[Reagir a uma mensagem de canal](/functions/channels#reagir-a-uma-mensagem-de-canal).
+
 No Instagram, a reação do contato chega no webhook `messages.upsert` como
 `reactionMessage`. A retirada vem com `removed: true`. O `key.id` desse evento é
 composto (`ig-reaction:<mid>:<remetente>:<timestamp>`), porque o Instagram não dá

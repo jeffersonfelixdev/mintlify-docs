@@ -1,0 +1,311 @@
+---
+title: Canais
+description: "Operações sobre canais do WhatsApp"
+---
+
+## Descrição
+
+Um canal do WhatsApp publica mensagens para os seguidores. Só os
+administradores do canal publicam. Os seguidores leem e reagem.
+
+As rotas de canal estão disponíveis só para instâncias conectadas por QR Code.
+Uma instância de outro tipo recebe `422` com o código
+`UNSUPPORTED_FOR_INSTANCE_TYPE`.
+
+## Operações
+
+A API permite estas operações em canais:
+
+- Listar os canais que o número segue ou administra.
+- Criar um canal.
+- Consultar um canal pelo id ou pelo link de convite.
+- Seguir e deixar de seguir um canal.
+- Silenciar e reativar um canal.
+- Alterar o nome, a descrição e a foto de um canal.
+- Apagar um canal.
+- Listar os seguidores de um canal.
+- Convidar e remover administradores, e transferir o canal.
+- Enviar mensagens, enquetes e perguntas para um canal.
+- Fixar uma mensagem e reagir a uma mensagem de um canal.
+- Consultar os insights de um canal.
+- Receber as mensagens dos canais que o número segue.
+
+As rotas estão na seção *Canais* da [API Reference](/api-reference).
+
+## Identificação do canal
+
+O canal tem um id com o sufixo `@newsletter`, por exemplo
+`120363012345678901@newsletter`. As rotas aceitam o id com ou sem o sufixo.
+
+O canal também tem um código de convite, em `inviteCode`. O link de convite é
+`https://whatsapp.com/channel/<inviteCode>`.
+
+## Dados do canal
+
+As rotas devolvem o canal com estes campos:
+
+| Campo | Significado |
+|---|---|
+| `id` | Id do canal, com o sufixo `@newsletter`. |
+| `name` | Nome do canal. |
+| `description` | Descrição do canal. |
+| `inviteCode` | Código do convite. |
+| `preview` | URL temporária da miniatura da foto. |
+| `picture` | URL temporária da foto em tamanho completo. Só na consulta pelo id. |
+| `verification` | `verified` ou `unverified`. |
+| `state` | `active`, `suspended` ou `geosuspended`. |
+| `subscribers` | Número de seguidores. A listagem não informa este campo. |
+| `createdAt` | Momento da criação, em segundos Unix. |
+| `mute` | `true` quando o número silenciou o canal. |
+| `role` | Papel do número no canal: `owner`, `admin`, `subscriber` ou `guest`. |
+
+A consulta pelo link de convite não informa `mute`, `role` nem `picture`.
+
+## Criar um canal
+
+`POST /{instanceId}/newsletters`
+
+Informe o nome em `name` e, se quiser, a descrição em `description`. O número
+conectado é o dono do canal. A resposta tem os dados do canal em `newsletter`.
+
+## Consultar um canal
+
+`GET /{instanceId}/newsletters/{newsletterId}` consulta um canal que o número
+segue ou administra.
+
+`GET /{instanceId}/newsletters/invite-info?invite=<link>` consulta qualquer
+canal pelo link de convite. Use esta rota para obter o id de um canal que o
+número não segue.
+
+## Seguir e silenciar
+
+- `POST /{instanceId}/newsletters/{newsletterId}/follow` segue o canal.
+- `POST /{instanceId}/newsletters/{newsletterId}/unfollow` deixa de seguir o
+  canal.
+- `PUT /{instanceId}/newsletters/{newsletterId}/mute` silencia o canal com
+  `"mute": true` e reativa com `"mute": false`.
+
+As três rotas respondem `204`, sem corpo.
+
+<Note>
+O WhatsApp silencia o canal quando o número começa a seguir. Para receber as
+notificações no celular, reative o canal.
+</Note>
+
+## Alterar nome, descrição e foto
+
+`PATCH /{instanceId}/newsletters/{newsletterId}` altera `name`, `description`
+ou os dois. O campo que você não envia não muda. Uma string vazia em
+`description` remove a descrição.
+
+`PATCH /{instanceId}/newsletters/{newsletterId}/picture` altera a foto. Informe
+em `picture` a URL ou o Base64 de uma imagem JPEG quadrada, de 640x640 pixels.
+
+`DELETE /{instanceId}/newsletters/{newsletterId}/picture` remove a foto.
+
+As três rotas respondem `204`, sem corpo. O número precisa ser administrador do
+canal.
+
+## Apagar um canal
+
+<Warning>
+A exclusão é permanente. Os seguidores perdem o acesso ao canal, e você não
+pode desfazer a operação.
+</Warning>
+
+`DELETE /{instanceId}/newsletters/{newsletterId}` apaga o canal. Só o dono do
+canal pode apagar. A API responde `204`, sem corpo.
+
+## Seguidores
+
+`GET /{instanceId}/newsletters/{newsletterId}/followers` lista os seguidores do
+canal. O número precisa ser dono ou administrador do canal. Use `limit` para
+definir o número máximo de seguidores, de 1 a 1000. O padrão é 100.
+
+Cada seguidor tem estes campos:
+
+| Campo | Significado |
+|---|---|
+| `id` | LID do seguidor, com o sufixo `@lid`. |
+| `phone` | Número do seguidor. O WhatsApp só informa o número de contas que o número conectado conhece. |
+| `name` | Nome de perfil. |
+| `username` | Username no WhatsApp. |
+| `role` | `owner`, `admin` ou `subscriber`. |
+| `followedAt` | Momento em que a conta começou a seguir, em segundos Unix. |
+
+## Administradores
+
+O dono do canal convida seguidores para serem administradores. Nas rotas abaixo,
+`user` é o número de telefone com código do país, ou o LID com o sufixo `@lid`.
+
+| Operação | Rota |
+|---|---|
+| Consultar | `GET /{instanceId}/newsletters/{newsletterId}/admins` |
+| Convidar | `POST /{instanceId}/newsletters/{newsletterId}/admins/invites` |
+| Revogar um convite | `DELETE /{instanceId}/newsletters/{newsletterId}/admins/invites/{user}` |
+| Aceitar um convite | `POST /{instanceId}/newsletters/{newsletterId}/admins/accept` |
+| Remover um administrador | `DELETE /{instanceId}/newsletters/{newsletterId}/admins/{user}` |
+| Transferir o canal | `PUT /{instanceId}/newsletters/{newsletterId}/owner` |
+
+A consulta devolve o número de administradores em `adminCount` e os convites
+não aceitos em `pendingInvites`. Para saber quem são os administradores, liste
+os seguidores e use o campo `role`.
+
+### Convidar um administrador
+
+Informe o usuário em `user` e, se quiser, um texto em `message`. A API cria o
+convite e envia a mensagem de convite na conversa particular do usuário. O
+usuário aceita o convite no WhatsApp.
+
+A resposta tem o prazo do convite em `expiresAt` e o campo `messageSent`.
+
+<Note>
+Com `messageSent` igual a `false`, o convite existe, mas o usuário não recebeu
+a mensagem. Envie o convite de novo ou revogue o convite.
+</Note>
+
+### Aceitar um convite
+
+Quando o número conectado recebe um convite de administrador, ele aceita o
+convite com `POST /{instanceId}/newsletters/{newsletterId}/admins/accept`.
+
+### Transferir o canal
+
+<Warning>
+A transferência é permanente para o número conectado. Ele deixa de ser o dono, e
+só o novo dono pode transferir o canal de novo.
+</Warning>
+
+Envie `PUT /{instanceId}/newsletters/{newsletterId}/owner` com um administrador
+do canal em `user`. A API responde `204`, sem corpo.
+
+## Enviar mensagens para um canal
+
+Use as rotas de [envio de mensagens](/functions/sending-messages) com o id do
+canal no destinatário. O número precisa ser administrador do canal.
+
+### Enquete e quiz
+
+`POST /{instanceId}/newsletters/{newsletterId}/polls` publica uma enquete.
+
+```json
+{
+  "name": "Qual horário você prefere?",
+  "options": ["Manhã", "Tarde", "Noite"],
+  "singleChoice": true
+}
+```
+
+- `options` aceita de 2 a 12 opções, sem repetição.
+- Com `singleChoice` igual a `true`, cada seguidor escolhe uma opção só.
+- Com `correctOption`, a enquete é um quiz. `correctOption` é a posição da
+  opção correta em `options`, a partir de 0. O quiz é sempre de escolha única.
+
+A resposta tem o `id` e o `serverId` da mensagem.
+
+### Pergunta
+
+`POST /{instanceId}/newsletters/{newsletterId}/questions` publica uma pergunta.
+Informe o texto em `text`. Os seguidores respondem à pergunta no WhatsApp.
+
+A resposta tem o `id` e o `serverId` da mensagem.
+
+<Note>
+O WhatsApp decide em quais canais o quiz e a pergunta estão disponíveis. Quando
+o WhatsApp recusa a publicação, a API responde `422` com o código
+`PROVIDER_REJECTED`.
+</Note>
+
+### Fixar uma mensagem
+
+- `PUT /{instanceId}/newsletters/{newsletterId}/messages/{serverId}/pin` fixa a
+  mensagem no topo do canal.
+- `DELETE /{instanceId}/newsletters/{newsletterId}/messages/{serverId}/pin`
+  desafixa a mensagem.
+
+`serverId` é o id de servidor da mensagem. As duas rotas devolvem em
+`pinnedMessages` as mensagens que ficam fixadas depois da operação.
+
+## Receber mensagens de um canal
+
+A instância entrega as mensagens dos canais só com a opção
+`receiveNewsletterMessages` ligada. A opção vem desligada.
+
+1. Envie `POST /{instanceId}/settings` com
+   `"receiveNewsletterMessages": true` no bloco `messages`.
+2. Assine o evento `messages.upsert` no webhook.
+
+Cada mensagem de canal chega no evento `messages.upsert`. O id do canal está em
+`key.remoteJid`, e o id de servidor da mensagem está em `serverId`. Veja o
+[exemplo de payload](/integrations/webhooks#mensagem-recebida-de-um-canal).
+
+A mensagem de canal vai só para o webhook. Ela não entra no
+[log de mensagens](/painel/log-de-mensagens), no Chatwoot nem no agente de IA.
+
+## Reagir a uma mensagem de canal
+
+Envie `POST /{instanceId}/messages/react` com o id do canal em `remoteJid` e o
+`serverId` da mensagem:
+
+```json
+{
+  "remoteJid": "120363012345678901@newsletter",
+  "id": "3EB0C767D26A1B9F7C31",
+  "serverId": 142,
+  "text": "👍"
+}
+```
+
+Uma string vazia em `text` remove a reação. Sem `serverId`, a API responde
+`400`.
+
+## Eventos
+
+O webhook recebe estes eventos de canal, quando você os assina:
+
+| Evento | Quando |
+|---|---|
+| `newsletters.upsert` | O número criou ou começou a seguir um canal. |
+| `newsletters.update` | O número silenciou ou reativou um canal. |
+| `newsletters.delete` | O número deixou de seguir um canal, ou o canal foi apagado. |
+
+Veja os [exemplos de payload](/integrations/webhooks#eventos-de-canal).
+
+## Insights
+
+`GET /{instanceId}/newsletters/{newsletterId}/insights` devolve as métricas de
+audiência do canal nos últimos 30 dias. O número precisa ser dono ou
+administrador do canal.
+
+| Campo | Significado |
+|---|---|
+| `followers` | Número de seguidores. |
+| `netFollows` | Saldo de seguidores no período. |
+| `uniqueVisitors` | Contas que viram o canal no período. |
+| `newUniqueVisitors` | Contas que viram o canal pela primeira vez no período. |
+| `uniqueVisitorsByCountry` | Contas que viram o canal, por país. |
+| `uniqueVisitorsByRole` | Contas que viram o canal, por papel no canal. |
+| `followersByCountry` | Seguidores por país. |
+| `followsPerDay` | Novos seguidores por dia. |
+| `unfollowsPerDay` | Contas que deixaram de seguir, por dia. |
+| `updatedAt` | Momento da última atualização das métricas, em segundos Unix. |
+| `status` | Estado das métricas, como o WhatsApp informa. |
+
+Uma métrica que o WhatsApp não informa fica ausente da resposta. As listas vêm
+vazias.
+
+<Note>
+O WhatsApp só libera os insights para canais com um número mínimo de seguidores.
+Em um canal sem o mínimo, a API responde `422` com o código `PROVIDER_REJECTED`.
+</Note>
+
+## Recusa do WhatsApp
+
+Quando o WhatsApp recusa a operação, a API responde `422` com o código
+`PROVIDER_REJECTED`. O motivo está em `detail`. Exemplos de recusa:
+
+- O canal não existe ou foi apagado.
+- O número consulta pelo id um canal que não segue.
+- O número altera ou apaga um canal que não administra.
+- A foto não é um JPEG quadrado.
+- O número convida ou remove um administrador de um canal do qual não é dono.
