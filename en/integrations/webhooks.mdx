@@ -547,7 +547,8 @@ Type: `messages.upsert`
 Published on unofficial instances with the `receiveNewsletterMessages` option
 on, when a channel that the number follows publishes a message. `key.remoteJid`
 is the channel id. `serverId` is the server id of the message. Use `serverId` to
-react to the message. Refer to
+react to the message. `key.fromMe` is `true` when the number itself published
+the message on a different device. Refer to
 [Channels](/en/functions/channels#receive-messages-from-a-channel).
 
 ```json

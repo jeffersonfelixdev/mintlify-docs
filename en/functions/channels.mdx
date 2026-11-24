@@ -242,7 +242,9 @@ The instance delivers the channel messages only with the
 2. Subscribe to the `messages.upsert` event in the webhook.
 
 Each channel message arrives in the `messages.upsert` event. The channel id is
-in `key.remoteJid`, and the server id of the message is in `serverId`. Refer to
+in `key.remoteJid`, and the server id of the message is in `serverId`. A message
+that the number itself published on a different device, such as the phone,
+arrives with `key.fromMe` set to `true`. Refer to
 the [payload example](/en/integrations/webhooks#message-received-from-a-channel).
 
 The channel message goes only to the webhook. It does not go to the

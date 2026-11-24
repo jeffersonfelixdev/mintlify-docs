@@ -236,7 +236,9 @@ A instância entrega as mensagens dos canais só com a opção
 2. Assine o evento `messages.upsert` no webhook.
 
 Cada mensagem de canal chega no evento `messages.upsert`. O id do canal está em
-`key.remoteJid`, e o id de servidor da mensagem está em `serverId`. Veja o
+`key.remoteJid`, e o id de servidor da mensagem está em `serverId`. Uma mensagem
+que o próprio número publicou em outro aparelho, como o celular, chega com
+`key.fromMe` igual a `true`. Veja o
 [exemplo de payload](/integrations/webhooks#mensagem-recebida-de-um-canal).
 
 A mensagem de canal vai só para o webhook. Ela não entra no

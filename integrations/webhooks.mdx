@@ -546,7 +546,8 @@ Tipo: `messages.upsert`
 Publicado em instâncias não oficiais com a opção `receiveNewsletterMessages`
 ligada, quando um canal que o número segue publica uma mensagem. `key.remoteJid`
 é o id do canal. `serverId` é o id de servidor da mensagem. Use `serverId` para
-reagir à mensagem. Veja [Canais](/functions/channels#receber-mensagens-de-um-canal).
+reagir à mensagem. `key.fromMe` é `true` quando o próprio número publicou a
+mensagem em outro aparelho. Veja [Canais](/functions/channels#receber-mensagens-de-um-canal).
 
 ```json
 {
