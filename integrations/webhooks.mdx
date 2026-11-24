@@ -16,13 +16,16 @@ evento acontece na instância. O webhook substitui a consulta periódica
 | `messages.upsert` | A instância recebeu ou enviou uma mensagem |
 | `contacts.preference` | O contato pediu para parar, ou voltou a aceitar, mensagens de marketing. Ou o integrador marcou isso pela API. Só em conexão oficial. Assinatura opt-in |
 | `contacts.identity` | O vínculo entre telefone, BSUID e username de um contato mudou. Só em conexão oficial. Assinatura opt-in |
-| `messages.update` | O contato editou ou apagou uma mensagem recebida. Só em conexão oficial, em número em coexistência com o WhatsApp Business. Assinatura opt-in |
+| `messages.update` | Em conexão oficial, em número em coexistência com o WhatsApp Business: o contato editou ou apagou uma mensagem recebida. Em conexão não oficial: uma mensagem foi favoritada, desfavoritada ou apagada só para a conta. Assinatura opt-in |
 | `messages.status` | O estado de uma mensagem enviada mudou. Em conexão oficial: enviada, entregue, lida ou falhou. Em conexão não oficial: entregue, lida ou falhou |
 | `messages.error` | O envio de uma mensagem falhou em definitivo |
 | `connection.update` | A conexão da instância abriu ou fechou |
 | `group-participants.update` | Participantes entraram, saíram, foram promovidos ou rebaixados em um grupo. Só em conexão não oficial |
 | `groups.update` | Nome, descrição, foto, configurações ou link de convite de um grupo mudaram. Só em conexão não oficial |
 | `groups.upsert` | O número passou a participar de um grupo: criou, foi adicionado ou entrou por convite. Só em conexão não oficial |
+| `chats.update` | Uma conversa foi fixada, arquivada, silenciada, marcada como lida ou não lida, limpa ou apagada em outro aparelho da conta. Só em conexão não oficial. Assinatura opt-in |
+| `contacts.update` | Um contato foi editado na agenda do celular, ou mudou o nome de perfil ou o nome comercial. Só em conexão não oficial. Assinatura opt-in |
+| `labels.update` | Uma etiqueta foi criada, editada ou apagada, ou foi posta ou tirada de uma conversa ou mensagem. Só em conexão não oficial, com WhatsApp Business. Assinatura opt-in |
 | `calls.update` | Uma chamada de voz ou vídeo foi recebida, atendida ou encerrada. Em conexão oficial e não oficial |
 | `templates.sync` | Uma sincronização de templates terminou. Só em conexão oficial. Assinatura opt-in |
 | `storage.failed` | Uma gravação no storage próprio falhou. Assinatura opt-in |
@@ -893,7 +896,8 @@ Na remoção, `update` vem só com o tipo:
 { "update": { "kind": "deleted" } }
 ```
 
-- `update.kind` é `edited` ou `deleted`.
+- `update.kind` é `edited` ou `deleted`. Em conexão não oficial, também
+  `starred`, `unstarred` ou `deleted_for_me` (veja abaixo).
 - Na edição, `update.message` traz o texto novo (`extendedTextMessage`) ou a
   legenda nova (`imageMessage`, `videoMessage` ou `documentMessage`, com
   `caption`). A mídia não é reenviada. Se a Meta não informa o conteúdo novo,
@@ -911,6 +915,36 @@ próprio de edição. Por isso, a edição chega como `messages.upsert` com
 [`unsupportedMessage`](#outros-tipos-de-mensagem-recebidos) de `type` `edit`,
 sem o texto novo, e não como `messages.update`. A remoção gera `messages.update`.
 </Note>
+
+#### Em conexão não oficial (`device`)
+
+O evento é publicado quando uma mensagem é favoritada, desfavoritada ou apagada
+só para a conta em outro aparelho, como o celular ou o WhatsApp Web. `update`
+traz só o tipo. Em grupo, `key.participant` traz o autor da mensagem.
+
+```json
+{
+  "type": "messages.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "120363012345678901@g.us",
+  "key": {
+    "remoteJid": "120363012345678901@g.us",
+    "fromMe": false,
+    "id": "3EB0C7A1B2D3E4F5A6B7",
+    "participant": "123456789012345@lid"
+  },
+  "update": { "kind": "starred" },
+  "timestamp": 1763920800
+}
+```
+
+| `update.kind` | Significado |
+|---|---|
+| `starred` | A mensagem foi favoritada. |
+| `unstarred` | A mensagem deixou de ser favorita. |
+| `deleted_for_me` | A mensagem foi apagada só para a conta. Ela continua com o contato. |
+
+A sincronização feita ao conectar o número não gera estes eventos.
 
 ### Escolha de opção em mensagem de lista
 
@@ -1185,6 +1219,120 @@ adicionou o número, quando o WhatsApp informa.
   }
 }
 ```
+
+### Mudança em uma conversa
+
+Tipo: `chats.update`
+
+Publicado em instâncias não oficiais quando uma conversa muda em outro aparelho
+da conta, como o celular ou o WhatsApp Web. `chatId` é o contato ou o grupo.
+`update` traz só o que mudou:
+
+| Campo de `update` | Significado |
+|---|---|
+| `archived` | `true`: a conversa foi arquivada. `false`: a conversa foi desarquivada. |
+| `pinned` | `true`: a conversa foi fixada. `false`: a conversa deixou de ser fixada. |
+| `muted` | `true`: a conversa foi silenciada. `false`: a conversa voltou a notificar. |
+| `mutedUntil` | Vem com `muted: true`. Fim do silêncio, em segundos Unix. `null` quando o silêncio é para sempre. |
+| `unread` | `true`: a conversa foi marcada como não lida. `false`: a conversa foi marcada como lida. |
+| `cleared` | `true`: as mensagens foram apagadas e a conversa ficou na lista. |
+| `deleted` | `true`: a conversa foi apagada da lista. |
+| `deleteMedia` | Vem com `cleared` ou `deleted`. `true`: a mídia do aparelho também foi apagada. |
+
+```json
+{
+  "type": "chats.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "timestamp": 1763920800,
+  "update": { "muted": true, "mutedUntil": 1763949600 }
+}
+```
+
+- `timestamp` é o momento da mudança, em segundos Unix. Se o WhatsApp não
+  informa o momento, o campo é omitido.
+- A sincronização feita ao conectar o número não gera este evento. O evento
+  descreve só as mudanças feitas depois.
+- A assinatura é opt-in. Inclua `chats.update` em `subscriptions`.
+
+### Contato editado
+
+Tipo: `contacts.update`
+
+Publicado em instâncias não oficiais nestes casos:
+
+- Um contato foi salvo, editado ou apagado na agenda do celular.
+- Um contato mandou uma mensagem com um nome de perfil diferente do anterior.
+- Uma empresa mudou o nome comercial verificado.
+
+`contactId` é o id do contato no evento: telefone (`@s.whatsapp.net`) ou LID
+(`@lid`). `contactPn` e `contactLid` trazem o telefone e o LID quando o WhatsApp
+informa. `update` traz só os campos que mudaram:
+
+| Campo de `update` | Significado |
+|---|---|
+| `name` | Nome completo na agenda do celular. Vazio quando o contato foi apagado da agenda. |
+| `firstName` | Primeiro nome na agenda do celular. |
+| `username` | Username do contato. |
+| `pushName` | Nome de perfil que o contato escolheu no WhatsApp. |
+| `businessName` | Nome comercial verificado. |
+
+```json
+{
+  "type": "contacts.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "contactId": "5512912345678@s.whatsapp.net",
+  "contactPn": "5512912345678@s.whatsapp.net",
+  "contactLid": "123456789012345@lid",
+  "timestamp": 1763920800,
+  "update": { "name": "Ana Souza", "firstName": "Ana" }
+}
+```
+
+- A sincronização da agenda feita ao conectar o número não gera este evento.
+- A assinatura é opt-in. Inclua `contacts.update` em `subscriptions`.
+
+### Etiqueta
+
+Tipo: `labels.update`
+
+Publicado em instâncias não oficiais conectadas a uma conta do WhatsApp
+Business. `kind` diz o que mudou:
+
+| `kind` | Significado | Campos |
+|---|---|---|
+| `label` | A etiqueta foi criada, editada ou apagada. | `label`, com `id`, `name`, `color`, `deleted` e, nas etiquetas padrão do WhatsApp, `predefinedId` |
+| `chat` | A etiqueta foi posta ou tirada de uma conversa. | `chatId` e `labeled` |
+| `message` | A etiqueta foi posta ou tirada de uma mensagem. | `chatId`, `messageId` e `labeled` |
+
+```json
+{
+  "type": "labels.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "kind": "label",
+  "labelId": "3",
+  "timestamp": 1763920800,
+  "label": { "id": "3", "name": "Novo cliente", "color": 2, "deleted": false }
+}
+```
+
+```json
+{
+  "type": "labels.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "kind": "chat",
+  "labelId": "3",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "labeled": true,
+  "timestamp": 1763920800
+}
+```
+
+- `labelId` liga a associação à etiqueta.
+- `labeled` é `true` quando a etiqueta foi posta e `false` quando foi tirada.
+- `color` é o índice da cor na paleta de etiquetas do WhatsApp.
+- A sincronização feita ao conectar o número não gera este evento.
+- A assinatura é opt-in. Inclua `labels.update` em `subscriptions`.
 
 ### Chamada
 

@@ -69,7 +69,7 @@ com `code: "CONTACT_NOT_FOUND"`. Veja
 | `trackId` | Todos os envios enfileirados | Identificador seu, devolvido no webhook do envio. Não precisa ser único. |
 | `trackSource` | Todos os envios enfileirados | Origem da mensagem (`crm`, `n8n`, …). Padrão: `api`. |
 | `delay` | Texto, áudio, mídia | Atraso antes do envio, de 0 a 20 segundos. |
-| `expiration` | Texto | Mensagem temporária: `none` (padrão), `24h`, `7d` ou `90d`. |
+| `expiration` | Texto | Mensagem temporária: `none` (padrão), `24h`, `7d` ou `90d`. Só em conexão não oficial. Veja [Mensagem temporária](#mensagem-temporaria). |
 | `quotedMessageId` | Todos os envios enfileirados, inclusive template | Id da mensagem a citar. Veja [Responder citando uma mensagem](#responder-citando-uma-mensagem). |
 | `groupStatus` | Texto, mídia (imagem, vídeo e áudio), áudio | Publica o envio como status do grupo. Veja [Status em grupo](#status-em-grupo). |
 
@@ -180,13 +180,42 @@ Só `message` é obrigatório. O destinatário vai em `jid` ou em `commentId`
 
 | Campo | Função |
 | --- | --- |
-| `mentions` | Números a mencionar. Só tem efeito em grupos. |
-| `mentionsEveryone` | Menciona todos os participantes do grupo. Ignora `mentions`. |
+| `mentions` | Contatos a mencionar. Veja [Mencionar contatos](#mencionar-contatos). |
+| `mentionsEveryone` | Menciona todos os participantes do grupo. Ignora `mentions`. Só em grupo. |
 | `splitMessage` | Divide a mensagem em várias, nas quebras de linha. |
 | `processImageLink` | Envia os links de imagem do texto como imagem, logo após a mensagem. |
 | `autoCaption` | Com `processImageLink` ativo, usa o texto da mensagem como legenda da imagem. |
 | `showLinkPreview` | Exibe ou oculta a prévia do link. |
 | `humanAgent` | Só Instagram. Veja [Responder em até 7 dias no Instagram](#responder-em-ate-7-dias-no-instagram). |
+
+### Mencionar contatos
+
+Os campos `mentions` e `mentionsEveryone` valem em conexão não oficial. Os
+outros tipos de conexão ignoram os campos.
+
+- Em `mentions`, informe o id de cada contato. Para destacar a menção no texto,
+  escreva `@` e o número no texto da mensagem, por exemplo `@5512912345678`.
+  O contato recebe a notificação também sem o `@número` no texto.
+- Com `splitMessage` ou `processImageLink`, a mensagem vira várias. Cada contato
+  vai só nas partes que têm o `@número` dele. O contato que não aparece em
+  nenhuma parte vai na primeira.
+- `mentionsEveryone` menciona todos os participantes do grupo, menos o próprio
+  número. A menção vai só na primeira mensagem de texto.
+
+```json
+{
+  "jid": "120363012345678901@g.us",
+  "message": "@5512912345678, o pedido chegou.",
+  "mentions": ["5512912345678"]
+}
+```
+
+### Mensagem temporária
+
+`expiration` define o tempo até a mensagem desaparecer: `24h`, `7d` ou `90d`.
+Com `none` ou sem o campo, a mensagem é permanente, mesmo numa conversa com
+mensagens temporárias ativadas. O campo vale em conexão não oficial e em todas
+as mensagens que o envio gera. O status de grupo ignora o campo.
 
 ### Responder em até 7 dias no Instagram
 

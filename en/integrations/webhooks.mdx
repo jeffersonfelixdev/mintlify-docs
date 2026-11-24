@@ -16,13 +16,16 @@ application receives the data at the moment of the event.
 | `messages.upsert` | The instance received or sent a message |
 | `contacts.preference` | The contact asked to stop, or to resume, marketing messages. Or the integrator set it through the API. Official connection only. Opt-in subscription |
 | `contacts.identity` | The link between phone, BSUID, and username of a contact changed. Official connection only. Opt-in subscription |
-| `messages.update` | The contact edited or deleted a received message. Official connection only, on a number in coexistence with WhatsApp Business. Opt-in subscription |
+| `messages.update` | On an official connection, on a number in coexistence with WhatsApp Business: the contact edited or deleted a received message. On an unofficial connection: a message was starred, unstarred, or deleted only for the account. Opt-in subscription |
 | `messages.status` | The state of a sent message changed. Official connection: sent, delivered, read, or failed. Unofficial connection: delivered, read, or failed |
 | `messages.error` | The send of a message failed permanently |
 | `connection.update` | The instance connection opened or closed |
 | `group-participants.update` | Participants joined, left, were promoted, or were demoted in a group. Unofficial connection only |
 | `groups.update` | The name, description, picture, settings, or invite link of a group changed. Unofficial connection only |
 | `groups.upsert` | The number started to participate in a group: it created the group, was added, or joined with an invite. Unofficial connection only |
+| `chats.update` | A chat was pinned, archived, muted, marked as read or unread, cleared, or deleted on another device of the account. Unofficial connection only. Opt-in subscription |
+| `contacts.update` | A contact was edited in the phone address book, or changed the profile name or the business name. Unofficial connection only. Opt-in subscription |
+| `labels.update` | A label was created, edited, or deleted, or was added to or removed from a chat or message. Unofficial connection only, with WhatsApp Business. Opt-in subscription |
 | `calls.update` | A voice or video call was received, answered, or ended. Official and unofficial connections |
 | `templates.sync` | A template sync ended. Official connection only. Opt-in subscription |
 | `storage.failed` | A write to the own storage failed. Opt-in subscription |
@@ -894,7 +897,8 @@ On deletion, `update` carries only the kind:
 { "update": { "kind": "deleted" } }
 ```
 
-- `update.kind` is `edited` or `deleted`.
+- `update.kind` is `edited` or `deleted`. On an unofficial connection, also
+  `starred`, `unstarred`, or `deleted_for_me` (see below).
 - On an edit, `update.message` carries the new text (`extendedTextMessage`) or
   the new caption (`imageMessage`, `videoMessage`, or `documentMessage`, with
   `caption`). The media is not resent. If Meta does not report the new content,
@@ -913,6 +917,37 @@ For this reason, the edit arrives as `messages.upsert` with
 the new text, and not as `messages.update`. The deletion generates
 `messages.update`.
 </Note>
+
+#### On an unofficial connection (`device`)
+
+The event is published when a message is starred, unstarred, or deleted only for
+the account on another device, such as the phone or WhatsApp Web. `update`
+carries only the kind. In a group, `key.participant` carries the author of the
+message.
+
+```json
+{
+  "type": "messages.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "120363012345678901@g.us",
+  "key": {
+    "remoteJid": "120363012345678901@g.us",
+    "fromMe": false,
+    "id": "3EB0C7A1B2D3E4F5A6B7",
+    "participant": "123456789012345@lid"
+  },
+  "update": { "kind": "starred" },
+  "timestamp": 1763920800
+}
+```
+
+| `update.kind` | Meaning |
+|---|---|
+| `starred` | The message was starred. |
+| `unstarred` | The message was unstarred. |
+| `deleted_for_me` | The message was deleted only for the account. The contact still has it. |
+
+The sync done when the number connects does not generate these events.
 
 ### Option chosen in a list message
 
@@ -1192,6 +1227,122 @@ person who added the number, when WhatsApp gives them.
   }
 }
 ```
+
+### Chat change
+
+Type: `chats.update`
+
+Published on unofficial instances when a chat changes on another device of the
+account, such as the phone or WhatsApp Web. `chatId` is the contact or the group.
+`update` carries only what changed:
+
+| `update` field | Meaning |
+|---|---|
+| `archived` | `true`: the chat was archived. `false`: the chat was unarchived. |
+| `pinned` | `true`: the chat was pinned. `false`: the chat was unpinned. |
+| `muted` | `true`: the chat was muted. `false`: the chat was unmuted. |
+| `mutedUntil` | Comes with `muted: true`. End of the mute, in Unix seconds. `null` when the mute has no end. |
+| `unread` | `true`: the chat was marked as unread. `false`: the chat was marked as read. |
+| `cleared` | `true`: the messages were deleted and the chat stayed in the list. |
+| `deleted` | `true`: the chat was deleted from the list. |
+| `deleteMedia` | Comes with `cleared` or `deleted`. `true`: the media on the device was also deleted. |
+
+```json
+{
+  "type": "chats.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "timestamp": 1763920800,
+  "update": { "muted": true, "mutedUntil": 1763949600 }
+}
+```
+
+- `timestamp` is the time of the change, in Unix seconds. If WhatsApp does not
+  report the time, the field is omitted.
+- The sync done when the number connects does not generate this event. The event
+  describes only the changes made after it.
+- The subscription is opt-in. Include `chats.update` in `subscriptions`.
+
+### Contact edited
+
+Type: `contacts.update`
+
+Published on unofficial instances in these cases:
+
+- A contact was saved, edited, or deleted in the phone address book.
+- A contact sent a message with a profile name different from the previous one.
+- A business changed its verified business name.
+
+`contactId` is the id of the contact in the event: phone number
+(`@s.whatsapp.net`) or LID (`@lid`). `contactPn` and `contactLid` carry the phone
+number and the LID when WhatsApp reports them. `update` carries only the fields
+that changed:
+
+| `update` field | Meaning |
+|---|---|
+| `name` | Full name in the phone address book. Empty when the contact was deleted from the address book. |
+| `firstName` | First name in the phone address book. |
+| `username` | Username of the contact. |
+| `pushName` | Profile name that the contact chose on WhatsApp. |
+| `businessName` | Verified business name. |
+
+```json
+{
+  "type": "contacts.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "contactId": "5512912345678@s.whatsapp.net",
+  "contactPn": "5512912345678@s.whatsapp.net",
+  "contactLid": "123456789012345@lid",
+  "timestamp": 1763920800,
+  "update": { "name": "Ana Souza", "firstName": "Ana" }
+}
+```
+
+- The address book sync done when the number connects does not generate this
+  event.
+- The subscription is opt-in. Include `contacts.update` in `subscriptions`.
+
+### Label
+
+Type: `labels.update`
+
+Published on unofficial instances connected to a WhatsApp Business account.
+`kind` tells what changed:
+
+| `kind` | Meaning | Fields |
+|---|---|---|
+| `label` | The label was created, edited, or deleted. | `label`, with `id`, `name`, `color`, `deleted` and, on the default WhatsApp labels, `predefinedId` |
+| `chat` | The label was added to or removed from a chat. | `chatId` and `labeled` |
+| `message` | The label was added to or removed from a message. | `chatId`, `messageId`, and `labeled` |
+
+```json
+{
+  "type": "labels.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "kind": "label",
+  "labelId": "3",
+  "timestamp": 1763920800,
+  "label": { "id": "3", "name": "New customer", "color": 2, "deleted": false }
+}
+```
+
+```json
+{
+  "type": "labels.update",
+  "instanceId": "inst_01hxyz1234567890",
+  "kind": "chat",
+  "labelId": "3",
+  "chatId": "5512912345678@s.whatsapp.net",
+  "labeled": true,
+  "timestamp": 1763920800
+}
+```
+
+- `labelId` links the association to the label.
+- `labeled` is `true` when the label was added and `false` when it was removed.
+- `color` is the index of the color in the WhatsApp label palette.
+- The sync done when the number connects does not generate this event.
+- The subscription is opt-in. Include `labels.update` in `subscriptions`.
 
 ### Call
 

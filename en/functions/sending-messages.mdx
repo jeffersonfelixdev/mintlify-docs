@@ -70,7 +70,7 @@ the business: the phone, if known, or the BSUID. Without a link, the response is
 | `trackId` | All queued sends | Your identifier, returned in the send webhook. It does not need to be unique. |
 | `trackSource` | All queued sends | Origin of the message (`crm`, `n8n`, …). Default: `api`. |
 | `delay` | Text, audio, media | Delay before the send, from 0 to 20 seconds. |
-| `expiration` | Text | Disappearing message: `none` (default), `24h`, `7d`, or `90d`. |
+| `expiration` | Text | Disappearing message: `none` (default), `24h`, `7d`, or `90d`. Unofficial connection only. See [Disappearing message](#disappearing-message). |
 | `quotedMessageId` | All queued sends, including template | Id of the message to quote. See [Reply with a quote](#reply-with-a-quote). |
 | `groupStatus` | Text, media (image, video, and audio), audio | Posts the send as a group status. See [Group status](#group-status). |
 
@@ -183,13 +183,44 @@ private reply to an Instagram comment). Enter exactly one of the two.
 
 | Field | Function |
 | --- | --- |
-| `mentions` | Numbers to mention. It has effect only in groups. |
-| `mentionsEveryone` | Mentions all participants of the group. It ignores `mentions`. |
+| `mentions` | Contacts to mention. See [Mention contacts](#mention-contacts). |
+| `mentionsEveryone` | Mentions all participants of the group. It ignores `mentions`. Groups only. |
 | `splitMessage` | Splits the message into several messages, at the line breaks. |
 | `processImageLink` | Sends the image links in the text as images, right after the message. |
 | `autoCaption` | With `processImageLink` active, uses the message text as the image caption. |
 | `showLinkPreview` | Shows or hides the link preview. |
 | `humanAgent` | Instagram only. See [Reply within 7 days on Instagram](#reply-within-7-days-on-instagram). |
+
+### Mention contacts
+
+The `mentions` and `mentionsEveryone` fields apply to the unofficial
+connection. Other connection types ignore the fields.
+
+- In `mentions`, give the id of each contact. To highlight the mention in the
+  text, write `@` and the number in the message text, for example
+  `@5512912345678`. The contact gets the notification also without the
+  `@number` in the text.
+- With `splitMessage` or `processImageLink`, the message becomes several
+  messages. Each contact goes only in the parts that have its `@number`. A
+  contact that is not in any part goes in the first part.
+- `mentionsEveryone` mentions all participants of the group, except the number
+  itself. The mention goes only in the first text message.
+
+```json
+{
+  "jid": "120363012345678901@g.us",
+  "message": "@5512912345678, the order arrived.",
+  "mentions": ["5512912345678"]
+}
+```
+
+### Disappearing message
+
+`expiration` sets the time until the message disappears: `24h`, `7d`, or
+`90d`. With `none` or without the field, the message is permanent, also in a
+chat with disappearing messages turned on. The field applies to the unofficial
+connection and to all messages that the send generates. A group status ignores
+the field.
 
 ### Reply within 7 days on Instagram
 
