@@ -911,7 +911,8 @@ os dois checks azuis. A API responde `204`, sem corpo.
 
 - `remoteJid` é a conversa. `ids` são os `key.id` das mensagens, como chegam no webhook `messages.upsert`.
 - Em grupo, informe também `senderJid` com o autor das mensagens.
-- A rota vale só para instâncias não oficiais.
+- A rota vale para instâncias não oficiais e para a Cloud API. Na Cloud API, a
+  Meta marca também as mensagens anteriores da conversa.
 - O efeito depende da privacidade da conta. Com a confirmação de leitura
   desligada, o WhatsApp não mostra os checks azuis ao remetente.
 

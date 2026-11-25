@@ -930,7 +930,8 @@ two blue check marks. The API responds `204`, with no body.
 
 - `remoteJid` is the chat. `ids` are the `key.id` of the messages, as they arrive in the `messages.upsert` webhook.
 - In a group, also enter `senderJid` with the author of the messages.
-- The route applies only to unofficial instances.
+- The route applies to unofficial instances and to the Cloud API. On the Cloud
+  API, Meta also marks the earlier messages of the chat as read.
 - The effect depends on the privacy settings of the account. With read receipts
   off, WhatsApp does not show the blue check marks to the sender.
 
