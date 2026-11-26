@@ -297,7 +297,7 @@ mensagem.
 | `sent` | A plataforma confirmou o envio |
 | `delivered` | A mensagem chegou ao aparelho do contato |
 | `read` | O contato leu a mensagem |
-| `failed` | O envio falhou. `error` traz `code` e `title` |
+| `failed` | O envio falhou. `error` traz `code`, `title` e, quando o provedor informa, `message` com o motivo |
 
 Uma mensagem apagada para todos vem com `deleted: true`, sem texto e sem mídia.
 
