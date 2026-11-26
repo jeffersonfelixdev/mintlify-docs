@@ -284,11 +284,17 @@
     "dark": "/logo/dark.svg"
   },
   "fonts": {
-    "body": {
-      "family": "Poppins"
-    },
     "heading": {
-      "family": "Poppins"
+      "family": "Baloo 2",
+      "weight": 625,
+      "source": "/fonts/baloo2.woff2",
+      "format": "woff2"
+    },
+    "body": {
+      "family": "Noto Sans",
+      "weight": 400,
+      "source": "/fonts/noto-sans.woff2",
+      "format": "woff2"
     }
   },
   "seo": {
