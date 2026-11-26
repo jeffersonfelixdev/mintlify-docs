@@ -305,7 +305,7 @@ and check the status of the message.
 | `sent` | The platform confirmed the send |
 | `delivered` | The message arrived on the device of the contact |
 | `read` | The contact read the message |
-| `failed` | The send failed. `error` has `code` and `title` |
+| `failed` | The send failed. `error` has `code`, `title`, and, when the provider gives it, `message` with the reason |
 
 A message deleted for everyone has `deleted: true`, with no text and no media.
 
