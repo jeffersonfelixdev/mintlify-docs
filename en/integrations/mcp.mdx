@@ -72,6 +72,8 @@ In all clients, the address of the server is `https://mcp.zapperhub.com/mcp`.
       </Step>
     </Steps>
 
+    On the Free plan, Claude supports one custom connector.
+
     On the Team and Enterprise plans, an owner of the organization adds the
     connector in **Organization settings** > **Connectors**. Each member clicks
     **Connect** on the connector and signs in with their own ZapperHub account.
@@ -82,6 +84,13 @@ In all clients, the address of the server is `https://mcp.zapperhub.com/mcp`.
     URL.
   </Tab>
   <Tab title="ChatGPT">
+    <Note>
+    According to the OpenAI help, the Business, Enterprise, and Edu plans have
+    the full connection. On the Pro plan, the connection gives only read
+    permissions: the agent reads the conversations and does not send messages.
+    The OpenAI help does not mention the other plans.
+    </Note>
+
     <Steps>
       <Step title="Open the plugins">
         Go to [chatgpt.com/plugins](https://chatgpt.com/plugins) on the web.
@@ -100,10 +109,10 @@ In all clients, the address of the server is `https://mcp.zapperhub.com/mcp`.
       </Step>
     </Steps>
 
-    Availability depends on the plan and the workspace. ChatGPT supports a custom
-    MCP server on the web only. Check the limits of your plan in the OpenAI help.
-    If the menu is different, look for the option to add a custom MCP server and
-    use the same URL.
+    On the Business plan, only admins and owners of the workspace create the
+    plugin. ChatGPT supports a custom MCP server on the web only. If the menu is
+    different, look for the option to add a custom MCP server and use the same
+    URL.
   </Tab>
   <Tab title="Other client">
     Add a connector or a remote MCP server with the URL
