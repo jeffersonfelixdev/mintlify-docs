@@ -139,12 +139,12 @@ The screen has two choices.
 |---|---|---|
 | **Instances** | **All instances** | All instances of the account, also the ones that you create later |
 | | **Only the selected ones** | Only the instances that you select. Select at least one |
-| **Access** | **Read only** (default) | View messages and chats. The agent uses 7 tools |
-| | **Read and write** | View and send messages. The agent uses all 12 tools |
+| **Access** | **Read only** (default) | View messages and chats. The agent uses 8 tools |
+| | **Read and write** | View and send messages. The agent uses all 13 tools |
 
-The 7 tools of the **Read only** access are `list_instances`, `list_chats`,
-`read_messages`, `wait_for_reply`, `check_numbers`, `get_service_window`, and
-`list_templates`. The **Read and write** access adds `send_text`, `send_media`,
+The 8 tools of the **Read only** access are `list_instances`, `list_chats`,
+`read_messages`, `wait_for_reply`, `check_numbers`, `get_service_window`,
+`list_templates`, and `list_groups`. The **Read and write** access adds `send_text`, `send_media`,
 `send_template`, `react`, and `mark_as_read`. With **Read only**, the agent does
 not see the write tools.
 
@@ -261,7 +261,7 @@ answer confirms that the connection works.
 
 ## Tools
 
-The server exposes 12 tools. Their names and descriptions are in English, for the
+The server exposes 13 tools. Their names and descriptions are in English, for the
 agent. In every tool, `instance` is the id or the name of an instance from
 `list_instances`. `chat` is a number with the country code, a group id that ends
 in `@g.us`, or a LID that ends in `@lid`.
@@ -277,6 +277,7 @@ in `@g.us`, or a LID that ends in `@lid`.
 | `check_numbers` | Checks whether up to 50 numbers have WhatsApp and returns the JID of each |
 | `get_service_window` | Tells whether the 24-hour window is open for a contact. It matters only in `cloud_api` |
 | `list_templates` | Lists the templates of a `cloud_api` instance, with name, language, status, category, and components |
+| `list_groups` | Lists the groups and communities of a `device` instance, by name, with the id and the `type`: `community` (the community, which does not receive messages), `announcement` (the announcement group), or `group`. `canSend` tells if the instance can send: `yes`, `no`, or `unknown`, with a `note` when it is not `yes`. `name` filters by the name, without a difference for uppercase letters and accents. Returns 200 groups at most |
 
 ### Send
 

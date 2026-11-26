@@ -141,12 +141,12 @@ A tela tem duas escolhas.
 |---|---|---|
 | **Instâncias** | **Todas as instâncias** | Todas as instâncias da conta, também as que você criar depois |
 | | **Somente as selecionadas** | Só as instâncias que você marcar. Marque ao menos uma |
-| **Acesso** | **Somente leitura** (padrão) | Ver mensagens e conversas. O agente usa 7 ferramentas |
-| | **Leitura e escrita** | Ver e enviar mensagens. O agente usa as 12 ferramentas |
+| **Acesso** | **Somente leitura** (padrão) | Ver mensagens e conversas. O agente usa 8 ferramentas |
+| | **Leitura e escrita** | Ver e enviar mensagens. O agente usa as 13 ferramentas |
 
-As 7 ferramentas do acesso **Somente leitura** são `list_instances`,
+As 8 ferramentas do acesso **Somente leitura** são `list_instances`,
 `list_chats`, `read_messages`, `wait_for_reply`, `check_numbers`,
-`get_service_window` e `list_templates`. O acesso **Leitura e escrita** soma
+`get_service_window`, `list_templates` e `list_groups`. O acesso **Leitura e escrita** soma
 `send_text`, `send_media`, `send_template`, `react` e `mark_as_read`. Com
 **Somente leitura**, o agente não vê as ferramentas de escrita.
 
@@ -262,7 +262,7 @@ instâncias. A resposta confirma que a conexão funciona.
 
 ## Ferramentas
 
-O servidor expõe 12 ferramentas. Elas têm nomes e descrições em inglês, para o
+O servidor expõe 13 ferramentas. Elas têm nomes e descrições em inglês, para o
 agente. Em toda ferramenta, `instance` é o id ou o nome de uma instância de
 `list_instances`. `chat` é um número com código do país, um id de grupo que
 termina em `@g.us` ou um LID que termina em `@lid`.
@@ -278,6 +278,7 @@ termina em `@g.us` ou um LID que termina em `@lid`.
 | `check_numbers` | Confere se até 50 números têm WhatsApp e devolve o JID de cada um |
 | `get_service_window` | Diz se a janela de 24 horas está aberta para um contato. Só faz diferença em `cloud_api` |
 | `list_templates` | Lista os templates de uma instância `cloud_api`, com nome, idioma, status, categoria e componentes |
+| `list_groups` | Lista os grupos e as comunidades de uma instância `device`, por nome, com o id e o `type`: `community` (a comunidade, que não recebe mensagens), `announcement` (o grupo de avisos) ou `group`. `canSend` diz se a instância pode enviar: `yes`, `no` ou `unknown`, com uma `note` quando não é `yes`. `name` filtra pelo nome, sem diferenciar maiúsculas e acentos. Devolve no máximo 200 grupos |
 
 ### Enviar
 
